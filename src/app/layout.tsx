@@ -7,6 +7,7 @@ import '@fontsource/hind-siliguri/700.css'
 import './globals.css'
 import { DemoBanner } from '@/components/DemoBanner'
 import { SiteHeader } from '@/components/SiteHeader'
+import { getSession } from '@/lib/auth/session'
 import { getDict } from '@/lib/i18n/server'
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = { width: 'device-width', initialScale: 1 }
 
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
-  const { lang, dict } = await getDict()
+  const [{ lang, dict }, session] = await Promise.all([getDict(), getSession()])
 
   return (
     <html lang={lang} className="h-full antialiased">
@@ -30,7 +31,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
           {dict.nav.skip}
         </a>
         <DemoBanner text={dict.banner} />
-        <SiteHeader dict={dict} lang={lang} />
+        <SiteHeader dict={dict} lang={lang} session={session} />
         <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
           {children}
         </main>
