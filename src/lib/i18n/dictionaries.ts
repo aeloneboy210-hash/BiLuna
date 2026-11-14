@@ -1,0 +1,257 @@
+import type { Lang } from './lang'
+
+const en = {
+  banner: 'Demo — fictional data — not medical advice',
+  brand: {
+    name: 'BiLuna',
+    tagline: 'Your Personal Healthcare AI Companion',
+  },
+  description:
+    "BiLuna — your personal healthcare AI companion. Feeling sick? Just tell me how you feel. I'll help you understand what might be going on, explain it in simple words, and show it to you in 3D. I'll tell you how to stay safe and when to see a doctor. Give me a medicine name and I'll explain what it's for. Worried about finding a good hospital or doctor? I'll find ones near you that fit your need and help you request an appointment. I'll help you choose the most affordable option too. And that's not all: you can learn about health and medicine with me, and get help with your research.",
+  nav: {
+    home: 'Home',
+    roadmap: 'Roadmap',
+    signIn: 'Sign in',
+    signOut: 'Sign out',
+    language: 'Language',
+    myPortal: 'My portal',
+    skip: 'Skip to content',
+  },
+  welcome: {
+    cta: 'Get started',
+    note: 'BiLuna does not replace doctors or emergency services.',
+    portalsTitle: 'Three portals',
+    modulesTitle: 'Eight modules',
+    prototype:
+      'BiLuna is a prototype built for an AI congress. It is not a launched or clinically validated healthcare service.',
+  },
+  portals: {
+    patient: {
+      name: 'Patient Portal',
+      blurb: 'Health chat, reports, medicines and finding care',
+    },
+    doctor: {
+      name: 'Healthcare Professional Portal',
+      blurb: 'Review what patients choose to share',
+    },
+    org_admin: {
+      name: 'Hospitals & Organizations Portal',
+      blurb: 'Service totals and appointment requests',
+    },
+  },
+  moduleBlurbs: {
+    health: 'Health conversations, symptom guidance, report explanation and consultation preparation',
+    intelligence: 'The AI layer that coordinates every module, with safety and permission checks',
+    medicine: 'Medicine information, prescription understanding and medication schedules',
+    navigator: 'Find hospitals and doctors and request appointments',
+    wellness: 'Everyday healthy habits, nutrition, movement and sleep',
+    academy: 'Curiosity-led learning and research help',
+    careers: 'Verified healthcare-related opportunities and skills',
+    economics: 'Healthcare costs, affordability and financial assistance',
+  },
+  moduleStatus: {
+    working: 'Open',
+    comingNext: 'Coming next',
+    roadmap: 'On the roadmap',
+  },
+  signIn: {
+    title: 'Sign in',
+    intro: 'Use one of the three demo accounts.',
+    email: 'Email',
+    password: 'Password',
+    submit: 'Sign in',
+    submitting: 'Signing in…',
+    error: 'The email or password is not correct.',
+    noSignUp: 'New accounts cannot be created in this demo.',
+  },
+  common: {
+    sampleData: 'Sample data',
+    signedInAs: 'Signed in as',
+    emergency: 'In an emergency call 999. BiLuna does not replace doctors or emergency services.',
+    laterStep: 'This arrives in a later step of the build.',
+  },
+  patient: {
+    greeting: 'Hello',
+    modulesTitle: 'Your modules',
+    profileTitle: 'Your health profile',
+    profileNote: 'A fictional profile for the demo.',
+    age: 'Age',
+    area: 'Area',
+    bloodGroup: 'Blood group',
+    allergies: 'Allergies',
+    conditions: 'Conditions',
+    activityTitle: 'Recent activity',
+    activityEmpty: 'Nothing yet. Your conversations and shared summaries will appear here.',
+  },
+  doctor: {
+    title: 'Shared with you',
+    intro: 'Summaries that patients have chosen to share with you.',
+    summaryLabel: 'Consultation Prep summary',
+    shared: 'Shared',
+    rule: "You see only what a patient chose to share. Chats, reports and other patients' records are not available here, and a patient can withdraw a share at any time.",
+    later: 'Opening a summary and adding a review note arrives in a later step of the build.',
+  },
+  org: {
+    orgName: 'Demo Hospital',
+    title: 'This month',
+    patients: 'Patients helped',
+    conversations: 'Conversations',
+    shared: 'Summaries shared',
+    emergencies: 'Emergency cards shown',
+    concernsTitle: 'Conversations by concern',
+    fever: 'Fever and cough',
+    stomach: 'Stomach',
+    headache: 'Headache',
+    skin: 'Skin',
+    other: 'Other',
+    rule: "Totals only. This portal cannot open any individual patient's record.",
+  },
+  roadmap: {
+    title: 'Roadmap',
+    intro: 'BiLuna has eight modules. This page shows which are working in the demo today and which come next.',
+    inDemo: 'Planned for this demo',
+    later: 'Planned for later',
+  },
+  sample: {
+    rahima: 'Rahima (demo patient)',
+    jamal: 'Jamal (demo patient)',
+    areaValue: 'Mirpur, Dhaka',
+    none: 'None recorded',
+    concernCough: 'Cough and mild fever for two days',
+    concernHeadache: 'Headaches every afternoon for one week',
+    today: 'today',
+    yesterday: 'yesterday',
+  },
+}
+
+export type Dictionary = typeof en
+
+const bn: Dictionary = {
+  banner: 'ডেমো — কাল্পনিক তথ্য — চিকিৎসা পরামর্শ নয়',
+  brand: {
+    name: 'BiLuna',
+    tagline: 'আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী',
+  },
+  description:
+    'বাইলুনা — আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী। অসুস্থ লাগছে? শুধু বলুন কেমন লাগছে। কী হতে পারে তা বুঝতে আমি সাহায্য করব, সহজ ভাষায় ব্যাখ্যা করব এবং থ্রিডিতে দেখাব। কীভাবে নিরাপদ থাকবেন আর কখন ডাক্তার দেখাবেন তা জানাব। ওষুধের নাম দিন, সেটি কীসের জন্য তা বুঝিয়ে বলব। ভালো হাসপাতাল বা ডাক্তার খুঁজে পাওয়া নিয়ে চিন্তিত? আপনার প্রয়োজন অনুযায়ী কাছের হাসপাতাল ও ডাক্তার খুঁজে দেব এবং অ্যাপয়েন্টমেন্টের অনুরোধ করতে সাহায্য করব। সবচেয়ে সাশ্রয়ী বিকল্প বেছে নিতেও সাহায্য করব। শুধু তা-ই নয়: আমার সঙ্গে স্বাস্থ্য ও চিকিৎসা বিষয়ে শিখতে পারবেন এবং গবেষণায় সাহায্য পাবেন।',
+  nav: {
+    home: 'হোম',
+    roadmap: 'রোডম্যাপ',
+    signIn: 'সাইন ইন',
+    signOut: 'সাইন আউট',
+    language: 'ভাষা',
+    myPortal: 'আমার পোর্টাল',
+    skip: 'মূল অংশে যান',
+  },
+  welcome: {
+    cta: 'শুরু করুন',
+    note: 'বাইলুনা ডাক্তার বা জরুরি সেবার বিকল্প নয়।',
+    portalsTitle: 'তিনটি পোর্টাল',
+    modulesTitle: 'আটটি মডিউল',
+    prototype:
+      'বাইলুনা একটি এআই কংগ্রেসের জন্য তৈরি প্রোটোটাইপ। এটি চালু হওয়া বা ক্লিনিক্যালি যাচাই করা স্বাস্থ্যসেবা নয়।',
+  },
+  portals: {
+    patient: {
+      name: 'রোগী পোর্টাল',
+      blurb: 'স্বাস্থ্য বিষয়ে কথা, রিপোর্ট, ওষুধ এবং সেবা খোঁজা',
+    },
+    doctor: {
+      name: 'স্বাস্থ্য পেশাজীবী পোর্টাল',
+      blurb: 'রোগী যা শেয়ার করতে চান তা দেখুন',
+    },
+    org_admin: {
+      name: 'হাসপাতাল ও প্রতিষ্ঠান পোর্টাল',
+      blurb: 'সেবার মোট হিসাব এবং অ্যাপয়েন্টমেন্টের অনুরোধ',
+    },
+  },
+  moduleBlurbs: {
+    health: 'স্বাস্থ্য বিষয়ে কথা, উপসর্গ নিয়ে পরামর্শ, রিপোর্ট বোঝা এবং ডাক্তার দেখানোর প্রস্তুতি',
+    intelligence: 'যে এআই স্তর নিরাপত্তা ও অনুমতি যাচাই করে সব মডিউলকে একসঙ্গে চালায়',
+    medicine: 'ওষুধের তথ্য, প্রেসক্রিপশন বোঝা এবং ওষুধ খাওয়ার সময়সূচি',
+    navigator: 'হাসপাতাল ও ডাক্তার খুঁজুন এবং অ্যাপয়েন্টমেন্টের অনুরোধ করুন',
+    wellness: 'প্রতিদিনের স্বাস্থ্যকর অভ্যাস, পুষ্টি, চলাফেরা ও ঘুম',
+    academy: 'কৌতূহল থেকে শেখা এবং গবেষণায় সাহায্য',
+    careers: 'যাচাই করা স্বাস্থ্যখাতের সুযোগ ও দক্ষতা',
+    economics: 'স্বাস্থ্যসেবার খরচ, সাশ্রয় এবং আর্থিক সহায়তা',
+  },
+  moduleStatus: {
+    working: 'খুলুন',
+    comingNext: 'শিগগিরই আসছে',
+    roadmap: 'রোডম্যাপে আছে',
+  },
+  signIn: {
+    title: 'সাইন ইন',
+    intro: 'তিনটি ডেমো অ্যাকাউন্টের একটি ব্যবহার করুন।',
+    email: 'ইমেইল',
+    password: 'পাসওয়ার্ড',
+    submit: 'সাইন ইন',
+    submitting: 'সাইন ইন হচ্ছে…',
+    error: 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।',
+    noSignUp: 'এই ডেমোতে নতুন অ্যাকাউন্ট খোলা যায় না।',
+  },
+  common: {
+    sampleData: 'নমুনা তথ্য',
+    signedInAs: 'সাইন ইন করেছেন',
+    emergency: 'জরুরি অবস্থায় ৯৯৯ নম্বরে কল করুন। বাইলুনা ডাক্তার বা জরুরি সেবার বিকল্প নয়।',
+    laterStep: 'এটি তৈরির পরের ধাপে যুক্ত হবে।',
+  },
+  patient: {
+    greeting: 'স্বাগতম',
+    modulesTitle: 'আপনার মডিউল',
+    profileTitle: 'আপনার স্বাস্থ্য প্রোফাইল',
+    profileNote: 'ডেমোর জন্য একটি কাল্পনিক প্রোফাইল।',
+    age: 'বয়স',
+    area: 'এলাকা',
+    bloodGroup: 'রক্তের গ্রুপ',
+    allergies: 'অ্যালার্জি',
+    conditions: 'রোগ',
+    activityTitle: 'সাম্প্রতিক কার্যক্রম',
+    activityEmpty: 'এখনো কিছু নেই। আপনার কথোপকথন ও শেয়ার করা সারাংশ এখানে দেখা যাবে।',
+  },
+  doctor: {
+    title: 'আপনার সঙ্গে শেয়ার করা',
+    intro: 'রোগীরা যে সারাংশগুলো আপনার সঙ্গে শেয়ার করেছেন।',
+    summaryLabel: 'ডাক্তার দেখানোর প্রস্তুতির সারাংশ',
+    shared: 'শেয়ার করা হয়েছে',
+    rule: 'রোগী যা শেয়ার করেছেন শুধু তা-ই আপনি দেখতে পাবেন। কথোপকথন, রিপোর্ট এবং অন্য রোগীর তথ্য এখানে পাওয়া যায় না, আর রোগী যেকোনো সময় শেয়ার বন্ধ করতে পারেন।',
+    later: 'সারাংশ খোলা এবং পর্যালোচনা নোট লেখা তৈরির পরের ধাপে যুক্ত হবে।',
+  },
+  org: {
+    orgName: 'ডেমো হাসপাতাল',
+    title: 'এই মাস',
+    patients: 'সাহায্য পাওয়া রোগী',
+    conversations: 'কথোপকথন',
+    shared: 'শেয়ার করা সারাংশ',
+    emergencies: 'জরুরি কার্ড দেখানো হয়েছে',
+    concernsTitle: 'সমস্যা অনুযায়ী কথোপকথন',
+    fever: 'জ্বর ও কাশি',
+    stomach: 'পেট',
+    headache: 'মাথাব্যথা',
+    skin: 'ত্বক',
+    other: 'অন্যান্য',
+    rule: 'শুধু মোট হিসাব। এই পোর্টাল থেকে কোনো রোগীর ব্যক্তিগত তথ্য খোলা যায় না।',
+  },
+  roadmap: {
+    title: 'রোডম্যাপ',
+    intro: 'বাইলুনার আটটি মডিউল আছে। কোনগুলো আজ ডেমোতে চালু আর কোনগুলো পরে আসবে তা এই পাতায় দেখানো হয়েছে।',
+    inDemo: 'এই ডেমোর জন্য পরিকল্পিত',
+    later: 'পরের জন্য পরিকল্পিত',
+  },
+  sample: {
+    rahima: 'রহিমা (ডেমো রোগী)',
+    jamal: 'জামাল (ডেমো রোগী)',
+    areaValue: 'মিরপুর, ঢাকা',
+    none: 'কিছু নথিভুক্ত নেই',
+    concernCough: 'দুই দিন ধরে কাশি ও হালকা জ্বর',
+    concernHeadache: 'এক সপ্তাহ ধরে প্রতিদিন বিকেলে মাথাব্যথা',
+    today: 'আজ',
+    yesterday: 'গতকাল',
+  },
+}
+
+export const dictionaries: Record<Lang, Dictionary> = { en, bn }
+
+export function getDictionary(lang: Lang): Dictionary {
+  return dictionaries[lang]
+}
