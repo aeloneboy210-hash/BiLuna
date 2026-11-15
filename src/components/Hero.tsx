@@ -37,7 +37,7 @@ export function Hero({
           {actions ? <div className="mt-2 flex flex-wrap gap-3">{actions}</div> : null}
         </div>
         <Image
-          src="/brand/logo.webp"
+          src="/brand/logo-v2.webp"
           alt=""
           width={390}
           height={364}

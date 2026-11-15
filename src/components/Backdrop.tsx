@@ -11,18 +11,18 @@ export function Backdrop() {
       <div className="absolute -top-40 right-[-10%] h-[36rem] w-[36rem] rounded-full bg-brand/20 blur-3xl" />
       <div className="absolute bottom-[-20%] left-[-10%] h-[30rem] w-[30rem] rounded-full bg-cyan/10 blur-3xl" />
       <Image
-        src="/brand/dna-left.webp"
+        src="/brand/dna-left-v2.webp"
         alt=""
         width={250}
         height={470}
-        className="brand-art absolute top-24 -left-16 h-[70vh] w-auto opacity-35 sm:-left-6 lg:opacity-55"
+        className="brand-art absolute top-24 -left-16 h-[70vh] w-auto opacity-50 sm:-left-6 lg:opacity-80"
       />
       <Image
-        src="/brand/dna-right.webp"
+        src="/brand/dna-right-v2.webp"
         alt=""
         width={236}
         height={480}
-        className="brand-art absolute top-10 -right-16 h-[78vh] w-auto opacity-35 sm:-right-6 lg:opacity-55"
+        className="brand-art absolute top-10 -right-16 h-[78vh] w-auto opacity-50 sm:-right-6 lg:opacity-80"
       />
     </div>
   )

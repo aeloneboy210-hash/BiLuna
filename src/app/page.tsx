@@ -26,7 +26,7 @@ export default async function WelcomePage() {
       <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 pt-10 pb-20 sm:px-12 sm:pt-14 sm:pb-28">
         <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:gap-12 lg:text-left">
           <Image
-            src="/brand/logo.webp"
+            src="/brand/logo-v2.webp"
             alt=""
             width={390}
             height={364}
