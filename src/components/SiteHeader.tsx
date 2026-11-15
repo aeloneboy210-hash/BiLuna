@@ -19,7 +19,7 @@ export function SiteHeader({
   session: Session | null
 }) {
   return (
-    <header className="border-b border-line bg-white">
+    <header className="border-b border-line bg-surface/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2.5 sm:px-6">
         <Logo name={dict.brand.name} />
         <nav aria-label={dict.brand.name} className="flex flex-wrap items-center gap-1 sm:gap-2">

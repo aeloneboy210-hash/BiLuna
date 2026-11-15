@@ -9,7 +9,7 @@ const OPTIONS: { lang: Lang; label: string }[] = [
 /** Works without JavaScript: each button posts a form that stores the choice in a cookie. */
 export function LanguageSwitch({ current, label }: { current: Lang; label: string }) {
   return (
-    <div role="group" aria-label={label} className="flex items-center gap-1 rounded-full border border-line bg-white p-1">
+    <div role="group" aria-label={label} className="flex items-center gap-1 rounded-full border border-line bg-surface p-1">
       {OPTIONS.map((option) => {
         const active = option.lang === current
         return (
@@ -19,7 +19,7 @@ export function LanguageSwitch({ current, label }: { current: Lang; label: strin
               lang={option.lang}
               aria-pressed={active}
               className={`min-h-9 rounded-full px-3 text-sm font-semibold ${
-                active ? 'bg-brand text-white' : 'text-brand hover:bg-soft'
+                active ? 'bg-brand text-on-brand' : 'text-brand hover:bg-soft'
               }`}
             >
               {option.label}

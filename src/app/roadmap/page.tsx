@@ -18,7 +18,7 @@ function ModuleList({ title, modules, dict }: { title: string; modules: BiLunaMo
                 <h3 className="text-lg font-semibold">{m.name}</h3>
                 <span
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    m.status === 'working' ? 'bg-brand text-white' : 'bg-soft text-body'
+                    m.status === 'working' ? 'bg-brand text-on-brand' : 'bg-soft text-body'
                   }`}
                 >
                   {dict.moduleStatus[moduleStatusKey(m)]}

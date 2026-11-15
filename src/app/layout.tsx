@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-import '@fontsource-variable/inter'
+import '@fontsource-variable/manrope'
+import '@fontsource-variable/space-grotesk'
 import '@fontsource/hind-siliguri/400.css'
 import '@fontsource/hind-siliguri/500.css'
 import '@fontsource/hind-siliguri/600.css'
@@ -26,7 +27,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
       <body className="flex min-h-full flex-col">
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
         >
           {dict.nav.skip}
         </a>
@@ -35,7 +36,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
           {children}
         </main>
-        <footer className="border-t border-line bg-white">
+        <footer className="border-t border-line bg-banner">
           <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs leading-relaxed text-muted sm:px-6">
             {dict.welcome.prototype}
           </p>

@@ -27,7 +27,7 @@ export default async function WelcomePage() {
           <h2 className="pb-3 text-sm font-semibold text-muted">{dict.welcome.portalsTitle}</h2>
           {ROLES.map((role) => (
             <div key={role} className="flex flex-col gap-0.5 border-t border-line py-3">
-              <span className="font-semibold">{dict.portals[role].name}</span>
+              <span className="font-semibold text-aqua">{dict.portals[role].name}</span>
               <span className="text-sm text-body">{dict.portals[role].blurb}</span>
             </div>
           ))}

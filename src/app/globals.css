@@ -1,29 +1,63 @@
 @import "tailwindcss";
 
+/*
+  BiLuna brand theme, taken from the owner's brand board:
+  Deep Blue #0B1F44, Cyber Blue #00A8FF, Sky Cyan #00E0FF, Soft Aqua #66F0FF, Pure White #FFFFFF.
+  Headings use Space Grotesk, body text uses Manrope, Bangla falls back to Hind Siliguri.
+  tests/lib/theme.test.ts checks that every text/background pair below stays readable.
+*/
 @theme {
-  --color-ink: #10231f;
-  --color-ground: #f5f8f7;
-  --color-brand: #0b6b5d;
-  --color-brand-dark: #084c42;
-  --color-mint: #d6efea;
-  --color-line: #d5dfdc;
-  --color-field: #9db1ab;
-  --color-muted: #4a5f59;
-  --color-body: #2f4640;
-  --color-soft: #e7eeec;
-  --color-danger: #b42318;
-  --color-warn: #8a4b08;
-  --font-sans: "Inter Variable", "Hind Siliguri", system-ui, sans-serif;
+  /* Backgrounds, darkest first */
+  --color-banner: #030a1c;
+  --color-ground: #061330;
+  --color-surface: #0b1f44;
+  --color-soft: #143366;
+
+  /* Lines */
+  --color-line: #1d4480;
+  --color-field: #4a7fc4;
+
+  /* Text */
+  --color-ink: #ffffff;
+  --color-body: #c9dcf5;
+  --color-muted: #8fb0d9;
+
+  /* Brand accents */
+  --color-brand: #00a8ff;
+  --color-cyan: #00e0ff;
+  --color-aqua: #66f0ff;
+  --color-on-brand: #04102a;
+
+  /* Status */
+  --color-danger: #ff8a80;
+  --color-warn: #ffd166;
+
+  --font-sans: "Manrope Variable", "Hind Siliguri", system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Hind Siliguri", system-ui, sans-serif;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
+  background: var(--color-ground);
 }
 
 body {
-  background: var(--color-ground);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  /* Two soft glows over the deep blue ground, echoing the brand board. */
+  background:
+    radial-gradient(60rem 32rem at 85% -10%, rgb(0 168 255 / 0.2), transparent 70%),
+    radial-gradient(48rem 28rem at -10% 110%, rgb(0 224 255 / 0.12), transparent 70%),
+    var(--color-ground);
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 /* Bangla needs more line height than Latin text to stay readable. */
@@ -31,7 +65,11 @@ html[lang="bn"] body {
   line-height: 1.7;
 }
 
+html[lang="bn"] :is(h1, h2, h3) {
+  letter-spacing: 0;
+}
+
 :focus-visible {
-  outline: 3px solid var(--color-brand);
+  outline: 3px solid var(--color-cyan);
   outline-offset: 2px;
 }

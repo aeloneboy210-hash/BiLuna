@@ -39,7 +39,7 @@ export default async function OrgPortal() {
                   <span className="font-semibold">{c.count}</span>
                 </div>
                 <div aria-hidden="true" className="h-3 rounded-full bg-soft">
-                  <div className="h-3 rounded-full bg-brand" style={{ width: `${(c.count / largest) * 100}%` }} />
+                  <div className="h-3 rounded-full bg-linear-to-r from-brand to-cyan" style={{ width: `${(c.count / largest) * 100}%` }} />
                 </div>
               </li>
             ))}

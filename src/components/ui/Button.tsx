@@ -7,8 +7,8 @@ const base =
   'inline-flex min-h-12 items-center justify-center rounded-xl px-5 text-base font-semibold transition-colors disabled:opacity-60'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-brand text-white hover:bg-brand-dark',
-  secondary: 'border border-brand bg-white text-brand hover:bg-soft',
+  primary: 'bg-brand text-on-brand shadow-[0_0_24px_rgb(0_168_255/0.35)] hover:bg-cyan',
+  secondary: 'border border-brand bg-surface text-brand hover:bg-soft',
   quiet: 'min-h-11 px-3 text-sm text-brand hover:bg-soft',
 }
 

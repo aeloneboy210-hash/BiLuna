@@ -7,7 +7,7 @@ import { signIn, type SignInState } from './actions'
 type Labels = { email: string; password: string; submit: string; submitting: string }
 
 const field =
-  'min-h-12 w-full rounded-xl border border-field bg-white px-3.5 text-base text-ink placeholder:text-muted'
+  'min-h-12 w-full rounded-xl border border-field bg-ground px-3.5 text-base text-ink placeholder:text-muted'
 
 const initial: SignInState = { error: null }
 
