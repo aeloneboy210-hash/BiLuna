@@ -157,7 +157,8 @@ html[lang="bn"] :is(h1, h2, h3) {
   z-index: -1;
   left: -15%;
   right: -15%;
-  top: 72%;
+  /* Sits inside the hero's bottom padding, so it never crosses the text. */
+  top: calc(100% - 2.75rem);
   height: 120%;
   border-radius: 50%;
   border-top: 2px solid rgb(0 224 255 / 0.7);
@@ -166,10 +167,15 @@ html[lang="bn"] :is(h1, h2, h3) {
   pointer-events: none;
 }
 
-/* Logo art cut from the brand board: screen blending drops its dark background. */
+@media (min-width: 640px) {
+  .horizon::after {
+    top: calc(100% - 4rem);
+  }
+}
+
+/* Logo and DNA art cut from the brand board, with the dark background made transparent. */
 .brand-art {
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 24px rgb(0 168 255 / 0.45));
+  filter: drop-shadow(0 0 18px rgb(0 168 255 / 0.4));
 }
 
 .text-gradient {
