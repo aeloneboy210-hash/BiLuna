@@ -6,7 +6,7 @@ export function Logo({ name, motto }: { name: string; motto: string }) {
   return (
     <Link href="/" className="group flex min-h-11 items-center gap-3">
       <Image
-        src="/brand/logo-small-v2.webp"
+        src="/brand/logo-small-v3.webp"
         alt=""
         width={96}
         height={90}
