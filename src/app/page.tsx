@@ -1,48 +1,113 @@
+import Image from 'next/image'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { Icon } from '@/components/ui/Icon'
+import { IconTile } from '@/components/ui/IconTile'
 import { getDict } from '@/lib/i18n/server'
 import { MODULES } from '@/lib/modules'
 import { ROLES } from '@/lib/portals'
+import type { IconName } from '@/lib/ui/icons'
+import { MODULE_ICONS, ROLE_ICONS } from '@/lib/ui/module-icons'
+
+const FEATURES: { key: 'care' | 'insights' | 'science' | 'everyone'; icon: IconName }[] = [
+  { key: 'care', icon: 'heart' },
+  { key: 'insights', icon: 'brain' },
+  { key: 'science', icon: 'dna' },
+  { key: 'everyone', icon: 'users' },
+]
 
 export default async function WelcomePage() {
   const { dict } = await getDict()
+  const w = dict.welcome
 
   return (
-    <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:gap-12">
-      <section className="flex min-w-0 flex-[3] flex-col gap-6">
-        <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-5xl sm:leading-[1.15]">
-          {dict.brand.tagline}
-        </h1>
-        <p className="text-base leading-relaxed text-body sm:text-lg sm:leading-relaxed">{dict.description}</p>
-        <div className="flex flex-col gap-3">
-          <ButtonLink href="/sign-in" className="self-start px-7 text-lg">
-            {dict.welcome.cta}
-          </ButtonLink>
-          <p className="text-sm text-muted">{dict.welcome.note}</p>
+    <div className="flex flex-col gap-14">
+      {/* Hero, laid out like the top of the brand board: logo, wordmark, motto. */}
+      <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 pt-10 pb-20 sm:px-12 sm:pt-14 sm:pb-28">
+        <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:gap-12 lg:text-left">
+          <Image
+            src="/brand/logo.webp"
+            alt=""
+            width={390}
+            height={364}
+            fetchPriority="high"
+            className="brand-art motion-safe:animate-float h-auto w-48 shrink-0 sm:w-64 lg:w-80"
+          />
+          <div className="flex min-w-0 flex-col items-center gap-5 lg:items-start lg:border-l lg:border-cyan/30 lg:pl-12">
+            <p className="text-gradient font-display text-6xl leading-none font-bold tracking-tight sm:text-8xl">
+              {dict.brand.name}
+            </p>
+            <p className="text-xs font-semibold tracking-[0.3em] text-body uppercase sm:text-sm">{dict.brand.motto}</p>
+            <h1 className="mt-2 text-3xl leading-tight font-bold sm:text-5xl">
+              {w.sloganA} <span className="text-cyan">{w.sloganB}</span>
+              <br />
+              {w.sloganC} <span className="text-cyan">{w.sloganD}</span>
+            </h1>
+            <p className="text-lg text-aqua">{dict.brand.tagline}</p>
+            <div className="mt-2 flex flex-wrap justify-center gap-3 lg:justify-start">
+              <ButtonLink href="/sign-in" className="px-8 text-lg">
+                {w.cta}
+                <Icon name="arrowRight" className="h-5 w-5" />
+              </ButtonLink>
+              <ButtonLink href="/roadmap" variant="secondary">
+                {w.secondaryCta}
+              </ButtonLink>
+            </div>
+          </div>
         </div>
       </section>
 
-      <Card className="flex min-w-0 flex-[2] flex-col gap-5 p-6">
-        <section className="flex flex-col">
-          <h2 className="pb-3 text-sm font-semibold text-muted">{dict.welcome.portalsTitle}</h2>
+      {/* The four promises from the bottom of the brand board. */}
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {FEATURES.map((f, i) => (
+          <li key={f.key} className="motion-safe:animate-rise" style={{ animationDelay: `${120 + i * 80}ms` }}>
+            <Card interactive className="flex h-full items-start gap-4 p-5">
+              <IconTile name={f.icon} />
+              <div className="flex flex-col gap-1">
+                <h2 className="font-display text-lg font-semibold">{w.features[f.key].title}</h2>
+                <p className="text-sm leading-relaxed text-body">{w.features[f.key].text}</p>
+              </div>
+            </Card>
+          </li>
+        ))}
+      </ul>
+
+      <section className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
+        <div className="flex min-w-0 flex-[3] flex-col gap-5">
+          <p className="text-base leading-relaxed text-body sm:text-lg sm:leading-relaxed">{dict.description}</p>
+          <p className="flex items-center gap-2 text-sm text-muted">
+            <Icon name="shield" className="h-4 w-4 text-cyan" />
+            {w.note}
+          </p>
+        </div>
+
+        <div className="flex min-w-0 flex-[2] flex-col gap-3">
+          <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.portalsTitle}</h2>
           {ROLES.map((role) => (
-            <div key={role} className="flex flex-col gap-0.5 border-t border-line py-3">
-              <span className="font-semibold text-aqua">{dict.portals[role].name}</span>
-              <span className="text-sm text-body">{dict.portals[role].blurb}</span>
-            </div>
+            <Card key={role} className="flex items-center gap-4 p-4">
+              <IconTile name={ROLE_ICONS[role]} size="sm" />
+              <div className="flex flex-col">
+                <span className="font-semibold">{dict.portals[role].name}</span>
+                <span className="text-sm text-body">{dict.portals[role].blurb}</span>
+              </div>
+            </Card>
           ))}
-        </section>
-        <section className="flex flex-col gap-3 border-t border-line pt-4">
-          <h2 className="text-sm font-semibold text-muted">{dict.welcome.modulesTitle}</h2>
-          <ul className="flex flex-wrap gap-2">
-            {MODULES.map((m) => (
-              <li key={m.id} className="rounded-full bg-soft px-3 py-2 text-sm font-semibold">
-                {m.name}
-              </li>
-            ))}
-          </ul>
-        </section>
-      </Card>
+        </div>
+      </section>
+
+      <section className="flex flex-col gap-5">
+        <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.modulesTitle}</h2>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {MODULES.map((m) => (
+            <li key={m.id}>
+              <Card interactive className="flex h-full flex-col items-center gap-3 p-5 text-center">
+                <IconTile name={MODULE_ICONS[m.id]} size="lg" />
+                <span className="font-display text-sm font-semibold sm:text-base">{m.name}</span>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   )
 }

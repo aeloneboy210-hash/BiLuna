@@ -5,6 +5,7 @@ const en = {
   brand: {
     name: 'BiLuna',
     tagline: 'Your Personal Healthcare AI Companion',
+    motto: 'Healthcare • Intelligence • Together',
   },
   description:
     "BiLuna — your personal healthcare AI companion. Feeling sick? Just tell me how you feel. I'll help you understand what might be going on, explain it in simple words, and show it to you in 3D. I'll tell you how to stay safe and when to see a doctor. Give me a medicine name and I'll explain what it's for. Worried about finding a good hospital or doctor? I'll find ones near you that fit your need and help you request an appointment. I'll help you choose the most affordable option too. And that's not all: you can learn about health and medicine with me, and get help with your research.",
@@ -18,6 +19,17 @@ const en = {
     skip: 'Skip to content',
   },
   welcome: {
+    sloganA: 'Smarter',
+    sloganB: 'Healthcare.',
+    sloganC: 'A Healthier',
+    sloganD: 'Tomorrow.',
+    secondaryCta: 'See the roadmap',
+    features: {
+      care: { title: 'Better Care', text: 'Clear explanations and safe next steps' },
+      insights: { title: 'Smarter Insights', text: 'AI that tells you how sure it is' },
+      science: { title: 'Advanced Science', text: 'A 3D body to show where it hurts' },
+      everyone: { title: 'For Everyone', text: 'Bangla and English, on any phone' },
+    },
     cta: 'Get started',
     note: 'BiLuna does not replace doctors or emergency services.',
     portalsTitle: 'Three portals',
@@ -72,6 +84,10 @@ const en = {
     laterStep: 'This arrives in a later step of the build.',
   },
   patient: {
+    heroSub: 'How are you feeling today? BiLuna is here whenever you need it.',
+    askBiluna: 'Ask BiLuna',
+    whereHurts: 'Where does it hurt?',
+    findCare: 'Find care',
     greeting: 'Hello',
     modulesTitle: 'Your modules',
     profileTitle: 'Your health profile',
@@ -85,6 +101,10 @@ const en = {
     activityEmpty: 'Nothing yet. Your conversations and shared summaries will appear here.',
   },
   doctor: {
+    greeting: 'Welcome back',
+    heroSub: 'Summaries that patients chose to share with you, in one place.',
+    sharedCount: 'Shared with you',
+    newToday: 'New today',
     title: 'Shared with you',
     intro: 'Summaries that patients have chosen to share with you.',
     summaryLabel: 'Consultation Prep summary',
@@ -93,6 +113,8 @@ const en = {
     later: 'Opening a summary and adding a review note arrives in a later step of the build.',
   },
   org: {
+    heroSub: 'How BiLuna helped your patients this month.',
+    ofAll: 'of all conversations',
     orgName: 'Demo Hospital',
     title: 'This month',
     patients: 'Patients helped',
@@ -149,6 +171,7 @@ const bn: Dictionary = {
   brand: {
     name: 'BiLuna',
     tagline: 'আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী',
+    motto: 'স্বাস্থ্যসেবা • বুদ্ধিমত্তা • একসাথে',
   },
   description:
     'বাইলুনা — আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী। অসুস্থ লাগছে? শুধু বলুন কেমন লাগছে। কী হতে পারে তা বুঝতে আমি সাহায্য করব, সহজ ভাষায় ব্যাখ্যা করব এবং থ্রিডিতে দেখাব। কীভাবে নিরাপদ থাকবেন আর কখন ডাক্তার দেখাবেন তা জানাব। ওষুধের নাম দিন, সেটি কীসের জন্য তা বুঝিয়ে বলব। ভালো হাসপাতাল বা ডাক্তার খুঁজে পাওয়া নিয়ে চিন্তিত? আপনার প্রয়োজন অনুযায়ী কাছের হাসপাতাল ও ডাক্তার খুঁজে দেব এবং অ্যাপয়েন্টমেন্টের অনুরোধ করতে সাহায্য করব। সবচেয়ে সাশ্রয়ী বিকল্প বেছে নিতেও সাহায্য করব। শুধু তা-ই নয়: আমার সঙ্গে স্বাস্থ্য ও চিকিৎসা বিষয়ে শিখতে পারবেন এবং গবেষণায় সাহায্য পাবেন।',
@@ -162,6 +185,17 @@ const bn: Dictionary = {
     skip: 'মূল অংশে যান',
   },
   welcome: {
+    sloganA: 'আরও স্মার্ট',
+    sloganB: 'স্বাস্থ্যসেবা।',
+    sloganC: 'আরও সুস্থ',
+    sloganD: 'আগামী।',
+    secondaryCta: 'রোডম্যাপ দেখুন',
+    features: {
+      care: { title: 'আরও ভালো যত্ন', text: 'সহজ ব্যাখ্যা আর নিরাপদ পরবর্তী পদক্ষেপ' },
+      insights: { title: 'আরও স্মার্ট বোঝাপড়া', text: 'এআই জানায় সে কতটা নিশ্চিত' },
+      science: { title: 'উন্নত বিজ্ঞান', text: 'কোথায় ব্যথা তা দেখাতে থ্রিডি শরীর' },
+      everyone: { title: 'সবার জন্য', text: 'বাংলা ও ইংরেজিতে, যেকোনো ফোনে' },
+    },
     cta: 'শুরু করুন',
     note: 'বাইলুনা ডাক্তার বা জরুরি সেবার বিকল্প নয়।',
     portalsTitle: 'তিনটি পোর্টাল',
@@ -216,6 +250,10 @@ const bn: Dictionary = {
     laterStep: 'এটি তৈরির পরের ধাপে যুক্ত হবে।',
   },
   patient: {
+    heroSub: 'আজ কেমন লাগছে? যখনই দরকার, বাইলুনা পাশে আছে।',
+    askBiluna: 'বাইলুনাকে জিজ্ঞেস করুন',
+    whereHurts: 'কোথায় ব্যথা?',
+    findCare: 'সেবা খুঁজুন',
     greeting: 'স্বাগতম',
     modulesTitle: 'আপনার মডিউল',
     profileTitle: 'আপনার স্বাস্থ্য প্রোফাইল',
@@ -229,6 +267,10 @@ const bn: Dictionary = {
     activityEmpty: 'এখনো কিছু নেই। আপনার কথোপকথন ও শেয়ার করা সারাংশ এখানে দেখা যাবে।',
   },
   doctor: {
+    greeting: 'আবার স্বাগতম',
+    heroSub: 'রোগীরা যে সারাংশ আপনার সঙ্গে শেয়ার করেছেন, সব এক জায়গায়।',
+    sharedCount: 'আপনার সঙ্গে শেয়ার করা',
+    newToday: 'আজ নতুন',
     title: 'আপনার সঙ্গে শেয়ার করা',
     intro: 'রোগীরা যে সারাংশগুলো আপনার সঙ্গে শেয়ার করেছেন।',
     summaryLabel: 'ডাক্তার দেখানোর প্রস্তুতির সারাংশ',
@@ -237,6 +279,8 @@ const bn: Dictionary = {
     later: 'সারাংশ খোলা এবং পর্যালোচনা নোট লেখা তৈরির পরের ধাপে যুক্ত হবে।',
   },
   org: {
+    heroSub: 'এই মাসে বাইলুনা আপনার রোগীদের কীভাবে সাহায্য করেছে।',
+    ofAll: 'সব কথোপকথনের মধ্যে',
     orgName: 'ডেমো হাসপাতাল',
     title: 'এই মাস',
     patients: 'সাহায্য পাওয়া রোগী',

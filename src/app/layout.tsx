@@ -6,6 +6,7 @@ import '@fontsource/hind-siliguri/500.css'
 import '@fontsource/hind-siliguri/600.css'
 import '@fontsource/hind-siliguri/700.css'
 import './globals.css'
+import { Backdrop } from '@/components/Backdrop'
 import { DemoBanner } from '@/components/DemoBanner'
 import { SiteHeader } from '@/components/SiteHeader'
 import { getSession } from '@/lib/auth/session'
@@ -31,12 +32,13 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         >
           {dict.nav.skip}
         </a>
+        <Backdrop />
         <DemoBanner text={dict.banner} />
         <SiteHeader dict={dict} lang={lang} session={session} />
         <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
           {children}
         </main>
-        <footer className="border-t border-line bg-banner">
+        <footer className="border-t border-cyan/15 bg-banner/80 backdrop-blur">
           <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs leading-relaxed text-muted sm:px-6">
             {dict.welcome.prototype}
           </p>

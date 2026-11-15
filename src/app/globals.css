@@ -34,6 +34,41 @@
 
   --font-sans: "Manrope Variable", "Hind Siliguri", system-ui, sans-serif;
   --font-display: "Space Grotesk Variable", "Hind Siliguri", system-ui, sans-serif;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-glow: glow 4s ease-in-out infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes glow {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
 html {
@@ -72,4 +107,121 @@ html[lang="bn"] :is(h1, h2, h3) {
 :focus-visible {
   outline: 3px solid var(--color-cyan);
   outline-offset: 2px;
+}
+
+/* ---------- Brand board effects ---------- */
+
+/* Hexagon grid, drawn as a repeating tile so no image file is needed. */
+.hex-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='51.96' height='90' viewBox='0 0 51.96 90'%3E%3Cpath d='M25.98 0 51.96 15v30L25.98 60 0 45V15ZM25.98 60v30' fill='none' stroke='%2300a8ff' stroke-opacity='0.16' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 51.96px 90px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
+}
+
+/* A glass panel with a thin cyan edge, like the panels on the brand board. */
+.glass {
+  background: linear-gradient(160deg, rgb(20 51 102 / 0.72), rgb(11 31 68 / 0.82));
+  border: 1px solid rgb(0 224 255 / 0.18);
+  box-shadow:
+    inset 0 1px 0 rgb(102 240 255 / 0.12),
+    0 10px 40px rgb(0 8 32 / 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.glow-edge {
+  transition:
+    border-color 0.25s,
+    box-shadow 0.25s,
+    transform 0.25s;
+}
+
+.glow-edge:hover {
+  border-color: rgb(0 224 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(102 240 255 / 0.2),
+    0 0 0 1px rgb(0 224 255 / 0.15),
+    0 0 36px rgb(0 168 255 / 0.35);
+  transform: translateY(-2px);
+}
+
+/* The glowing curve along the bottom of the hero, like the horizon on the brand board. */
+.horizon {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.horizon::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: -15%;
+  right: -15%;
+  top: 72%;
+  height: 120%;
+  border-radius: 50%;
+  border-top: 2px solid rgb(0 224 255 / 0.7);
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgb(0 168 255 / 0.35), transparent 70%);
+  box-shadow: 0 -10px 60px rgb(0 168 255 / 0.45);
+  pointer-events: none;
+}
+
+/* Logo art cut from the brand board: screen blending drops its dark background. */
+.brand-art {
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 24px rgb(0 168 255 / 0.45));
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #ffffff 0%, #66f0ff 55%, #00e0ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Numbers that count up from zero. The real value is always in the page for screen readers. */
+@property --n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.count-up {
+  --n: var(--target);
+  counter-reset: n var(--n);
+  animation: count-up 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.count-up::after {
+  content: counter(n);
+}
+
+@keyframes count-up {
+  from {
+    --n: 0;
+  }
+  to {
+    --n: var(--target);
+  }
+}
+
+/* Bars that grow to their width when the page opens. */
+.grow-x {
+  transform-origin: left;
+  animation: grow-x 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

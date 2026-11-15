@@ -1,5 +1,14 @@
 import type { ReactNode } from 'react'
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-2xl border border-line bg-surface shadow-[0_8px_32px_rgb(0_10_40/0.45)] ${className}`}>{children}</div>
+/** A glass panel. `interactive` adds the cyan glow on hover for cards that are links. */
+export function Card({
+  children,
+  className = '',
+  interactive = false,
+}: {
+  children: ReactNode
+  className?: string
+  interactive?: boolean
+}) {
+  return <div className={`glass rounded-2xl ${interactive ? 'glow-edge' : ''} ${className}`}>{children}</div>
 }
