@@ -77,6 +77,17 @@ export const ICONS = {
   activity: [p('M3 12h4l3-8 4 16 3-8h4')],
   arrowRight: [p('M5 12h14'), p('m13 6 6 6-6 6')],
   map: [p('M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6Z'), p('M9 4v14M15 6v14')],
+  bell: [p('M6 9.5a6 6 0 0 1 12 0c0 5.5 2.5 7 2.5 7h-17S6 15 6 9.5Z'), p('M10 20a2 2 0 0 0 4 0')],
+  search: [c(11, 11, 6.5), p('m20 20-4.2-4.2')],
+  home: [p('M3.5 11 12 4l8.5 7'), p('M5.5 9.5V20h13V9.5'), p('M10 20v-5h4v5')],
+  logout: [
+    p('M10 4H5.5A1.5 1.5 0 0 0 4 5.5v13A1.5 1.5 0 0 0 5.5 20H10'),
+    p('m15 8 4 4-4 4'),
+    p('M9 12h10'),
+  ],
+  bolt: [p('M13 3 5 13.5h6L10 21l8-10.5h-6Z')],
+  megaphone: [p('M4 10v4h3l7 4V6l-7 4Z'), p('M17.5 9a4 4 0 0 1 0 6')],
+  send: [p('M4 12 20 4l-4 16-4-6.5Z'), p('m12 13.5 8-9.5')],
 } as const satisfies Record<string, readonly IconShape[]>
 
 export type IconName = keyof typeof ICONS

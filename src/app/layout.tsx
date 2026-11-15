@@ -8,8 +8,6 @@ import '@fontsource/hind-siliguri/700.css'
 import './globals.css'
 import { Backdrop } from '@/components/Backdrop'
 import { DemoBanner } from '@/components/DemoBanner'
-import { SiteHeader } from '@/components/SiteHeader'
-import { getSession } from '@/lib/auth/session'
 import { getDict } from '@/lib/i18n/server'
 
 export const metadata: Metadata = {
@@ -18,31 +16,24 @@ export const metadata: Metadata = {
     'BiLuna is a Bangladesh-first healthcare AI companion prototype. Demo with fictional data. Not medical advice.',
 }
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1 }
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#061330' }
 
+/** Shared by every page: language, fonts, background and the demo banner. Each area adds its own frame. */
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
-  const [{ lang, dict }, session] = await Promise.all([getDict(), getSession()])
+  const { lang, dict } = await getDict()
 
   return (
     <html lang={lang} className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-10 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2"
         >
           {dict.nav.skip}
         </a>
         <Backdrop />
         <DemoBanner text={dict.banner} />
-        <SiteHeader dict={dict} lang={lang} session={session} />
-        <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
-          {children}
-        </main>
-        <footer className="border-t border-cyan/15 bg-banner/80 backdrop-blur">
-          <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs leading-relaxed text-muted sm:px-6">
-            {dict.welcome.prototype}
-          </p>
-        </footer>
+        {children}
       </body>
     </html>
   )

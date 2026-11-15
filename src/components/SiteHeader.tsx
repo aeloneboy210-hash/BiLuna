@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { signOut } from '@/app/sign-in/actions'
+import { signOut } from '@/lib/auth/sign-out'
 import type { Session } from '@/lib/auth/session'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'

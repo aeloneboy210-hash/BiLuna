@@ -35,9 +35,3 @@ export async function signIn(_prev: SignInState, formData: FormData): Promise<Si
 
   redirect(PORTALS[profile.role].home)
 }
-
-export async function signOut(): Promise<void> {
-  const supabase = await createClient()
-  await supabase?.auth.signOut()
-  redirect('/sign-in')
-}

@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
@@ -72,27 +73,44 @@ export default async function WelcomePage() {
         ))}
       </ul>
 
-      <section className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-10">
-        <div className="flex min-w-0 flex-[3] flex-col gap-5">
-          <p className="text-base leading-relaxed text-body sm:text-lg sm:leading-relaxed">{dict.description}</p>
-          <p className="flex items-center gap-2 text-sm text-muted">
-            <Icon name="shield" className="h-4 w-4 text-cyan" />
-            {w.note}
-          </p>
-        </div>
-
-        <div className="flex min-w-0 flex-[2] flex-col gap-3">
-          <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.portalsTitle}</h2>
+      {/* The three portals, as large cards like the dashboard design. */}
+      <section className="flex flex-col gap-5">
+        <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.portalsTitle}</h2>
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {ROLES.map((role) => (
-            <Card key={role} className="flex items-center gap-4 p-4">
-              <IconTile name={ROLE_ICONS[role]} size="sm" />
-              <div className="flex flex-col">
-                <span className="font-semibold">{dict.portals[role].name}</span>
-                <span className="text-sm text-body">{dict.portals[role].blurb}</span>
-              </div>
-            </Card>
+            <li key={role}>
+              <Link
+                href="/sign-in"
+                className="glass glow-edge group flex h-full items-center gap-4 rounded-2xl p-5"
+              >
+                <span
+                  aria-hidden="true"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan text-on-brand shadow-[0_0_28px_rgb(0_168_255/0.5)]"
+                >
+                  <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="font-display text-lg font-semibold">{dict.portals[role].name}</span>
+                  <span className="text-sm text-body">{dict.portals[role].blurb}</span>
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20 text-cyan transition-transform group-hover:translate-x-1"
+                >
+                  <Icon name="arrowRight" className="h-5 w-5" />
+                </span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
+      </section>
+
+      <section className="flex flex-col gap-4 lg:max-w-4xl">
+        <p className="text-base leading-relaxed text-body sm:text-lg sm:leading-relaxed">{dict.description}</p>
+        <p className="flex items-center gap-2 text-sm text-muted">
+          <Icon name="shield" className="h-4 w-4 text-cyan" />
+          {w.note}
+        </p>
       </section>
 
       <section className="flex flex-col gap-5">
