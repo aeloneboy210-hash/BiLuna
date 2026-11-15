@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { DemoAccountList } from '@/components/DemoAccountList'
 import { Card } from '@/components/ui/Card'
 import { getDict } from '@/lib/i18n/server'
 import { SignInForm } from './SignInForm'
@@ -22,6 +23,7 @@ export default async function SignInPage() {
           submitting: dict.signIn.submitting,
         }}
       />
+      <DemoAccountList dict={dict} title={dict.signIn.accounts} />
       <p className="border-t border-line pt-4 text-xs text-muted">{dict.signIn.noSignUp}</p>
     </Card>
   )
