@@ -149,8 +149,9 @@ export default async function PatientPortal() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute right-0 bottom-0 hidden h-full items-end md:flex">
-          <div className="glass mr-[-1rem] mb-auto mt-6 max-w-56 self-start rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-snug">
+        <div className="pointer-events-none absolute right-0 bottom-0 hidden h-full md:block">
+          {/* The speech bubble sits over the robot's faded left side, clear of the greeting text. */}
+          <div className="glass absolute top-6 right-[58%] z-10 hidden w-60 rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-snug xl:block">
             <span className="font-semibold">{t.botHello}</span> {t.botAsk}
           </div>
           <Image
@@ -159,7 +160,7 @@ export default async function PatientPortal() {
             width={341}
             height={270}
             fetchPriority="high"
-            className="h-[92%] w-auto max-w-none"
+            className="absolute right-0 bottom-0 h-[92%] w-auto max-w-none"
           />
         </div>
       </section>

@@ -47,3 +47,13 @@ test('letter case does not bypass the guard', () => {
   expect(r('/Patient', null)).toBe('/sign-in')
   expect(r('/ORG/x', 'patient')).toBe('/patient')
 })
+
+import { needsRole } from '@/lib/access/route-guard'
+
+test.each(['/patient', '/doctor/x', '/org', '/sign-in', '/Patient/'])('%s needs the role looked up', (p) => {
+  expect(needsRole(p)).toBe(true)
+})
+
+test.each(['/', '/roadmap', '/setup', '/patients', '/organization'])('%s does not need the role', (p) => {
+  expect(needsRole(p)).toBe(false)
+})

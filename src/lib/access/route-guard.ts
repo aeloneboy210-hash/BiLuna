@@ -28,3 +28,9 @@ export function resolveRedirect(pathname: string, role: Role | null): string | n
 
   return null
 }
+
+/** True for the paths where the account's role decides what happens: the three portals and sign-in. */
+export function needsRole(pathname: string): boolean {
+  const path = normalise(pathname)
+  return path === SIGN_IN || ROLES.some((role) => isWithin(path, PORTALS[role].home))
+}

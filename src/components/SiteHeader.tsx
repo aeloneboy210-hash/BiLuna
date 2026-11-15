@@ -28,9 +28,10 @@ export function SiteHeader({
           </Link>
           {session ? (
             <>
-              <Link href={PORTALS[session.role].home} className={navLink}>
+              {/* A full page load, so a page your browser remembered from before you signed in is never shown. */}
+              <a href={PORTALS[session.role].home} className={navLink}>
                 {dict.nav.myPortal}
-              </Link>
+              </a>
               <form action={signOut}>
                 <button type="submit" className={navLink}>
                   {dict.nav.signOut}

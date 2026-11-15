@@ -1,13 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { resolveRedirect } from '@/lib/access/route-guard'
+import { needsRole, resolveRedirect } from '@/lib/access/route-guard'
 import { isRole, type Role } from '@/lib/portals'
 import { getSupabaseEnv } from '@/lib/supabase/env'
 
 /**
- * Runs before every portal and sign-in request: refreshes the session cookie,
- * finds the account's role and redirects when the path is not theirs to open.
- * The portal pages repeat the check themselves, so this is the first gate, not the only one.
+ * Runs before every page request. It always refreshes the session cookie, because only here can a
+ * refreshed login be saved: if a page refreshed it instead, the new login would be lost and the next
+ * request would look signed out. On the portals and sign-in it also finds the account's role and
+ * redirects when the path is not theirs to open. The portal pages repeat that check themselves.
  */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request })
@@ -33,7 +34,7 @@ export async function proxy(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    if (user) {
+    if (user && needsRole(request.nextUrl.pathname)) {
       const { data } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
       role = isRole(data?.role) ? data.role : null
     }
@@ -51,5 +52,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/patient/:path*', '/doctor/:path*', '/org/:path*', '/sign-in'],
+  // Every page, but not the framework's own files, images or the site icons.
+  matcher: ['/((?!_next/static|_next/image|brand/|icon.png|apple-icon.png|favicon.ico).*)'],
 }
