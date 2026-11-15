@@ -4,24 +4,33 @@ begin;
 
 do $$
 declare
-  p uuid := gen_random_uuid();
-  d uuid := gen_random_uuid();
+  p uuid;
+  d uuid;
   s uuid := gen_random_uuid();
   n int;
   r text;
 begin
-  insert into auth.users (id, email) values
-    (p, 'patient@biluna.demo'),
-    (d, 'doctor@biluna.demo'),
-    (s, 'stranger@example.com');
+  -- Use the real demo accounts when they exist, otherwise create them for the test.
+  select id into p from auth.users where email = 'patient@biluna.demo';
+  if p is null then p := gen_random_uuid(); insert into auth.users (id, email) values (p, 'patient@biluna.demo'); end if;
+  select id into d from auth.users where email = 'doctor@biluna.demo';
+  if d is null then d := gen_random_uuid(); insert into auth.users (id, email) values (d, 'doctor@biluna.demo'); end if;
+
+  -- No public sign-up: an email that is not a demo account cannot become an account at all.
+  begin
+    insert into auth.users (id, email) values (s, 'stranger@example.com');
+    raise exception 'stranger account was created';
+  exception when others then
+    if sqlerrm = 'stranger account was created' then raise; end if;
+  end;
+  select count(*) into n from auth.users where id = s;
+  if n <> 0 then raise exception 'stranger account exists'; end if;
 
   -- Profiles come from demo_accounts; an unknown email gets none.
   select role::text into r from public.profiles where id = p;
   if r is distinct from 'patient' then raise exception 'patient profile role is %', r; end if;
   select role::text into r from public.profiles where id = d;
   if r is distinct from 'doctor' then raise exception 'doctor profile role is %', r; end if;
-  select count(*) into n from public.profiles where id = s;
-  if n <> 0 then raise exception 'stranger got a profile'; end if;
 
   -- Acting as the signed-in patient.
   perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
@@ -40,7 +49,7 @@ begin
   end;
 
   begin
-    insert into public.profiles (id, role, display_name) values (s, 'org_admin', 'x');
+    insert into public.profiles (id, role, display_name) values (d, 'org_admin', 'x');
     raise exception 'patient inserted a profile';
   exception when insufficient_privilege then null;
   end;

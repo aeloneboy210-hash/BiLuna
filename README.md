@@ -24,7 +24,10 @@ The dashboards show sample data, marked as such on screen. The AI chat and the o
 | `doctor@biluna.demo` | Healthcare Professional Portal |
 | `hospital@biluna.demo` | Hospitals & Organizations Portal |
 
-Passwords are set by the project owner in the Supabase dashboard and are not stored in this repository.
+Passwords are chosen by the project owner and are never stored in this repository.
+Only these three accounts can exist: the database refuses any other sign-up (migration 0004).
+
+To reset the demo password, see the comment at the top of `supabase/migrations/0003_lock_demo_setup.sql`.
 
 ## How it is built
 
@@ -49,7 +52,7 @@ npm test          # unit tests
 npm run build     # type check and production build
 ```
 
-Database access tests are in `supabase/tests/`. Run each file in the Supabase SQL editor; it rolls itself back and ends with a "passed" row.
+Database access tests are in `supabase/tests/`. Run each file in the Supabase SQL editor after all migrations are applied; it rolls itself back and ends with a "passed" row.
 
 ## Project documents
 
