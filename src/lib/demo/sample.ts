@@ -34,6 +34,7 @@ export function profileCompleteness(fields: Record<string, string | null>): {
 
 /** Real milestones of this build, newest first, shown in "Latest updates". */
 export const BUILD_UPDATES = [
+  { key: 'chat', date: '2026-11-19' },
   { key: 'design', date: '2026-11-15' },
   { key: 'core', date: '2026-11-15' },
   { key: 'plan', date: '2026-11-14' },

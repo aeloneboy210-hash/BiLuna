@@ -196,14 +196,14 @@ export default async function PatientPortal() {
           </ul>
         </Panel>
 
-        {/* The chat card. It is honest about not working yet: the chat is the next feature. */}
+        {/* The chat card: typing here opens the Health chat with the question already sent. */}
         <Card className="flex flex-col gap-4 p-5 lg:col-span-2 2xl:col-span-1">
           <div className="flex items-center gap-3">
             <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-12 w-auto" />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">{t.botName}</h2>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-warn">
-                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-warn motion-safe:animate-glow" />
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-ok">
+                <span aria-hidden="true" className="h-2 w-2 rounded-full bg-ok" />
                 {t.botStatus}
               </span>
             </div>
@@ -214,22 +214,25 @@ export default async function PatientPortal() {
               {t.welcomeBack.replace(/,$/, '')} {firstName}! {t.botAsk}
             </p>
           </div>
-          <form className="mt-auto flex flex-col gap-2" aria-describedby="bot-soon">
+          {/* A plain GET form: the Health page reads ?q= and sends it as the first question. */}
+          <form action={hrefOf('health')} method="get" className="mt-auto flex flex-col gap-2" aria-describedby="bot-soon">
             <div className="flex overflow-hidden rounded-xl border border-field bg-surface">
               <label htmlFor="ask" className="sr-only">
                 {t.askPlaceholder}
               </label>
               <input
                 id="ask"
-                disabled
+                name="q"
+                required
+                maxLength={2000}
+                autoComplete="off"
                 placeholder={t.askPlaceholder}
-                className="min-h-12 min-w-0 flex-1 bg-transparent px-4 text-sm placeholder:text-muted disabled:cursor-not-allowed"
+                className="min-h-12 min-w-0 flex-1 bg-transparent px-4 text-sm placeholder:text-muted"
               />
               <button
-                type="button"
-                disabled
+                type="submit"
                 aria-label={t.send}
-                className="flex w-14 items-center justify-center bg-brand/50 text-on-brand disabled:cursor-not-allowed"
+                className="flex w-14 items-center justify-center bg-brand text-on-brand hover:bg-aqua"
               >
                 <Icon name="send" className="h-5 w-5" />
               </button>

@@ -10,8 +10,13 @@ test('the patient sidebar has the dashboard and all eight modules, in order', ()
 })
 
 test('planned modules in the sidebar lead to the roadmap', () => {
+  const medicine = navFor('patient').find((i) => i.key === 'medicine')
+  expect(medicine?.href).toBe('/roadmap#medicine')
+})
+
+test('BiLuna Health in the sidebar opens the Health chat', () => {
   const health = navFor('patient').find((i) => i.key === 'health')
-  expect(health?.href).toBe('/roadmap#health')
+  expect(health?.href).toBe('/patient/health')
 })
 
 test.each([

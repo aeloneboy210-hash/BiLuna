@@ -42,7 +42,7 @@ test.each([
   ['brand', 'ground'], ['brand', 'surface'], ['brand', 'soft'],
   ['aqua', 'surface'], ['ink', 'tint'], ['body', 'tint'],
   ['on-brand', 'brand'], ['on-brand', 'aqua'], ['on-brand', 'ink'], ['tint', 'ink'],
-  ['danger', 'surface'], ['warn', 'surface'], ['warn', 'ground'],
+  ['danger', 'surface'], ['warn', 'surface'], ['warn', 'ground'], ['ok', 'surface'], ['warn', 'soft'],
 ])('%s text on %s is readable (4.5:1)', (fg, bg) => {
   expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5)
 })
