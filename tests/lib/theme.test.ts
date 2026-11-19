@@ -24,27 +24,30 @@ function contrast(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-test('brand palette matches the BiLuna brand board', () => {
-  expect(token('surface').toLowerCase()).toBe('#0b1f44') // Deep Blue
-  expect(token('brand').toLowerCase()).toBe('#00a8ff') // Cyber Blue
-  expect(token('cyan').toLowerCase()).toBe('#00e0ff') // Sky Cyan
-  expect(token('aqua').toLowerCase()).toBe('#66f0ff') // Soft Aqua
-  expect(token('ink').toLowerCase()).toBe('#ffffff') // Pure White
+test('palette follows the BiLuna logo', () => {
+  expect(token('surface').toLowerCase()).toBe('#ffffff') // white page and cards
+  expect(token('ink').toLowerCase()).toBe('#0c2a5c') // logo navy
+  expect(token('cyan').toLowerCase()).toBe('#2580eb') // logo blue
+  expect(token('tint').toLowerCase()).toBe('#dbeafc') // logo light blue
+})
+
+test('the theme is flat: no gradients or glows in the stylesheet', () => {
+  expect(css).not.toMatch(/gradient\(/)
 })
 
 test.each([
-  ['ink', 'ground'], ['ink', 'surface'], ['ink', 'soft'], ['ink', 'banner'],
+  ['ink', 'ground'], ['ink', 'surface'], ['ink', 'soft'], ['ink', 'banner'], ['muted', 'soft'],
   ['body', 'ground'], ['body', 'surface'], ['body', 'soft'],
   ['muted', 'ground'], ['muted', 'surface'],
   ['brand', 'ground'], ['brand', 'surface'], ['brand', 'soft'],
-  ['cyan', 'surface'], ['aqua', 'surface'],
-  ['on-brand', 'brand'], ['on-brand', 'cyan'],
+  ['aqua', 'surface'], ['ink', 'tint'], ['body', 'tint'],
+  ['on-brand', 'brand'], ['on-brand', 'aqua'], ['on-brand', 'ink'], ['tint', 'ink'],
   ['danger', 'surface'], ['warn', 'surface'], ['warn', 'ground'],
 ])('%s text on %s is readable (4.5:1)', (fg, bg) => {
   expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5)
 })
 
-test.each([['field', 'surface'], ['brand', 'surface']])('%s border on %s is visible (3:1)', (fg, bg) => {
+test.each([['field', 'surface'], ['brand', 'surface'], ['cyan', 'surface'], ['cyan', 'soft']])('%s border on %s is visible (3:1)', (fg, bg) => {
   expect(contrast(fg, bg)).toBeGreaterThanOrEqual(3)
 })
 

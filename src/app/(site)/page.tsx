@@ -24,13 +24,13 @@ export default async function WelcomePage() {
   return (
     <div className="flex flex-col gap-14">
       {/* Hero, laid out like the top of the brand board: logo, wordmark, motto. */}
-      <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 pt-10 pb-20 sm:px-12 sm:pt-14 sm:pb-28">
+      <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 py-10 sm:px-12 sm:py-14">
         <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:gap-12 lg:text-left">
           <Image
-            src="/brand/logo-v3.webp"
+            src="/brand/logo-v4.webp"
             alt=""
-            width={390}
-            height={364}
+            width={512}
+            height={482}
             fetchPriority="high"
             className="brand-art motion-safe:animate-float h-auto w-48 shrink-0 sm:w-64 lg:w-80"
           />
@@ -85,7 +85,7 @@ export default async function WelcomePage() {
               >
                 <span
                   aria-hidden="true"
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan text-on-brand shadow-[0_0_28px_rgb(0_168_255/0.5)]"
+                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
                 >
                   <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
                 </span>

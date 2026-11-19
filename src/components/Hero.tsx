@@ -24,7 +24,7 @@ export function Hero({
   actions?: ReactNode
 }) {
   return (
-    <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 pt-7 pb-14 sm:px-10 sm:pt-10 sm:pb-20">
+    <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 py-7 sm:px-10 sm:py-10">
       <div className="flex items-start gap-6">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-wrap items-center gap-3">
@@ -37,10 +37,10 @@ export function Hero({
           {actions ? <div className="mt-2 flex flex-wrap gap-3">{actions}</div> : null}
         </div>
         <Image
-          src="/brand/logo-v3.webp"
+          src="/brand/logo-v4.webp"
           alt=""
-          width={390}
-          height={364}
+          width={512}
+          height={482}
           fetchPriority="high"
           className="brand-art motion-safe:animate-float hidden h-auto w-44 shrink-0 md:block lg:w-56"
         />

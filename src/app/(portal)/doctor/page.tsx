@@ -45,7 +45,7 @@ export default async function DoctorPortal() {
                   <Card interactive className="flex items-start gap-4 p-5">
                     <span
                       aria-hidden="true"
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan font-display text-lg font-bold text-on-brand shadow-[0_0_20px_rgb(0_168_255/0.45)]"
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand font-display text-lg font-bold text-on-brand"
                     >
                       {name.slice(0, 1)}
                     </span>

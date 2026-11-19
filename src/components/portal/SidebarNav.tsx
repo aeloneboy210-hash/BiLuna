@@ -31,10 +31,10 @@ export function SidebarNav({
                 aria-current={active ? 'page' : undefined}
                 className={`flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-[0.95rem] font-semibold transition-all ${
                   active
-                    ? 'bg-linear-to-r from-brand to-brand/70 text-on-brand shadow-[0_0_24px_rgb(0_168_255/0.45)]'
+                    ? 'bg-brand text-on-brand'
                     : compact
-                      ? 'glass text-body hover:text-aqua'
-                      : 'text-body hover:bg-soft/60 hover:text-aqua'
+                      ? 'glass text-body hover:text-ink'
+                      : 'text-body hover:bg-soft hover:text-ink'
                 }`}
               >
                 <Icon name={link.icon} className={`h-5 w-5 shrink-0 ${active ? '' : 'text-cyan'}`} />

@@ -6,7 +6,6 @@ import '@fontsource/hind-siliguri/500.css'
 import '@fontsource/hind-siliguri/600.css'
 import '@fontsource/hind-siliguri/700.css'
 import './globals.css'
-import { Backdrop } from '@/components/Backdrop'
 import { DemoBanner } from '@/components/DemoBanner'
 import { getDict } from '@/lib/i18n/server'
 
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
     'BiLuna is a Bangladesh-first healthcare AI companion prototype. Demo with fictional data. Not medical advice.',
 }
 
-export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#061330' }
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#ffffff' }
 
 /** Shared by every page: language, fonts, background and the demo banner. Each area adds its own frame. */
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
@@ -31,7 +30,6 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         >
           {dict.nav.skip}
         </a>
-        <Backdrop />
         <DemoBanner text={dict.banner} />
         {children}
       </body>

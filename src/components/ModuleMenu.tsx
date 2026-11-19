@@ -18,7 +18,7 @@ export function ModuleMenu({ dict }: { dict: Dictionary }) {
               href={moduleHref(m)}
               className={`group glow-edge flex h-full min-h-40 flex-col gap-3 rounded-2xl p-5 ${
                 working
-                  ? 'bg-linear-to-br from-brand to-cyan text-on-brand shadow-[0_0_36px_rgb(0_168_255/0.4)]'
+                  ? 'bg-brand text-on-brand'
                   : 'glass text-ink'
               }`}
             >

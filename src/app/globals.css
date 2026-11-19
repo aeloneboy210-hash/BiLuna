@@ -1,36 +1,38 @@
 @import "tailwindcss";
 
 /*
-  BiLuna brand theme, taken from the owner's brand board:
-  Deep Blue #0B1F44, Cyber Blue #00A8FF, Sky Cyan #00E0FF, Soft Aqua #66F0FF, Pure White #FFFFFF.
+  BiLuna brand theme, taken from the owner's logo (19 November 2026):
+  flat and light, no gradients or glows. Navy #0C2A5C for lines and text, logo blue #2580EB for accents,
+  light blue #DBEAFC like the inside of the logo's cross, on a white page.
   Headings use Space Grotesk, body text uses Manrope, Bangla falls back to Hind Siliguri.
   tests/lib/theme.test.ts checks that every text/background pair below stays readable.
 */
 @theme {
-  /* Backgrounds, darkest first */
-  --color-banner: #030a1c;
-  --color-ground: #061330;
-  --color-surface: #0b1f44;
-  --color-soft: #143366;
+  /* Backgrounds, lightest first */
+  --color-banner: #eaf2fd;
+  --color-ground: #f7faff;
+  --color-surface: #ffffff;
+  --color-soft: #eaf2fd;
+  --color-tint: #dbeafc;
 
   /* Lines */
-  --color-line: #1d4480;
-  --color-field: #4a7fc4;
+  --color-line: #d6e2f1;
+  --color-field: #7a93b4;
 
   /* Text */
-  --color-ink: #ffffff;
-  --color-body: #c9dcf5;
-  --color-muted: #8fb0d9;
+  --color-ink: #0c2a5c;
+  --color-body: #34507a;
+  --color-muted: #566b8a;
 
   /* Brand accents */
-  --color-brand: #00a8ff;
-  --color-cyan: #00e0ff;
-  --color-aqua: #66f0ff;
-  --color-on-brand: #04102a;
+  --color-brand: #1a64c8;
+  --color-cyan: #2580eb;
+  --color-aqua: #0c4fa8;
+  --color-on-brand: #ffffff;
 
   /* Status */
-  --color-danger: #ff8a80;
-  --color-warn: #ffd166;
+  --color-danger: #b42318;
+  --color-warn: #8a5300;
 
   --font-sans: "Manrope Variable", "Hind Siliguri", system-ui, sans-serif;
   --font-display: "Space Grotesk Variable", "Hind Siliguri", system-ui, sans-serif;
@@ -73,19 +75,14 @@
 
 html {
   -webkit-text-size-adjust: 100%;
-  color-scheme: dark;
+  color-scheme: light;
   background: var(--color-ground);
 }
 
 body {
   color: var(--color-ink);
   font-family: var(--font-sans);
-  /* Two soft glows over the deep blue ground, echoing the brand board. */
-  background:
-    radial-gradient(60rem 32rem at 85% -10%, rgb(0 168 255 / 0.2), transparent 70%),
-    radial-gradient(48rem 28rem at -10% 110%, rgb(0 224 255 / 0.12), transparent 70%),
-    var(--color-ground);
-  background-attachment: fixed;
+  background: var(--color-ground);
 }
 
 h1,
@@ -109,80 +106,41 @@ html[lang="bn"] :is(h1, h2, h3) {
   outline-offset: 2px;
 }
 
-/* ---------- Brand board effects ---------- */
+/* ---------- Flat logo style ---------- */
 
-/* Hexagon grid, drawn as a repeating tile so no image file is needed. */
-.hex-grid {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='51.96' height='90' viewBox='0 0 51.96 90'%3E%3Cpath d='M25.98 0 51.96 15v30L25.98 60 0 45V15ZM25.98 60v30' fill='none' stroke='%2300a8ff' stroke-opacity='0.16' stroke-width='1'/%3E%3C/svg%3E");
-  background-size: 51.96px 90px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 0%, transparent 75%);
-}
-
-/* A glass panel with a thin cyan edge, like the panels on the brand board. */
+/* A plain white card with a thin line and a soft shadow. (The name is kept from the dark theme.) */
 .glass {
-  background: linear-gradient(160deg, rgb(20 51 102 / 0.72), rgb(11 31 68 / 0.82));
-  border: 1px solid rgb(0 224 255 / 0.18);
-  box-shadow:
-    inset 0 1px 0 rgb(102 240 255 / 0.12),
-    0 10px 40px rgb(0 8 32 / 0.5);
-  backdrop-filter: blur(10px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 1px 2px rgb(12 42 92 / 0.06);
 }
 
 .glow-edge {
   transition:
-    border-color 0.25s,
-    box-shadow 0.25s,
-    transform 0.25s;
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
 }
 
 .glow-edge:hover {
-  border-color: rgb(0 224 255 / 0.55);
-  box-shadow:
-    inset 0 1px 0 rgb(102 240 255 / 0.2),
-    0 0 0 1px rgb(0 224 255 / 0.15),
-    0 0 36px rgb(0 168 255 / 0.35);
+  border-color: var(--color-cyan);
+  box-shadow: 0 4px 14px rgb(12 42 92 / 0.08);
   transform: translateY(-2px);
 }
 
-/* The glowing curve along the bottom of the hero, like the horizon on the brand board. */
+/* The hero no longer draws a glowing horizon. */
 .horizon {
   position: relative;
   overflow: hidden;
-  isolation: isolate;
 }
 
-.horizon::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  left: -15%;
-  right: -15%;
-  /* Sits inside the hero's bottom padding, so it never crosses the text. */
-  top: calc(100% - 2.75rem);
-  height: 120%;
-  border-radius: 50%;
-  border-top: 2px solid rgb(0 224 255 / 0.7);
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgb(0 168 255 / 0.35), transparent 70%);
-  box-shadow: 0 -10px 60px rgb(0 168 255 / 0.45);
-  pointer-events: none;
-}
-
-@media (min-width: 640px) {
-  .horizon::after {
-    top: calc(100% - 4rem);
-  }
-}
-
-/* Logo and DNA art cut from the brand board, with the dark background made transparent. */
 .brand-art {
-  filter: drop-shadow(0 0 18px rgb(0 168 255 / 0.4));
+  filter: none;
 }
 
+/* Flat brand blue; no gradient text. */
 .text-gradient {
-  background: linear-gradient(90deg, #ffffff 0%, #66f0ff 55%, #00e0ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-cyan);
 }
 
 /* Numbers that count up from zero. The real value is always in the page for screen readers. */

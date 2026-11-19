@@ -19,8 +19,8 @@ export function QuickAction({
       href={href}
       className={`inline-flex min-h-12 items-center gap-2 rounded-full px-5 text-sm font-semibold transition-all ${
         primary
-          ? 'bg-brand text-on-brand shadow-[0_0_28px_rgb(0_168_255/0.45)] hover:bg-cyan'
-          : 'border border-cyan/40 bg-surface/60 text-aqua hover:border-cyan hover:shadow-[0_0_24px_rgb(0_168_255/0.3)]'
+          ? 'bg-brand text-on-brand hover:bg-aqua'
+          : 'border border-brand bg-surface text-brand hover:bg-soft'
       }`}
     >
       <Icon name={icon} className="h-5 w-5" />

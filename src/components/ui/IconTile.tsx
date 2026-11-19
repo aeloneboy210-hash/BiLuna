@@ -7,7 +7,7 @@ const SIZES = {
   lg: { box: 'h-16 w-16 rounded-2xl', icon: 'h-8 w-8' },
 } as const
 
-/** A glowing rounded square holding an icon, like the app icon on the brand board. */
+/** A flat rounded square holding an icon, like the app icon on the brand board. */
 export function IconTile({
   name,
   size = 'md',
@@ -19,9 +19,9 @@ export function IconTile({
 }) {
   const tones = {
     brand:
-      'border-cyan/35 bg-linear-to-br from-brand/25 to-cyan/5 text-aqua shadow-[0_0_22px_rgb(0_168_255/0.3),inset_0_1px_0_rgb(102_240_255/0.25)]',
+      'border-tint bg-tint text-brand',
     danger:
-      'border-danger/40 bg-linear-to-br from-danger/25 to-danger/5 text-danger shadow-[0_0_22px_rgb(255_138_128/0.25)]',
+      'border-danger/30 bg-danger/10 text-danger',
     solid: 'border-on-brand/20 bg-on-brand/15 text-on-brand',
   }
   return (

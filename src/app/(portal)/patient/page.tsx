@@ -57,24 +57,17 @@ function Ring({ percent, label }: { percent: number; label: string }) {
   return (
     <div className="relative h-36 w-36 shrink-0">
       <svg viewBox="0 0 128 128" className="h-full w-full -rotate-90" aria-hidden="true">
-        <defs>
-          <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#00a8ff" />
-            <stop offset="100%" stopColor="#66f0ff" />
-          </linearGradient>
-        </defs>
-        <circle cx="64" cy="64" r={r} fill="none" stroke="rgb(20 51 102)" strokeWidth="11" />
+        <circle cx="64" cy="64" r={r} fill="none" stroke="#dbeafc" strokeWidth="11" />
         <circle
           cx="64"
           cy="64"
           r={r}
           fill="none"
-          stroke="url(#ring)"
+          stroke="#2580eb"
           strokeWidth="11"
           strokeLinecap="round"
           strokeDasharray={length}
           strokeDashoffset={length * (1 - percent / 100)}
-          className="drop-shadow-[0_0_8px_rgb(0_224_255/0.7)]"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -92,11 +85,10 @@ function Heartbeat() {
       <path
         d="M0 32h70l10-14 12 34 14-48 12 40 8-12h114"
         fill="none"
-        stroke="#00e0ff"
+        stroke="#2580eb"
         strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="drop-shadow-[0_0_6px_rgb(0_224_255/0.9)]"
       />
     </svg>
   )
@@ -130,8 +122,8 @@ export default async function PatientPortal() {
   return (
     <>
       {/* Welcome banner with the heartbeat line and BiLuna Bot, as in the design. */}
-      <section className="glass horizon motion-safe:animate-rise relative overflow-hidden rounded-3xl">
-        <div className="relative z-10 flex flex-col gap-5 px-6 pt-8 pb-14 sm:px-10 sm:pb-16 md:max-w-[60%]">
+      <section className="motion-safe:animate-rise relative overflow-hidden rounded-3xl border border-tint bg-soft">
+        <div className="relative z-10 flex flex-col gap-5 px-6 py-8 sm:px-10 sm:py-10 md:max-w-[62%]">
           <h1 className="text-3xl leading-tight font-bold sm:text-5xl">
             {t.welcomeBack}
             <br />
@@ -149,19 +141,21 @@ export default async function PatientPortal() {
           </div>
         </div>
 
-        <div className="pointer-events-none absolute right-0 bottom-0 hidden h-full md:block">
-          {/* The speech bubble sits over the robot's faded left side, clear of the greeting text. */}
-          <div className="glass absolute top-6 right-[58%] z-10 hidden w-60 rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-snug xl:block">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[38%] items-center justify-center md:flex">
+          {/* The BiLuna logo on a white disc, with BiLuna's greeting beside it. */}
+          <div className="relative flex aspect-square h-[82%] max-h-64 items-center justify-center rounded-full border border-tint bg-surface">
+            <Image
+              src="/brand/logo-v4.webp"
+              alt=""
+              width={512}
+              height={482}
+              fetchPriority="high"
+              className="h-[72%] w-auto"
+            />
+          </div>
+          <div className="glass absolute top-6 right-[78%] z-10 hidden w-56 rounded-2xl rounded-br-sm px-4 py-3 text-sm leading-snug 2xl:block">
             <span className="font-semibold">{t.botHello}</span> {t.botAsk}
           </div>
-          <Image
-            src="/brand/robot-v1.webp"
-            alt=""
-            width={341}
-            height={270}
-            fetchPriority="high"
-            className="absolute right-0 bottom-0 h-[92%] w-auto max-w-none"
-          />
         </div>
       </section>
 
@@ -192,9 +186,9 @@ export default async function PatientPortal() {
               <li key={q.label}>
                 <Link
                   href={q.href}
-                  className="glow-edge flex h-full min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-cyan/25 bg-soft/40 p-3 text-center text-sm font-semibold"
+                  className="glow-edge flex h-full min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-soft p-3 text-center text-sm font-semibold"
                 >
-                  <Icon name={q.icon} className="h-8 w-8 text-cyan drop-shadow-[0_0_8px_rgb(0_224_255/0.6)]" />
+                  <Icon name={q.icon} className="h-8 w-8 text-cyan" />
                   {q.label}
                 </Link>
               </li>
@@ -205,7 +199,7 @@ export default async function PatientPortal() {
         {/* The chat card. It is honest about not working yet: the chat is the next feature. */}
         <Card className="flex flex-col gap-4 p-5 lg:col-span-2 2xl:col-span-1">
           <div className="flex items-center gap-3">
-            <Image src="/brand/bot-face-v1.webp" alt="" width={144} height={136} className="h-12 w-auto" />
+            <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-12 w-auto" />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">{t.botName}</h2>
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-warn">
@@ -215,13 +209,13 @@ export default async function PatientPortal() {
             </div>
           </div>
           <div className="flex items-end gap-2.5">
-            <Image src="/brand/bot-face-v1.webp" alt="" width={144} height={136} className="h-8 w-auto" />
-            <p className="rounded-2xl rounded-bl-sm border border-cyan/25 bg-soft/60 px-4 py-3 text-sm leading-relaxed">
+            <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-8 w-auto" />
+            <p className="rounded-2xl rounded-bl-sm bg-soft px-4 py-3 text-sm leading-relaxed">
               {t.welcomeBack.replace(/,$/, '')} {firstName}! {t.botAsk}
             </p>
           </div>
           <form className="mt-auto flex flex-col gap-2" aria-describedby="bot-soon">
-            <div className="flex overflow-hidden rounded-xl border border-field bg-ground">
+            <div className="flex overflow-hidden rounded-xl border border-field bg-surface">
               <label htmlFor="ask" className="sr-only">
                 {t.askPlaceholder}
               </label>
@@ -235,7 +229,7 @@ export default async function PatientPortal() {
                 type="button"
                 disabled
                 aria-label={t.send}
-                className="flex w-14 items-center justify-center bg-brand/60 text-on-brand disabled:cursor-not-allowed"
+                className="flex w-14 items-center justify-center bg-brand/50 text-on-brand disabled:cursor-not-allowed"
               >
                 <Icon name="send" className="h-5 w-5" />
               </button>
@@ -268,7 +262,7 @@ export default async function PatientPortal() {
               <li key={u.key} className="flex items-center gap-3 text-sm">
                 <span
                   aria-hidden="true"
-                  className={`h-3 w-3 shrink-0 rounded-full ${i === 0 ? 'bg-cyan shadow-[0_0_10px_rgb(0_224_255/0.9)]' : 'bg-brand/70'}`}
+                  className={`h-3 w-3 shrink-0 rounded-full ${i === 0 ? 'bg-cyan' : 'bg-tint'}`}
                 />
                 <span className="min-w-0 flex-1 font-semibold">{t.updates[u.key]}</span>
                 <span className="shrink-0 text-muted">{dateFormat.format(new Date(u.date))}</span>
@@ -277,16 +271,16 @@ export default async function PatientPortal() {
           </ul>
         </Panel>
 
-        <section className="horizon relative flex min-h-44 flex-col justify-center gap-4 overflow-hidden rounded-2xl border border-cyan/30 bg-linear-to-br from-brand/35 via-surface to-cyan/20 p-6 shadow-[0_0_40px_rgb(0_168_255/0.25)] lg:col-span-2 2xl:col-span-1">
+        <section className="relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl bg-ink p-6 sm:flex-row sm:items-center 2xl:flex-col 2xl:items-stretch text-on-brand lg:col-span-2 2xl:col-span-1">
           <div className="flex items-center gap-4">
-            <Image src="/brand/logo-small-v3.webp" alt="" width={96} height={90} className="brand-art h-14 w-auto" />
+            <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-14 w-auto rounded-xl bg-surface p-1.5" />
             <h2 className="text-xl leading-snug font-bold">
               {t.ctaTitleA}
               <br />
-              <span className="text-cyan">{t.ctaTitleB}</span>
+              <span className="text-tint">{t.ctaTitleB}</span>
             </h2>
           </div>
-          <Link href="/roadmap" className={buttonClass('primary', 'self-end')}>
+          <Link href="/roadmap" className="inline-flex min-h-12 items-center justify-center gap-2 self-end rounded-full bg-surface px-6 text-base font-semibold text-ink transition-all hover:bg-tint">
             {t.ctaButton}
             <Icon name="arrowRight" className="h-5 w-5" />
           </Link>

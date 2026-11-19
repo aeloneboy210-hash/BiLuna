@@ -59,8 +59,8 @@ export default async function OrgPortal() {
                   </div>
                   <div aria-hidden="true" className="h-3 overflow-hidden rounded-full bg-soft/70">
                     <div
-                      className={`grow-x h-3 rounded-full shadow-[0_0_14px_rgb(0_224_255/0.55)] ${
-                        c.key === 'other' ? 'bg-muted/70' : 'bg-linear-to-r from-brand to-cyan'
+                      className={`grow-x h-3 rounded-full ${
+                        c.key === 'other' ? 'bg-muted/70' : 'bg-cyan'
                       }`}
                       style={{ width: `${(c.count / largest) * 100}%`, animationDelay: `${i * 90}ms` }}
                     />

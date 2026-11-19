@@ -6,10 +6,10 @@ export function Logo({ name, motto }: { name: string; motto: string }) {
   return (
     <Link href="/" className="group flex min-h-11 items-center gap-3">
       <Image
-        src="/brand/logo-small-v3.webp"
+        src="/brand/logo-small-v4.webp"
         alt=""
-        width={96}
-        height={90}
+        width={160}
+        height={151}
         className="brand-art h-11 w-auto transition-transform duration-300 group-hover:scale-105"
       />
       <span className="flex flex-col">

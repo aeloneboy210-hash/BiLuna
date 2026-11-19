@@ -12,7 +12,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {children}
       </main>
-      <footer className="border-t border-cyan/15 bg-banner/80 backdrop-blur">
+      <footer className="border-t border-line bg-surface">
         <p className="mx-auto w-full max-w-6xl px-4 py-4 text-xs leading-relaxed text-muted sm:px-6">
           {dict.welcome.prototype}
         </p>

@@ -40,7 +40,7 @@ export function PortalFrame({
     <div className="mx-auto flex w-full max-w-[96rem] flex-1 gap-6 px-3 py-4 sm:px-5 lg:py-6">
       <aside className="glass sticky top-6 hidden h-[calc(100vh-5.5rem)] w-64 shrink-0 flex-col gap-6 overflow-y-auto rounded-3xl p-4 lg:flex">
         <Link href="/" className="flex items-center gap-3 px-1 pt-1">
-          <Image src="/brand/logo-small-v3.webp" alt="" width={96} height={90} className="brand-art h-12 w-auto" />
+          <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="brand-art h-12 w-auto" />
           <span className="flex flex-col">
             <span className="text-gradient font-display text-2xl leading-none font-bold">{dict.brand.name}</span>
             <span className="mt-1 text-[0.7rem] leading-tight text-body">{dict.brand.tagline}</span>
@@ -53,13 +53,13 @@ export function PortalFrame({
           <form action={signOut}>
             <button
               type="submit"
-              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-[0.95rem] font-semibold text-body hover:bg-soft/60 hover:text-aqua"
+              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3.5 text-[0.95rem] font-semibold text-body hover:bg-soft hover:text-ink"
             >
               <Icon name="logout" className="h-5 w-5 text-cyan" />
               {dict.nav.signOut}
             </button>
           </form>
-          <div className="flex items-center gap-3 rounded-2xl border border-cyan/25 bg-soft/40 p-3.5">
+          <div className="flex items-center gap-3 rounded-2xl bg-soft p-3.5">
             <Icon name="shield" className="h-8 w-8 shrink-0 text-cyan" />
             <p className="text-xs leading-snug text-body">{dict.shell.dataSafe}</p>
           </div>
@@ -69,7 +69,7 @@ export function PortalFrame({
       <div className="flex min-w-0 flex-1 flex-col gap-5">
         <header className="flex flex-wrap items-center gap-3">
           <Link href="/" className="flex items-center gap-2 lg:hidden">
-            <Image src="/brand/logo-small-v3.webp" alt="" width={96} height={90} className="brand-art h-10 w-auto" />
+            <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="brand-art h-10 w-auto" />
             <span className="text-gradient font-display text-xl font-bold">{dict.brand.name}</span>
           </Link>
 
@@ -95,7 +95,7 @@ export function PortalFrame({
             <div className="glass flex items-center gap-3 rounded-full py-1.5 pr-4 pl-1.5">
               <span
                 aria-hidden="true"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-linear-to-br from-brand to-cyan font-display font-bold text-on-brand"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-brand font-display font-bold text-on-brand"
               >
                 {initial}
               </span>
