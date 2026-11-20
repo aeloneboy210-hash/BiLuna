@@ -6,8 +6,8 @@ test('eight modules with the blueprint names, in order', () => {
     'BiLuna Wellness', 'BiLuna Academy', 'BiLuna Careers', 'BiLuna Economics',
   ])
 })
-test('BiLuna Health is open; the other seven are still planned', () => {
-  expect(MODULES.filter((m) => m.status === 'working').map((m) => m.id)).toEqual(['health'])
+test('Health and Intelligence are open; the other six are still planned', () => {
+  expect(MODULES.filter((m) => m.status === 'working').map((m) => m.id)).toEqual(['health', 'intelligence'])
 })
 test('planned modules link to the roadmap', () =>
   expect(moduleHref({ id: 'wellness', status: 'planned' })).toBe('/roadmap#wellness'))

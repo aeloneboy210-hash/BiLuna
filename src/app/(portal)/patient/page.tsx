@@ -7,7 +7,8 @@ import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
 import { SampleTag } from '@/components/ui/SampleTag'
 import { requirePortal } from '@/lib/auth/require-portal'
-import { BUILD_UPDATES, SAMPLE_PATIENT_PROFILE, profileCompleteness } from '@/lib/demo/sample'
+import { BUILD_UPDATES, profileCompleteness } from '@/lib/demo/sample'
+import { getProfile } from '@/lib/intelligence/store'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import { getDict } from '@/lib/i18n/server'
 import { MODULES, moduleHref, type ModuleId } from '@/lib/modules'
@@ -109,12 +110,14 @@ export default async function PatientPortal() {
   const t = dict.patient
 
   const firstName = session.displayName.split(' ')[0]
+  // The health profile the patient keeps in BiLuna Intelligence; the area stays sample data.
+  const saved = await getProfile().catch(() => null)
   const profile: [IconName, string, string | null][] = [
-    ['calendar', t.age, String(SAMPLE_PATIENT_PROFILE.age)],
+    ['calendar', t.age, saved?.age != null ? String(saved.age) : null],
     ['mapPin', t.area, dict.sample.areaValue],
-    ['droplet', t.bloodGroup, SAMPLE_PATIENT_PROFILE.bloodGroup],
-    ['alert', t.allergies, dict.sample.none],
-    ['activity', t.conditions, SAMPLE_PATIENT_PROFILE.conditionsAdded ? dict.sample.none : null],
+    ['droplet', t.bloodGroup, saved?.bloodGroup ?? null],
+    ['alert', t.allergies, saved?.allergies ?? null],
+    ['activity', t.conditions, saved?.conditions ?? null],
   ]
   const completeness = profileCompleteness(Object.fromEntries(profile.map(([, label, value]) => [label, value])))
   const dateFormat = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -175,7 +178,12 @@ export default async function PatientPortal() {
             </dl>
           </div>
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted">{t.profileNote}</span>
+            <span className="text-xs text-muted">
+              {t.profileNote}{' '}
+              <Link href="/patient/intelligence" className="font-semibold text-brand underline-offset-2 hover:underline">
+                {t.profileEdit}
+              </Link>
+            </span>
             <SampleTag label={dict.common.sampleData} />
           </div>
         </Panel>

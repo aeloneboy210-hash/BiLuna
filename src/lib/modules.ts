@@ -18,7 +18,7 @@ export type BiLunaModule = { id: ModuleId; name: string; status: ModuleStatus; s
 /** The eight BiLuna modules. Each feature flips its module to 'working' when it ships. */
 export const MODULES: readonly BiLunaModule[] = [
   { id: 'health', scope: 'demo', name: 'BiLuna Health', status: 'working' },
-  { id: 'intelligence', scope: 'roadmap', name: 'BiLuna Intelligence', status: 'planned' },
+  { id: 'intelligence', scope: 'demo', name: 'BiLuna Intelligence', status: 'working' },
   { id: 'medicine', scope: 'demo', name: 'BiLuna Medicine', status: 'planned' },
   { id: 'navigator', scope: 'demo', name: 'BiLuna Navigator', status: 'planned' },
   { id: 'wellness', scope: 'roadmap', name: 'BiLuna Wellness', status: 'planned' },

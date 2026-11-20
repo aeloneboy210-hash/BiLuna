@@ -13,12 +13,12 @@ test('every sample label exists in the dictionary', () => {
     expect(dictionaries.en.sample[s.when]).toBeTruthy()
   }
 })
-test('five modules are in the demo scope and three are roadmap only', () => {
+test('six modules are in the demo scope and two are roadmap only', () => {
   expect(MODULES.filter((m) => m.scope === 'demo').map((m) => m.id)).toEqual([
-    'health', 'medicine', 'navigator', 'academy', 'economics',
+    'health', 'intelligence', 'medicine', 'navigator', 'academy', 'economics',
   ])
   expect(MODULES.filter((m) => m.scope === 'roadmap').map((m) => m.id)).toEqual([
-    'intelligence', 'wellness', 'careers',
+    'wellness', 'careers',
   ])
 })
 test('status label key follows status and scope', () => {
