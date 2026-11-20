@@ -74,7 +74,9 @@ export function NavLoader({ label }: { label: string }) {
     }
   }, [loading])
 
-  if (!shown) return null
+  // Keep the logo loaded ahead of time, so it is there the first time the screen shows.
+  if (!shown)
+    return <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} loading="eager" className="hidden" aria-hidden="true" />
 
   return (
     <div className="nav-loader fixed inset-0 z-[90] flex flex-col items-center justify-center bg-surface/95" role="status" aria-live="polite">
