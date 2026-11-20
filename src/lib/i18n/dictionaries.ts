@@ -27,6 +27,7 @@ const en = {
     roles: { patient: 'Patient', doctor: 'Doctor', org_admin: 'Hospital admin' },
   },
   welcome: {
+    introSkip: 'Skip',
     sloganA: 'Smarter',
     sloganB: 'Healthcare.',
     sloganC: 'A Healthier',
@@ -321,6 +322,7 @@ const bn: Dictionary = {
     roles: { patient: 'রোগী', doctor: 'ডাক্তার', org_admin: 'হাসপাতাল অ্যাডমিন' },
   },
   welcome: {
+    introSkip: 'বাদ দিন',
     sloganA: 'আরও স্মার্ট',
     sloganB: 'স্বাস্থ্যসেবা।',
     sloganC: 'আরও সুস্থ',

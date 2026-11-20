@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { IntroSplash } from '@/components/IntroSplash'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
@@ -8,6 +9,7 @@ import { getDict } from '@/lib/i18n/server'
 import { MODULES } from '@/lib/modules'
 import { ROLES } from '@/lib/portals'
 import type { IconName } from '@/lib/ui/icons'
+import { INTRO_GATE_SCRIPT } from '@/lib/ui/intro'
 import { MODULE_ICONS, ROLE_ICONS } from '@/lib/ui/module-icons'
 
 const FEATURES: { key: 'care' | 'insights' | 'science' | 'everyone'; icon: IconName }[] = [
@@ -23,6 +25,8 @@ export default async function WelcomePage() {
 
   return (
     <div className="flex flex-col gap-14">
+      <IntroSplash tagline={dict.brand.tagline} skip={w.introSkip} />
+      <script dangerouslySetInnerHTML={{ __html: INTRO_GATE_SCRIPT }} />
       {/* Hero, laid out like the top of the brand board: logo, wordmark, motto. */}
       <section className="glass horizon motion-safe:animate-rise rounded-3xl px-6 py-10 sm:px-12 sm:py-14">
         <div className="flex flex-col items-center gap-8 text-center lg:flex-row lg:gap-12 lg:text-left">
