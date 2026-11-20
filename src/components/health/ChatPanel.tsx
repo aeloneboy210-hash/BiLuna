@@ -3,13 +3,53 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react'
-import { sendMessage } from '@/app/(portal)/patient/health/actions'
+import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { Icon } from '@/components/ui/Icon'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 
 type Bubble = { id: string; author: 'patient' | 'biluna'; body: string }
+type Rating = 1 | -1
+
+/** 👍 / 👎 under a reply. Saved for reviewed improvements only; never training data. */
+function FeedbackButtons({ messageId, initial, t }: { messageId: string; initial?: Rating; t: Dictionary['health'] }) {
+  const [rating, setRating] = useState<Rating | undefined>(initial)
+  const [busy, setBusy] = useState(false)
+  async function rate(r: Rating) {
+    if (busy || r === rating) return
+    setBusy(true)
+    const before = rating
+    setRating(r)
+    const ok = await rateReply({ messageId, rating: r })
+    if (!ok) setRating(before)
+    setBusy(false)
+  }
+  const base = 'flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm transition-colors'
+  return (
+    <div className="mt-1.5 flex items-center gap-1.5 pl-1" role="group" aria-label={t.feedbackLabel}>
+      <button
+        type="button"
+        onClick={() => rate(1)}
+        aria-pressed={rating === 1}
+        aria-label={t.helpful}
+        className={`${base} ${rating === 1 ? 'border-brand bg-brand text-on-brand' : 'border-line text-muted hover:bg-soft'}`}
+      >
+        <span aria-hidden="true">👍</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => rate(-1)}
+        aria-pressed={rating === -1}
+        aria-label={t.notHelpful}
+        className={`${base} ${rating === -1 ? 'border-brand bg-brand text-on-brand' : 'border-line text-muted hover:bg-soft'}`}
+      >
+        <span aria-hidden="true">👎</span>
+      </button>
+      {rating ? <span className="text-xs text-muted">{t.feedbackThanks}</span> : null}
+    </div>
+  )
+}
 
 const PREFIXES = Object.values(CONFIDENCE_PREFIX)
 
@@ -37,12 +77,14 @@ function ReplyText({ body }: { body: string }) {
 export function ChatPanel({
   conversationId: initialId,
   initial,
+  feedback,
   firstQuestion,
   t,
   emergency,
 }: {
   conversationId: string | null
   initial: Bubble[]
+  feedback: Record<string, Rating>
   firstQuestion: string
   t: Dictionary['health']
   emergency: string
@@ -73,7 +115,7 @@ export function ChatPanel({
         window.history.replaceState(null, '', `/patient/health?c=${result.conversationId}`)
       }
       if (result.ok) {
-        setMessages((m) => [...m, { id: `reply-${Date.now()}`, author: 'biluna', body: result.reply.body }])
+        setMessages((m) => [...m, { id: result.reply.id, author: 'biluna', body: result.reply.body }])
       } else {
         setError(result.error)
         if (result.error === 'empty' || result.error === 'tooLong') setMessages((m) => m.slice(0, -1))
@@ -122,11 +164,14 @@ export function ChatPanel({
               </p>
             </div>
           ) : (
-            <div key={m.id} className="flex items-end gap-2.5">
-              <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-9 w-auto shrink-0" />
-              <div className="max-w-[85%] rounded-2xl rounded-bl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
-                <span className="sr-only">{t.biluna}: </span>
-                <ReplyText body={m.body} />
+            <div key={m.id} className="flex items-start gap-2.5">
+              <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="mt-1 h-9 w-auto shrink-0" />
+              <div className="flex max-w-[85%] flex-col">
+                <div className="rounded-2xl rounded-tl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
+                  <span className="sr-only">{t.biluna}: </span>
+                  <ReplyText body={m.body} />
+                </div>
+                <FeedbackButtons messageId={m.id} initial={feedback[m.id]} t={t} />
               </div>
             </div>
           ),

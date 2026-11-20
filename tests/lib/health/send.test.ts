@@ -11,10 +11,14 @@ function deps(over: Partial<SendDeps> = {}) {
     }),
     addMessage: vi.fn(async (id, author, body, lang) => {
       log.push(`add:${id}:${author}:${lang}:${body}`)
-      return { ok: true as const }
+      return { ok: true as const, id: `${author}-msg` }
     }),
     loadHistory: vi.fn(async () => [{ author: 'patient' as const, body: 'hi' }]),
-    ask: vi.fn(async () => ({ ok: true as const, text: 'reply text' })),
+    loadProfile: vi.fn(async () => null),
+    ask: vi.fn(async () => ({ ok: true as const, text: 'reply text', kind: 'answer' as const, retried: false })),
+    logEvent: vi.fn(async (kind: string, lang?: string) => {
+      log.push(`event:${kind}${lang ? `:${lang}` : ''}`)
+    }),
     ...over,
   }
   return { d, log }
@@ -37,10 +41,11 @@ test('a new chat is created with the first 60 characters as its title', async ()
   const { d, log } = deps()
   const text = 'I have had a headache and a mild fever for two days, and now my neck hurts too.'
   const result = await handleSend({ conversationId: null, text }, d)
-  expect(result).toEqual({ ok: true, conversationId: 'new-id', reply: { body: 'reply text', lang: 'en' } })
+  expect(result).toEqual({ ok: true, conversationId: 'new-id', reply: { id: 'biluna-msg', body: 'reply text', lang: 'en' } })
   expect(log[0]).toBe(`create:${text.slice(0, 60)}`)
   expect(log[1]).toBe(`add:new-id:patient:en:${text}`)
   expect(log[2]).toBe('add:new-id:biluna:en:reply text')
+  expect(log[3]).toBe('event:reply:en')
 })
 
 test('an existing chat is used, and Bangla is detected', async () => {
@@ -48,7 +53,7 @@ test('an existing chat is used, and Bangla is detected', async () => {
   const result = await handleSend({ conversationId: 'c1', text: 'আমার কাশি হচ্ছে' }, d)
   expect(result).toMatchObject({ ok: true, conversationId: 'c1', reply: { lang: 'bn' } })
   expect(d.createConversation).not.toHaveBeenCalled()
-  expect(d.ask).toHaveBeenCalledWith(expect.anything(), 'bn')
+  expect(d.ask).toHaveBeenCalledWith(expect.anything(), 'bn', null)
   expect(log[0]).toBe('add:c1:patient:bn:আমার কাশি হচ্ছে')
 })
 
@@ -63,4 +68,35 @@ test.each(['busy', 'unsafe', 'error'] as const)('AI %s returns the error and sav
   expect(await handleSend({ conversationId: 'c1', text: 'hello' }, d)).toEqual({ ok: false, error: reason, conversationId: 'c1' })
   expect(log.filter((l) => l.includes(':biluna:'))).toEqual([])
   expect(log.filter((l) => l.includes(':patient:'))).toHaveLength(1)
+})
+
+test('an unsafe reply is logged as blocked', async () => {
+  const { d, log } = deps({ ask: vi.fn(async () => ({ ok: false as const, reason: 'unsafe' as const })) })
+  await handleSend({ conversationId: 'c1', text: 'hello' }, d)
+  expect(log).toContain('event:blocked:en')
+})
+
+test('a rewritten reply is logged as retry and reply', async () => {
+  const { d, log } = deps({ ask: vi.fn(async () => ({ ok: true as const, text: 'ok', kind: 'answer' as const, retried: true })) })
+  await handleSend({ conversationId: 'c1', text: 'hello' }, d)
+  expect(log.filter((l) => l.startsWith('event:'))).toEqual(['event:retry:en', 'event:reply:en'])
+})
+
+test('a follow-up question is logged as clarify', async () => {
+  const { d, log } = deps({ ask: vi.fn(async () => ({ ok: true as const, text: 'Where?', kind: 'clarify' as const, retried: false })) })
+  await handleSend({ conversationId: 'c1', text: 'I feel sick' }, d)
+  expect(log.filter((l) => l.startsWith('event:'))).toEqual(['event:clarify:en', 'event:reply:en'])
+})
+
+test('a consented profile is passed to the AI and its use is logged', async () => {
+  const { d, log } = deps({ loadProfile: vi.fn(async () => '- Allergies: Penicillin') })
+  await handleSend({ conversationId: 'c1', text: 'hello' }, d)
+  expect(d.ask).toHaveBeenCalledWith(expect.anything(), 'en', '- Allergies: Penicillin')
+  expect(log).toContain('event:profile_used')
+})
+
+test('a failed event log never breaks the chat', async () => {
+  const { d } = deps({ logEvent: vi.fn(async () => { throw new Error('db down') }) })
+  const r = await handleSend({ conversationId: 'c1', text: 'hello' }, d)
+  expect(r.ok).toBe(true)
 })

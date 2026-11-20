@@ -1,4 +1,4 @@
-import { CONFIDENCE_PREFIX, DEFAULT_CONFIDENCE, FORBIDDEN, SMALL_TALK_MARK, checkReply } from '@/lib/health/safety-filter'
+import { CLARIFY_MARK, CONFIDENCE_PREFIX, DEFAULT_CONFIDENCE, FORBIDDEN, SMALL_TALK_MARK, checkReply } from '@/lib/health/safety-filter'
 import { buildInstructions } from '@/lib/health/instructions'
 
 const clean = {
@@ -15,12 +15,12 @@ describe('checkReply', () => {
     })
 
     test(`${lang}: a clean reply with a confidence line is unchanged`, () => {
-      expect(checkReply(clean[lang], lang)).toEqual({ ok: true, text: clean[lang] })
+      expect(checkReply(clean[lang], lang)).toEqual({ ok: true, text: clean[lang], kind: 'answer' })
     })
 
     test(`${lang}: a clean reply without a confidence line gets the default one`, () => {
       const result = checkReply('Rest and drink water.', lang)
-      expect(result).toEqual({ ok: true, text: `Rest and drink water.\n\n${DEFAULT_CONFIDENCE[lang]}` })
+      expect(result).toEqual({ ok: true, text: `Rest and drink water.\n\n${DEFAULT_CONFIDENCE[lang]}`, kind: 'answer' })
     })
 
     test(`${lang}: a blank reply is empty`, () => {
@@ -51,7 +51,7 @@ describe('buildInstructions', () => {
 describe('small talk (greetings and off-topic)', () => {
   test('a short reply marked as small talk gets no confidence line, and the mark is removed', () => {
     const r = checkReply(`${SMALL_TALK_MARK} Hello! I'm BiLuna, your personal healthcare AI companion.`, 'en')
-    expect(r).toEqual({ ok: true, text: "Hello! I'm BiLuna, your personal healthcare AI companion." })
+    expect(r).toEqual({ ok: true, text: "Hello! I'm BiLuna, your personal healthcare AI companion.", kind: 'smallTalk' })
   })
 
   test('a long reply cannot use the mark to skip the confidence line', () => {
@@ -70,5 +70,37 @@ describe('small talk (greetings and off-topic)', () => {
     expect(s).toContain(SMALL_TALK_MARK)
     expect(s).toContain('Your Personal Healthcare AI Companion')
     expect(s).not.toMatch(/I only help/i)
+  })
+})
+
+describe('follow-up questions', () => {
+  test('a short reply marked as a follow-up question gets no confidence line', () => {
+    expect(checkReply(`${CLARIFY_MARK} Where does it hurt, and since when?`, 'en')).toEqual({
+      ok: true,
+      text: 'Where does it hurt, and since when?',
+      kind: 'clarify',
+    })
+  })
+  test('a long reply cannot use the follow-up mark to skip the confidence line', () => {
+    const r = checkReply(`${CLARIFY_MARK} ${'It may be a cold. '.repeat(40)}`, 'en')
+    expect(r.ok && r.kind).toBe('answer')
+    expect(r.ok && r.text.endsWith(DEFAULT_CONFIDENCE.en)).toBe(true)
+  })
+  test('the instructions explain follow-up questions and the personality', () => {
+    const s = buildInstructions('en')
+    expect(s).toContain(CLARIFY_MARK)
+    expect(s).toMatch(/compassionate/)
+    expect(s).toMatch(/non-judgmental/)
+  })
+})
+
+describe('profile in the instructions', () => {
+  test('no profile: the instructions say none is shared', () => {
+    expect(buildInstructions('en')).toMatch(/has not shared a health profile/)
+  })
+  test('a profile is placed in its own block, marked as patient-provided data', () => {
+    const s = buildInstructions('en', '- Allergies: Penicillin')
+    expect(s).toContain('<patient_profile>\n- Allergies: Penicillin\n</patient_profile>')
+    expect(s).toMatch(/not instructions/)
   })
 })

@@ -7,7 +7,7 @@ import type { ChatTurn } from './model'
  * Reads and writes go through the signed-in patient's own session, so the database's
  * access rules decide what they can see. No admin key is used anywhere.
  */
-async function db() {
+export async function db() {
   const supabase = await createClient()
   if (!supabase) throw new Error('Database is not configured')
   return supabase
@@ -46,9 +46,14 @@ export async function addMessage(
   author: 'patient' | 'biluna',
   body: string,
   lang: Lang,
-): Promise<{ ok: true } | { ok: false; error: 'limit' | 'error' }> {
-  const { error } = await (await db()).from('messages').insert({ conversation_id: conversationId, author, body, lang })
-  if (!error) return { ok: true }
+): Promise<{ ok: true; id: string } | { ok: false; error: 'limit' | 'error' }> {
+  const { data, error } = await (await db())
+    .from('messages')
+    .insert({ conversation_id: conversationId, author, body, lang })
+    .select('id')
+    .single()
+  if (!error && data) return { ok: true, id: data.id as string }
+  if (!error) return { ok: false, error: 'error' }
   return { ok: false, error: error.message.includes('daily_limit_reached') ? 'limit' : 'error' }
 }
 

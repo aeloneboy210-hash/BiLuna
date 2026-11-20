@@ -22,26 +22,33 @@ export const FORBIDDEN: Record<Lang, string[]> = {
  * confidence line, but only for short replies, so a health answer cannot use it to drop the line.
  */
 export const SMALL_TALK_MARK = '[SMALL_TALK]'
-const SMALL_TALK_MAX = 400
+/** The model starts a reply that only asks follow-up questions with this mark. Same rules as small talk. */
+export const CLARIFY_MARK = '[ASK]'
+const SHORT_MAX = 400
 
-export type CheckResult = { ok: true; text: string } | { ok: false; reason: 'diagnosis' | 'empty' }
+export type ReplyKind = 'answer' | 'smallTalk' | 'clarify'
+export type CheckResult = { ok: true; text: string; kind: ReplyKind } | { ok: false; reason: 'diagnosis' | 'empty' }
 
 export function checkReply(text: string, lang: Lang): CheckResult {
   let trimmed = text.trim()
-  const smallTalk = trimmed.startsWith(SMALL_TALK_MARK)
-  trimmed = trimmed.split(SMALL_TALK_MARK).join('').trim()
+  const marked: ReplyKind = trimmed.startsWith(SMALL_TALK_MARK)
+    ? 'smallTalk'
+    : trimmed.startsWith(CLARIFY_MARK)
+      ? 'clarify'
+      : 'answer'
+  trimmed = trimmed.split(SMALL_TALK_MARK).join('').split(CLARIFY_MARK).join('').trim()
   if (!trimmed) return { ok: false, reason: 'empty' }
 
   const lower = trimmed.toLowerCase()
   const phrases = [...FORBIDDEN.en, ...FORBIDDEN.bn]
   if (phrases.some((p) => lower.includes(p.toLowerCase()))) return { ok: false, reason: 'diagnosis' }
 
-  if (smallTalk && trimmed.length <= SMALL_TALK_MAX) return { ok: true, text: trimmed }
+  if (marked !== 'answer' && trimmed.length <= SHORT_MAX) return { ok: true, text: trimmed, kind: marked }
 
   const lines = trimmed.split('\n').filter((l) => l.trim())
   const last = lines[lines.length - 1].trim().replace(/^[*_#>\s]+/, '')
   if (last.startsWith(CONFIDENCE_PREFIX.en) || last.startsWith(CONFIDENCE_PREFIX.bn)) {
-    return { ok: true, text: trimmed }
+    return { ok: true, text: trimmed, kind: 'answer' }
   }
-  return { ok: true, text: `${trimmed}\n\n${DEFAULT_CONFIDENCE[lang]}` }
+  return { ok: true, text: `${trimmed}\n\n${DEFAULT_CONFIDENCE[lang]}`, kind: 'answer' }
 }

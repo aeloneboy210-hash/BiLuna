@@ -4,6 +4,7 @@ import { ConversationList } from '@/components/health/ConversationList'
 import { requirePortal } from '@/lib/auth/require-portal'
 import { getMessages, listConversations } from '@/lib/health/chat-store'
 import { getDict } from '@/lib/i18n/server'
+import { feedbackFor } from '@/lib/intelligence/store'
 
 export const metadata: Metadata = { title: 'BiLuna Health' }
 
@@ -26,6 +27,7 @@ export default async function HealthPage({
   const conversations = await listConversations()
   const owned = c && conversations.some((x) => x.id === c) ? c : null
   const messages = owned ? await getMessages(owned) : []
+  const feedback = await feedbackFor(messages.filter((m) => m.author === 'biluna').map((m) => m.id))
 
   return (
     <div className="flex flex-col gap-5">
@@ -39,6 +41,7 @@ export default async function HealthPage({
           key={owned ?? 'new'}
           conversationId={owned}
           initial={messages.map(({ id, author, body }) => ({ id, author, body }))}
+          feedback={feedback}
           firstQuestion={owned ? '' : q}
           t={dict.health}
           emergency={dict.common.emergency}

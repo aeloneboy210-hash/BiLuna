@@ -151,6 +151,10 @@ const en = {
     you: 'You',
     biluna: 'BiLuna',
     enterHint: 'Enter to send, Shift + Enter for a new line',
+    feedbackLabel: 'Was this reply helpful?',
+    helpful: 'Helpful',
+    notHelpful: 'Not helpful',
+    feedbackThanks: 'Thanks. Used only to improve BiLuna, never as training data.',
     errors: {
       limit: "You've reached today's message limit for the demo. Please try again tomorrow.",
       busy: 'BiLuna is busy right now. Please wait a minute and try again.',
@@ -377,6 +381,10 @@ const bn: Dictionary = {
     you: 'আপনি',
     biluna: 'বাইলুনা',
     enterHint: 'পাঠাতে Enter, নতুন লাইনের জন্য Shift + Enter',
+    feedbackLabel: 'উত্তরটি কি কাজে লেগেছে?',
+    helpful: 'কাজে লেগেছে',
+    notHelpful: 'কাজে লাগেনি',
+    feedbackThanks: 'ধন্যবাদ। শুধু বাইলুনাকে উন্নত করতে ব্যবহার হবে, কখনো ট্রেনিং ডেটা হিসেবে নয়।',
     errors: {
       limit: 'ডেমোর জন্য আজকের মেসেজের সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।',
       busy: 'বাইলুনা এখন ব্যস্ত। এক মিনিট পর আবার চেষ্টা করুন।',

@@ -3,7 +3,7 @@ import { google } from '@ai-sdk/google'
 import { APICallError, generateText } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
 import { buildInstructions } from './instructions'
-import { checkReply } from './safety-filter'
+import { checkReply, type ReplyKind } from './safety-filter'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
 type ModelMessage = { role: 'user' | 'assistant'; content: string }
@@ -11,7 +11,9 @@ type ModelMessage = { role: 'user' | 'assistant'; content: string }
 /** The one call to the model, kept small so tests can replace it. */
 export type Generate = (opts: { instructions: string; messages: ModelMessage[] }) => Promise<{ text: string }>
 
-export type AskResult = { ok: true; text: string } | { ok: false; reason: 'busy' | 'unsafe' | 'error' }
+export type AskResult =
+  | { ok: true; text: string; kind: ReplyKind; retried: boolean }
+  | { ok: false; reason: 'busy' | 'unsafe' | 'error' }
 
 /** Free-tier model; set BILUNA_AI_MODEL in Vercel to change it without a code change. */
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
@@ -37,19 +39,23 @@ const defaultGenerate: Generate = async ({ instructions, messages }) => {
  * Asks BiLuna to reply to a conversation. Every reply goes through the safety filter before it is returned;
  * a reply that states a diagnosis is regenerated once, then refused.
  */
-export async function askBiLuna(history: ChatTurn[], lang: Lang, deps: { generate?: Generate } = {}): Promise<AskResult> {
+export async function askBiLuna(
+  history: ChatTurn[],
+  lang: Lang,
+  deps: { generate?: Generate; profile?: string | null } = {},
+): Promise<AskResult> {
   const generate = deps.generate ?? defaultGenerate
   const messages: ModelMessage[] = history.slice(-HISTORY_LIMIT).map((m) => ({
     role: m.author === 'patient' ? 'user' : 'assistant',
     content: m.body,
   }))
-  const instructions = buildInstructions(lang)
+  const instructions = buildInstructions(lang, deps.profile ?? null)
 
   try {
     for (const extra of ['', RETRY_NOTE]) {
       const { text } = await generate({ instructions: instructions + extra, messages })
       const checked = checkReply(text, lang)
-      if (checked.ok) return { ok: true, text: checked.text }
+      if (checked.ok) return { ok: true, text: checked.text, kind: checked.kind, retried: extra !== '' }
       if (checked.reason === 'empty') return { ok: false, reason: 'error' }
     }
     return { ok: false, reason: 'unsafe' }

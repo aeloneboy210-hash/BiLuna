@@ -23,14 +23,14 @@ const apiError = (statusCode: number) =>
 
 test('a clean reply passes through', async () => {
   const f = fake(good)
-  expect(await askBiLuna(history, 'en', { generate: f.generate })).toEqual({ ok: true, text: good })
+  expect(await askBiLuna(history, 'en', { generate: f.generate })).toEqual({ ok: true, text: good, kind: 'answer', retried: false })
   expect(f.calls).toHaveLength(1)
   expect(f.calls[0].instructions).toContain('How sure I am:')
 })
 
 test('a reply naming the cause is retried exactly once', async () => {
   const f = fake('The cause is flu.', good)
-  expect(await askBiLuna(history, 'en', { generate: f.generate })).toEqual({ ok: true, text: good })
+  expect(await askBiLuna(history, 'en', { generate: f.generate })).toEqual({ ok: true, text: good, kind: 'answer', retried: true })
   expect(f.calls).toHaveLength(2)
   expect(f.calls[1].instructions).toMatch(/possibilities/i)
 })
@@ -70,4 +70,10 @@ test('only the last 12 messages are sent, mapped to user and assistant', async (
   expect(sent).toHaveLength(12)
   expect(sent[0]).toEqual({ role: 'user', content: 'm8' })
   expect(sent[11]).toEqual({ role: 'assistant', content: 'm19' })
+})
+
+test('a consented profile reaches the instructions', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate, profile: '- Allergies: Penicillin' })
+  expect(f.calls[0].instructions).toContain('- Allergies: Penicillin')
 })
