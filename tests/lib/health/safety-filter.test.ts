@@ -1,4 +1,4 @@
-import { CONFIDENCE_PREFIX, DEFAULT_CONFIDENCE, FORBIDDEN, checkReply } from '@/lib/health/safety-filter'
+import { CONFIDENCE_PREFIX, DEFAULT_CONFIDENCE, FORBIDDEN, SMALL_TALK_MARK, checkReply } from '@/lib/health/safety-filter'
 import { buildInstructions } from '@/lib/health/instructions'
 
 const clean = {
@@ -45,5 +45,30 @@ describe('buildInstructions', () => {
     const s = buildInstructions('en')
     expect(s).toContain('How sure I am:')
     expect(s).toContain('999')
+  })
+})
+
+describe('small talk (greetings and off-topic)', () => {
+  test('a short reply marked as small talk gets no confidence line, and the mark is removed', () => {
+    const r = checkReply(`${SMALL_TALK_MARK} Hello! I'm BiLuna, your personal healthcare AI companion.`, 'en')
+    expect(r).toEqual({ ok: true, text: "Hello! I'm BiLuna, your personal healthcare AI companion." })
+  })
+
+  test('a long reply cannot use the mark to skip the confidence line', () => {
+    const long = `${SMALL_TALK_MARK} ${'You may have a cold. '.repeat(40)}`
+    const r = checkReply(long, 'en')
+    expect(r.ok && r.text.endsWith(DEFAULT_CONFIDENCE.en)).toBe(true)
+    expect(r.ok && r.text.includes(SMALL_TALK_MARK)).toBe(false)
+  })
+
+  test('the mark does not let a diagnosis through', () => {
+    expect(checkReply(`${SMALL_TALK_MARK} The cause is flu.`, 'en')).toEqual({ ok: false, reason: 'diagnosis' })
+  })
+
+  test('the instructions explain the mark and give a firm introduction', () => {
+    const s = buildInstructions('en')
+    expect(s).toContain(SMALL_TALK_MARK)
+    expect(s).toContain('Your Personal Healthcare AI Companion')
+    expect(s).not.toMatch(/I only help/i)
   })
 })

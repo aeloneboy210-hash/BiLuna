@@ -17,15 +17,26 @@ export const FORBIDDEN: Record<Lang, string[]> = {
   bn: ['আপনার রোগ নির্ণয়', 'নিশ্চিতভাবে আপনার', 'কারণ হলো', 'আপনার অবশ্যই'],
 }
 
+/**
+ * The model starts a greeting or an off-topic reply with this mark. The filter removes it and skips the
+ * confidence line, but only for short replies, so a health answer cannot use it to drop the line.
+ */
+export const SMALL_TALK_MARK = '[SMALL_TALK]'
+const SMALL_TALK_MAX = 400
+
 export type CheckResult = { ok: true; text: string } | { ok: false; reason: 'diagnosis' | 'empty' }
 
 export function checkReply(text: string, lang: Lang): CheckResult {
-  const trimmed = text.trim()
+  let trimmed = text.trim()
+  const smallTalk = trimmed.startsWith(SMALL_TALK_MARK)
+  trimmed = trimmed.split(SMALL_TALK_MARK).join('').trim()
   if (!trimmed) return { ok: false, reason: 'empty' }
 
   const lower = trimmed.toLowerCase()
   const phrases = [...FORBIDDEN.en, ...FORBIDDEN.bn]
   if (phrases.some((p) => lower.includes(p.toLowerCase()))) return { ok: false, reason: 'diagnosis' }
+
+  if (smallTalk && trimmed.length <= SMALL_TALK_MAX) return { ok: true, text: trimmed }
 
   const lines = trimmed.split('\n').filter((l) => l.trim())
   const last = lines[lines.length - 1].trim().replace(/^[*_#>\s]+/, '')
