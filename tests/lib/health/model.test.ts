@@ -77,3 +77,31 @@ test('a consented profile reaches the instructions', async () => {
   await askBiLuna(history, 'en', { generate: f.generate, profile: '- Allergies: Penicillin' })
   expect(f.calls[0].instructions).toContain('- Allergies: Penicillin')
 })
+
+test('an answer keeps its 3D body tag at the end, after the confidence line check', async () => {
+  const f = fake(`It might be your lungs.\n[[body:lungs]]\n\n${CONFIDENCE_PREFIX.en} fairly sure.`)
+  const r = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(r).toEqual({ ok: true, text: `It might be your lungs.\n\n${CONFIDENCE_PREFIX.en} fairly sure.\n[[body:lungs]]`, kind: 'answer', retried: false })
+})
+
+test('a tag on an answer with no confidence line still gets the default line first', async () => {
+  const f = fake('It might be your stomach.\n[[body:stomach]]')
+  const r = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(r.ok && r.text.endsWith('[[body:stomach]]')).toBe(true)
+  expect(r.ok && r.text).toContain(CONFIDENCE_PREFIX.en)
+})
+
+test('follow-up questions and unknown tags carry no 3D tag', async () => {
+  const f = fake('[ASK] Where does it hurt? [[body:heart]]', 'Maybe a cold.\n[[body:aura]]')
+  const a = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(a).toEqual({ ok: true, text: 'Where does it hurt?', kind: 'clarify', retried: false })
+  const b = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(b.ok && b.text).not.toContain('[[')
+})
+
+test('the instructions explain the 3D body tag and the organ list', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate })
+  expect(f.calls[0].instructions).toContain('[[body:')
+  expect(f.calls[0].instructions).toContain('gallbladder')
+})

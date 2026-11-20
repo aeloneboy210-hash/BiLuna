@@ -1,4 +1,5 @@
 import type { Lang } from '@/lib/i18n/lang'
+import { BODY_ORGANS } from '@/lib/body/chat-body'
 import { CLARIFY_MARK, CONFIDENCE_PREFIX, SMALL_TALK_MARK } from './safety-filter'
 
 /**
@@ -46,6 +47,11 @@ Shape of every health answer, in this order
 2. What to do now, and clearly when to see a doctor or go to a hospital.
 3. A last line that starts exactly with "${prefix}" and says plainly what you are fairly sure of and what a clinician must check.
 Keep the whole answer under about 180 words.
+
+3D body
+- The patient may start a message with "📍" and the place they tapped on a 3D body (for example "📍 Where it hurts: Left leg · Tibia (left)"). Treat it as where they feel the problem.
+- When your answer is about a part of the body, you may add one tag on its own line at the very end, after the confidence line: [[body:NAME]], where NAME is exactly one of: ${BODY_ORGANS.join(', ')}.
+- The screen shows that organ lit up as "may be involved", never as the cause. Pick the one organ your answer talks about most. Leave the tag out if none fits, and never use it for greetings or follow-up questions.
 
 Never
 - Never give a diagnosis, never name "the cause", never say "you have" a disease, never sound certain when you are not.

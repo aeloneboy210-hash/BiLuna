@@ -2,6 +2,7 @@ import 'server-only'
 import { google } from '@ai-sdk/google'
 import { APICallError, generateText } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
+import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
 import { checkReply, type ReplyKind } from './safety-filter'
 
@@ -54,8 +55,13 @@ export async function askBiLuna(
   try {
     for (const extra of ['', RETRY_NOTE]) {
       const { text } = await generate({ instructions: instructions + extra, messages })
-      const checked = checkReply(text, lang)
-      if (checked.ok) return { ok: true, text: checked.text, kind: checked.kind, retried: extra !== '' }
+      // The 3D body tag comes off before the safety check and goes back at the very end, answers only.
+      const tagged = extractBodyTag(text)
+      const checked = checkReply(tagged.text, lang)
+      if (checked.ok) {
+        const body = tagged.organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(tagged.organ)}` : checked.text
+        return { ok: true, text: body, kind: checked.kind, retried: extra !== '' }
+      }
       if (checked.reason === 'empty') return { ok: false, reason: 'error' }
     }
     return { ok: false, reason: 'unsafe' }

@@ -49,6 +49,8 @@ export function BodyViewer({
   onLoaded,
   label,
   compact = false,
+  loadingText = 'Loading 3D body…',
+  failedText = '3D could not start on this device.',
 }: {
   highlight: string | null
   layers: BodyLayers
@@ -56,6 +58,8 @@ export function BodyViewer({
   onLoaded?: (info: { ms: number; bytes: number; parts: number }) => void
   label: string
   compact?: boolean
+  loadingText?: string
+  failedText?: string
 }) {
   const mount = useRef<HTMLDivElement>(null)
   const api = useRef<{ setHighlight: (h: string | null) => void; setLayers: (l: BodyLayers) => void } | null>(null)
@@ -270,10 +274,10 @@ export function BodyViewer({
     <div className="relative h-full w-full">
       <div ref={mount} className="h-full w-full" role="img" aria-label={label} />
       {loading && !failed ? (
-        <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">Loading 3D body…</p>
+        <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">{loadingText}</p>
       ) : null}
       {failed ? (
-        <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-warn">3D could not start on this device.</p>
+        <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-warn">{failedText}</p>
       ) : null}
     </div>
   )

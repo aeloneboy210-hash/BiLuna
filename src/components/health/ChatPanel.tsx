@@ -4,10 +4,14 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
+import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { Icon } from '@/components/ui/Icon'
+import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
+import { detectLang } from '@/lib/health/lang-detect'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
+import type { Lang } from '@/lib/i18n/lang'
 
 type Bubble = { id: string; author: 'patient' | 'biluna'; body: string }
 type Rating = 1 | -1
@@ -91,6 +95,7 @@ export function ChatPanel({
   feedback,
   firstQuestion,
   t,
+  lang,
   emergency,
 }: {
   conversationId: string | null
@@ -98,6 +103,7 @@ export function ChatPanel({
   feedback: Record<string, Rating>
   firstQuestion: string
   t: Dictionary['health']
+  lang: Lang
   emergency: string
 }) {
   const router = useRouter()
@@ -108,16 +114,26 @@ export function ChatPanel({
   const [pending, startTransition] = useTransition()
   const endRef = useRef<HTMLDivElement>(null)
   const sentFirst = useRef(false)
+  const [point, setPoint] = useState<BodyPoint | null>(null)
+  // Only one 3D view at a time: 'picker', a reply's id, or none. The newest reply's card starts open.
+  const [open3d, setOpen3d] = useState<string | null>(() => {
+    const last = initial[initial.length - 1]
+    return last?.author === 'biluna' && extractBodyTag(last.body).organ ? last.id : null
+  })
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, pending])
 
   function send(raw: string) {
-    const value = raw.trim()
-    if (!value || pending) return
+    const words = raw.trim()
+    if ((!words && !point) || pending) return
+    // The pointed line uses the language of the words typed, so BiLuna replies in that language.
+    const value = point ? `${pointedLine(point, words ? detectLang(words) : lang)}${words ? `\n${words}` : ''}` : words
     setError(null)
     setText('')
+    setPoint(null)
+    if (open3d === 'picker') setOpen3d(null)
     setMessages((m) => [...m, { id: `local-${Date.now()}`, author: 'patient', body: value }])
     startTransition(async () => {
       const result = await sendMessage({ conversationId, text: value })
@@ -127,6 +143,7 @@ export function ChatPanel({
       }
       if (result.ok) {
         setMessages((m) => [...m, { id: result.reply.id, author: 'biluna', body: result.reply.body }])
+        if (extractBodyTag(result.reply.body).organ) setOpen3d(result.reply.id)
       } else {
         setError(result.error)
         if (result.error === 'empty' || result.error === 'tooLong') setMessages((m) => m.slice(0, -1))
@@ -166,27 +183,44 @@ export function ChatPanel({
           </div>
         </div>
 
-        {messages.map((m) =>
-          m.author === 'patient' ? (
-            <div key={m.id} className="flex justify-end">
-              <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed whitespace-pre-wrap text-on-brand">
-                <span className="sr-only">{t.you}: </span>
-                {m.body}
-              </p>
-            </div>
-          ) : (
+        {messages.map((m) => {
+          if (m.author === 'patient') {
+            const { point: pointed, rest } = splitPointed(m.body)
+            return (
+              <div key={m.id} className="flex justify-end">
+                <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand">
+                  <span className="sr-only">{t.you}: </span>
+                  {pointed ? (
+                    <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">📍 {pointed}</span>
+                  ) : null}
+                  {rest ? <p className="whitespace-pre-wrap">{rest}</p> : null}
+                </div>
+              </div>
+            )
+          }
+          const reply = extractBodyTag(m.body)
+          return (
             <div key={m.id} className="flex items-start gap-2.5">
               <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="mt-1 h-9 w-auto shrink-0" />
               <div className="flex max-w-[85%] flex-col">
                 <div className="rounded-2xl rounded-tl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
                   <span className="sr-only">{t.biluna}: </span>
-                  <ReplyText body={m.body} />
+                  <ReplyText body={reply.text} />
+                  {reply.organ ? (
+                    <BodyCard
+                      organ={reply.organ}
+                      open={open3d === m.id}
+                      onToggle={() => setOpen3d((o) => (o === m.id ? null : m.id))}
+                      lang={lang}
+                      t={t.body}
+                    />
+                  ) : null}
                 </div>
                 <FeedbackButtons messageId={m.id} initial={feedback[m.id]} t={t} />
               </div>
             </div>
-          ),
-        )}
+          )
+        })}
 
         {pending ? (
           <div className="flex items-end gap-2.5" role="status">
@@ -214,7 +248,21 @@ export function ChatPanel({
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-2 border-t border-line p-3 sm:p-4">
+        {open3d === 'picker' ? (
+          <BodyPicker point={point} onPoint={setPoint} onClose={() => setOpen3d(null)} lang={lang} t={t.body} />
+        ) : null}
+        {point ? <PointChip point={point} onClear={() => setPoint(null)} lang={lang} t={t.body} /> : null}
         <div className="flex items-end gap-2">
+          <button
+            type="button"
+            onClick={() => setOpen3d((o) => (o === 'picker' ? null : 'picker'))}
+            aria-pressed={open3d === 'picker'}
+            aria-label={t.body.button}
+            title={t.body.button}
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${open3d === 'picker' ? 'border-brand bg-brand text-on-brand' : 'border-field text-brand hover:bg-soft'}`}
+          >
+            <Icon name="body" className="h-6 w-6" />
+          </button>
           <label htmlFor="health-input" className="sr-only">
             {t.placeholder}
           </label>
@@ -230,7 +278,7 @@ export function ChatPanel({
           />
           <button
             type="submit"
-            disabled={pending || !text.trim()}
+            disabled={pending || (!text.trim() && !point)}
             aria-label={t.send}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand text-on-brand hover:bg-aqua disabled:opacity-50"
           >

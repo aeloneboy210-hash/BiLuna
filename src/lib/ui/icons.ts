@@ -88,6 +88,7 @@ export const ICONS = {
   bolt: [p('M13 3 5 13.5h6L10 21l8-10.5h-6Z')],
   megaphone: [p('M4 10v4h3l7 4V6l-7 4Z'), p('M17.5 9a4 4 0 0 1 0 6')],
   send: [p('M4 12 20 4l-4 16-4-6.5Z'), p('m12 13.5 8-9.5')],
+  body: [c(12, 4.5, 2.5), p('M6 9.5h12'), p('M12 9.5v6'), p('m9 21 3-5.5 3 5.5'), p('M7.5 9.5 6 14.5'), p('m16.5 9.5 1.5 5')],
 } as const satisfies Record<string, readonly IconShape[]>
 
 export type IconName = keyof typeof ICONS

@@ -19,7 +19,7 @@ export default async function HealthPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   await requirePortal('patient')
-  const { dict } = await getDict()
+  const { dict, lang } = await getDict()
   const params = await searchParams
   const c = typeof params.c === 'string' && UUID.test(params.c) ? params.c : null
   const q = typeof params.q === 'string' ? params.q.slice(0, 2000) : ''
@@ -44,6 +44,7 @@ export default async function HealthPage({
           feedback={feedback}
           firstQuestion={owned ? '' : q}
           t={dict.health}
+          lang={lang}
           emergency={dict.common.emergency}
         />
       </div>
