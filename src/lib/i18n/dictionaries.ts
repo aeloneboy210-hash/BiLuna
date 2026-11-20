@@ -158,6 +158,7 @@ const en = {
     helpful: 'Helpful',
     notHelpful: 'Not helpful',
     feedbackThanks: 'Thanks. BiLuna uses this only for reviewed improvements, never as training data.',
+    feedbackFailed: 'Could not save your rating. Please try again.',
     errors: {
       limit: "You've reached today's message limit for the demo. Please try again tomorrow.",
       busy: 'BiLuna is busy right now. Please wait a minute and try again.',
@@ -453,6 +454,7 @@ const bn: Dictionary = {
     helpful: 'কাজে লেগেছে',
     notHelpful: 'কাজে লাগেনি',
     feedbackThanks: 'ধন্যবাদ। বাইলুনা এটি শুধু যাচাই করা উন্নয়নে ব্যবহার করে, কখনো ট্রেনিং ডেটা হিসেবে নয়।',
+    feedbackFailed: 'রেটিং সেভ করা যায়নি। আবার চেষ্টা করুন।',
     errors: {
       limit: 'ডেমোর জন্য আজকের মেসেজের সীমা শেষ। আগামীকাল আবার চেষ্টা করুন।',
       busy: 'বাইলুনা এখন ব্যস্ত। এক মিনিট পর আবার চেষ্টা করুন।',

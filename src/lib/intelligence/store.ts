@@ -108,11 +108,17 @@ export async function messagesSentToday(): Promise<number> {
   return count ?? 0
 }
 
+/**
+ * Saves a 👍 / 👎. Changes only the rating of an existing one, else adds a new one. (An upsert would also try
+ * to rewrite which message the rating belongs to, which the database refuses on purpose.)
+ */
 export async function setFeedback(messageId: string, rating: 1 | -1): Promise<boolean> {
-  const { error } = await (await db())
-    .from('message_feedback')
-    .upsert({ message_id: messageId, rating }, { onConflict: 'message_id' })
-  return !error
+  const table = (await db()).from('message_feedback')
+  const { data, error } = await table.update({ rating }).eq('message_id', messageId).select('message_id')
+  if (error) return false
+  if (data && data.length > 0) return true
+  const inserted = await (await db()).from('message_feedback').insert({ message_id: messageId, rating })
+  return !inserted.error
 }
 
 export async function feedbackFor(messageIds: string[]): Promise<Record<string, 1 | -1>> {

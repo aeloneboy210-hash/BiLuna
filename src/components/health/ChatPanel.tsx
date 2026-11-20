@@ -16,13 +16,18 @@ type Rating = 1 | -1
 function FeedbackButtons({ messageId, initial, t }: { messageId: string; initial?: Rating; t: Dictionary['health'] }) {
   const [rating, setRating] = useState<Rating | undefined>(initial)
   const [busy, setBusy] = useState(false)
+  const [failed, setFailed] = useState(false)
   async function rate(r: Rating) {
     if (busy || r === rating) return
     setBusy(true)
+    setFailed(false)
     const before = rating
     setRating(r)
-    const ok = await rateReply({ messageId, rating: r })
-    if (!ok) setRating(before)
+    const ok = await rateReply({ messageId, rating: r }).catch(() => false)
+    if (!ok) {
+      setRating(before)
+      setFailed(true)
+    }
     setBusy(false)
   }
   const base = 'flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm transition-colors'
@@ -46,7 +51,13 @@ function FeedbackButtons({ messageId, initial, t }: { messageId: string; initial
       >
         <span aria-hidden="true">👎</span>
       </button>
-      {rating ? <span className="text-xs text-muted">{t.feedbackThanks}</span> : null}
+      {failed ? (
+        <span role="status" className="text-xs font-semibold text-warn">
+          {t.feedbackFailed}
+        </span>
+      ) : rating ? (
+        <span className="text-xs text-muted">{t.feedbackThanks}</span>
+      ) : null}
     </div>
   )
 }
