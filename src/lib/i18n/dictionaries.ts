@@ -99,8 +99,9 @@ const en = {
   },
   patient: {
     welcomeBack: 'Welcome back,',
+    helloIm: "Hello, I'm",
     heroLine: 'Your health, our priority — always.',
-    explore: 'Explore your health',
+    explore: 'Tell me how you feel',
     botName: 'BiLuna Bot',
     botHello: "Hello! I'm BiLuna.",
     botAsk: 'How can I help you today?',
@@ -400,8 +401,9 @@ const bn: Dictionary = {
   },
   patient: {
     welcomeBack: 'আবার স্বাগতম,',
+    helloIm: 'হ্যালো, আমি',
     heroLine: 'আপনার স্বাস্থ্যই আমাদের অগ্রাধিকার — সবসময়।',
-    explore: 'আপনার স্বাস্থ্য দেখুন',
+    explore: 'আপনার কেমন লাগছে বলুন',
     botName: 'বাইলুনা বট',
     botHello: 'হ্যালো! আমি বাইলুনা।',
     botAsk: 'আজ আপনাকে কীভাবে সাহায্য করতে পারি?',
