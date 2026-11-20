@@ -14,7 +14,7 @@ export type Generate = (opts: { instructions: string; messages: ModelMessage[] }
 export type AskResult = { ok: true; text: string } | { ok: false; reason: 'busy' | 'unsafe' | 'error' }
 
 /** Free-tier model; set BILUNA_AI_MODEL in Vercel to change it without a code change. */
-const DEFAULT_MODEL = 'gemini-2.5-flash-lite'
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
 const HISTORY_LIMIT = 12
 const TIMEOUT_MS = 25_000
 
