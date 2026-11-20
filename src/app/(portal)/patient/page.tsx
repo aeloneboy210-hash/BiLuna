@@ -105,7 +105,7 @@ function quickLinks(dict: Dictionary): { href: string; icon: IconName; label: st
 }
 
 export default async function PatientPortal() {
-  const session = await requirePortal('patient')
+  await requirePortal('patient')
   const { dict, lang } = await getDict()
   const t = dict.patient
 
