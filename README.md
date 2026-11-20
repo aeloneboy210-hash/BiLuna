@@ -4,7 +4,7 @@
 
 This is a demo. Every patient, doctor, hospital and number in it is fictional, and nothing in it is medical advice.
 
-## What works today (feature 1: the core application)
+## What works today
 
 - Welcome page in English and Bangla
 - Sign-in with three demo accounts
@@ -13,8 +13,9 @@ This is a demo. Every patient, doctor, hospital and number in it is fictional, a
   - Healthcare Professional Portal (`/doctor`)
   - Hospitals & Organizations Portal (`/org`)
 - The eight-module menu and a roadmap page
+- **BiLuna Health chat** in Bangla and English: possible explanations and next steps, never a diagnosis, and every health answer ends with "How sure I am:". Each reply passes a safety filter before the patient sees it, and each patient may send 40 messages a day (enforced by the database).
 
-The dashboards show sample data, marked as such on screen. The AI chat and the other modules are not built yet.
+The dashboards show sample data, marked as such on screen. The other modules are not built yet.
 
 ## Demo accounts
 
@@ -33,6 +34,7 @@ To reset the demo password, see the comment at the top of `supabase/migrations/0
 
 - Next.js (App Router), React, TypeScript, Tailwind CSS
 - Supabase for sign-in and the database
+- Google Gemini (free tier, `gemini-3.5-flash-lite`) through the Vercel AI SDK; the key lives only on the server as `GOOGLE_GENERATIVE_AI_API_KEY`
 - Hosted on Vercel
 
 Roles live in the `profiles` table. Row Level Security lets an account read only its own profile and never change its role. `src/lib/access/route-guard.ts` is the one place that decides who may open which path; the request proxy and every portal page both call it.
