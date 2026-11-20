@@ -8,15 +8,20 @@ This is a demo. Every patient, doctor, hospital and number in it is fictional, a
 
 ## For judges: a quick tour
 
+No sign-in or password is needed.
+
 1. Open https://biluna.vercel.app to see the opening animation and the welcome page. Switch between English and বাংলা at the top.
-2. Open the **3D body** at https://biluna.vercel.app/lab/body (no sign-in needed). Drag to turn it, pinch or scroll to zoom, and tap any bone or organ to see its name. The Bones and Organs switches hide a layer, and the light-up buttons make an organ glow as "may be involved".
-3. Sign in as the patient (the password is shared separately) and open **BiLuna Health** to chat in Bangla or English.
-4. Open **BiLuna Intelligence** to see how BiLuna thinks, the safety numbers, the consent-based profile and the activity log.
-5. Sign in as the doctor and the hospital to see the other two portals.
+2. Tap **Try as Patient** and open **BiLuna Health** to chat in Bangla or English.
+3. Open **BiLuna Intelligence** to see how BiLuna thinks, the safety numbers, the consent-based profile and the activity log.
+4. Open the **3D body** at https://biluna.vercel.app/lab/body. Drag to turn it, pinch or scroll to zoom, and tap any bone or organ to see its name. The Bones and Organs switches hide a layer, and the light-up buttons make an organ glow as "may be involved".
+5. Go back to the welcome page and tap **Try as Doctor** or **Try as Hospital** to see the other two portals.
+
+All visitors share the same three demo accounts, so you may see chats left by other visitors. The patient account can send 40 messages a day in total.
 
 ## What works today
 
 - Welcome page in English and Bangla
+- One-tap "Try as Patient / Doctor / Hospital" buttons, so no sign-in is needed; the shared demo password stays on the server (`BILUNA_DEMO_PASSWORD`)
 - Sign-in with three demo accounts
 - Three portals, each locked to its own role
   - Patient Portal (`/patient`)
