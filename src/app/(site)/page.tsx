@@ -1,6 +1,7 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { IntroSplash } from '@/components/IntroSplash'
+import { startDemo } from '@/app/(site)/sign-in/actions'
+import { TryDemoButton } from '@/components/TryDemo'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
@@ -12,7 +13,10 @@ import type { IconName } from '@/lib/ui/icons'
 import { INTRO_GATE_SCRIPT } from '@/lib/ui/intro'
 import { MODULE_ICONS, ROLE_ICONS } from '@/lib/ui/module-icons'
 
-const FEATURES: { key: 'care' | 'insights' | 'science' | 'everyone'; icon: IconName }[] = [
+const FEATURES: {
+  key: 'care' | 'insights' | 'science' | 'everyone'
+  icon: IconName
+}[] = [
   { key: 'care', icon: 'heart' },
   { key: 'insights', icon: 'brain' },
   { key: 'science', icon: 'dna' },
@@ -39,9 +43,7 @@ export default async function WelcomePage() {
             className="brand-art motion-safe:animate-float h-auto w-48 shrink-0 sm:w-64 lg:w-80"
           />
           <div className="flex min-w-0 flex-col items-center gap-5 lg:items-start lg:border-l lg:border-cyan/30 lg:pl-12">
-            <p className="text-gradient font-display text-6xl leading-none font-bold tracking-tight sm:text-8xl">
-              {dict.brand.name}
-            </p>
+            <p className="text-gradient font-display text-6xl leading-none font-bold tracking-tight sm:text-8xl">{dict.brand.name}</p>
             <p className="text-xs font-semibold tracking-[0.3em] text-body uppercase sm:text-sm">{dict.brand.motto}</p>
             <h1 className="mt-2 text-3xl leading-tight font-bold sm:text-5xl">
               {w.sloganA} <span className="text-cyan">{w.sloganB}</span>
@@ -50,10 +52,7 @@ export default async function WelcomePage() {
             </h1>
             <p className="text-lg text-aqua">{dict.brand.tagline}</p>
             <div className="mt-2 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <ButtonLink href="/sign-in" className="px-8 text-lg">
-                {w.cta}
-                <Icon name="arrowRight" className="h-5 w-5" />
-              </ButtonLink>
+              <TryDemoButton role="patient" dict={dict} className="px-8 text-lg" />
               <ButtonLink href="/roadmap" variant="secondary">
                 {w.secondaryCta}
               </ButtonLink>
@@ -83,27 +82,28 @@ export default async function WelcomePage() {
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {ROLES.map((role) => (
             <li key={role}>
-              <Link
-                href="/sign-in"
-                className="glass glow-edge group flex h-full items-center gap-4 rounded-2xl p-5"
-              >
-                <span
-                  aria-hidden="true"
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
-                >
-                  <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="font-display text-lg font-semibold">{dict.portals[role].name}</span>
-                  <span className="text-sm text-body">{dict.portals[role].blurb}</span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20 text-cyan transition-transform group-hover:translate-x-1"
-                >
-                  <Icon name="arrowRight" className="h-5 w-5" />
-                </span>
-              </Link>
+              <form action={startDemo} className="h-full">
+                <input type="hidden" name="role" value={role} />
+                <button type="submit" className="glass glow-edge group flex h-full w-full items-center gap-4 rounded-2xl p-5 text-left">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
+                  >
+                    <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="font-display text-lg font-semibold">{dict.portals[role].name}</span>
+                    <span className="text-sm text-body">{dict.portals[role].blurb}</span>
+                    <span className="mt-1 text-sm font-semibold text-brand">{dict.signIn.try[role]}</span>
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20 text-cyan transition-transform group-hover:translate-x-1"
+                  >
+                    <Icon name="arrowRight" className="h-5 w-5" />
+                  </span>
+                </button>
+              </form>
             </li>
           ))}
         </ul>

@@ -77,6 +77,11 @@ const en = {
   },
   signIn: {
     title: 'Sign in',
+    tryTitle: 'Try the demo — no sign-in needed',
+    try: { patient: 'Try as Patient', doctor: 'Try as Doctor', org_admin: 'Try as Hospital' },
+    tryNotReady: 'One-tap demo is not switched on yet. Please sign in below.',
+    tryFailed: 'Could not open the demo. Please try again.',
+    orSignIn: 'Or sign in with a demo account',
     intro: 'Use one of the three demo accounts.',
     email: 'Email',
     password: 'Password',
@@ -388,6 +393,11 @@ const bn: Dictionary = {
   },
   signIn: {
     title: 'সাইন ইন',
+    tryTitle: 'ডেমো দেখুন — সাইন ইন লাগবে না',
+    try: { patient: 'রোগী হিসেবে দেখুন', doctor: 'ডাক্তার হিসেবে দেখুন', org_admin: 'হাসপাতাল হিসেবে দেখুন' },
+    tryNotReady: 'এক ট্যাপের ডেমো এখনো চালু হয়নি। নিচে সাইন ইন করুন।',
+    tryFailed: 'ডেমো খোলা যায়নি। আবার চেষ্টা করুন।',
+    orSignIn: 'অথবা ডেমো অ্যাকাউন্ট দিয়ে সাইন ইন করুন',
     intro: 'তিনটি ডেমো অ্যাকাউন্টের একটি ব্যবহার করুন।',
     email: 'ইমেইল',
     password: 'পাসওয়ার্ড',
