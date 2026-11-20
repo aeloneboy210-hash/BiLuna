@@ -18,7 +18,7 @@ export function TryDemoButton({
   className?: string
 }) {
   return (
-    <form action={startDemo}>
+    <form action={startDemo} data-page-loader="">
       <input type="hidden" name="role" value={role} />
       <button type="submit" className={buttonClass(variant, className)}>
         <Icon name={ROLE_ICONS[role]} className="h-5 w-5" />

@@ -82,7 +82,7 @@ export default async function WelcomePage() {
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {ROLES.map((role) => (
             <li key={role}>
-              <form action={startDemo} className="h-full">
+              <form action={startDemo} data-page-loader="" className="h-full">
                 <input type="hidden" name="role" value={role} />
                 <button type="submit" className="glass glow-edge group flex h-full w-full items-center gap-4 rounded-2xl p-5 text-left">
                   <span

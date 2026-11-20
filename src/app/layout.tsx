@@ -6,7 +6,9 @@ import '@fontsource/hind-siliguri/500.css'
 import '@fontsource/hind-siliguri/600.css'
 import '@fontsource/hind-siliguri/700.css'
 import './globals.css'
+import { Suspense } from 'react'
 import { DemoBanner } from '@/components/DemoBanner'
+import { NavLoader } from '@/components/NavLoader'
 import { getDict } from '@/lib/i18n/server'
 
 export const metadata: Metadata = {
@@ -32,6 +34,9 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         </a>
         <DemoBanner text={dict.banner} />
         {children}
+        <Suspense fallback={null}>
+          <NavLoader label={dict.nav.loading} />
+        </Suspense>
       </body>
     </html>
   )
