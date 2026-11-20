@@ -104,3 +104,30 @@ describe('profile in the instructions', () => {
     expect(s).toMatch(/not instructions/)
   })
 })
+
+describe('the short-reply marks cannot hide health advice', () => {
+  const advice =
+    'I can help you manage and prevent allergic reactions based on what you are sensitive to, such as your allergy to shrimp. Preventing allergies usually involves avoiding your known triggers, reading food labels carefully, and keeping safe options on hand. What specific allergy would you like to talk about today?'
+  test('real advice marked as small talk still gets the confidence line (seen live on 20 Nov)', () => {
+    const r = checkReply(`${SMALL_TALK_MARK} ${advice}`, 'en')
+    expect(r.ok && r.kind).toBe('answer')
+    expect(r.ok && r.text.endsWith(DEFAULT_CONFIDENCE.en)).toBe(true)
+  })
+  test('the same text marked as a follow-up question still gets the line', () => {
+    const r = checkReply(`${CLARIFY_MARK} ${advice}`, 'en')
+    expect(r.ok && r.kind).toBe('answer')
+  })
+  test('a follow-up must actually ask something', () => {
+    const r = checkReply(`${CLARIFY_MARK} Drink water and rest.`, 'en')
+    expect(r.ok && r.kind).toBe('answer')
+  })
+  test('a short greeting and a short Bangla question still pass', () => {
+    expect(checkReply(`${SMALL_TALK_MARK} Hello! I am BiLuna. What is bothering you today?`, 'en')).toMatchObject({ kind: 'smallTalk' })
+    expect(checkReply(`${CLARIFY_MARK} কোথায় ব্যথা, আর কবে থেকে?`, 'bn')).toMatchObject({ kind: 'clarify' })
+  })
+  test('the instructions forbid marking advice and explain how BiLuna works', () => {
+    const s = buildInstructions('en')
+    expect(s).toMatch(/Never use .* for a reply that gives health information or advice/)
+    expect(s).toMatch(/how you work/i)
+  })
+})

@@ -24,7 +24,9 @@ export const FORBIDDEN: Record<Lang, string[]> = {
 export const SMALL_TALK_MARK = '[SMALL_TALK]'
 /** The model starts a reply that only asks follow-up questions with this mark. Same rules as small talk. */
 export const CLARIFY_MARK = '[ASK]'
-const SHORT_MAX = 400
+/** Longest reply that may skip the confidence line. A greeting fits; a paragraph of advice does not. */
+const SMALL_TALK_MAX = 300
+const CLARIFY_MAX = 220
 
 export type ReplyKind = 'answer' | 'smallTalk' | 'clarify'
 export type CheckResult = { ok: true; text: string; kind: ReplyKind } | { ok: false; reason: 'diagnosis' | 'empty' }
@@ -43,7 +45,10 @@ export function checkReply(text: string, lang: Lang): CheckResult {
   const phrases = [...FORBIDDEN.en, ...FORBIDDEN.bn]
   if (phrases.some((p) => lower.includes(p.toLowerCase()))) return { ok: false, reason: 'diagnosis' }
 
-  if (marked !== 'answer' && trimmed.length <= SHORT_MAX) return { ok: true, text: trimmed, kind: marked }
+  const shortEnough =
+    (marked === 'smallTalk' && trimmed.length <= SMALL_TALK_MAX) ||
+    (marked === 'clarify' && trimmed.length <= CLARIFY_MAX && /[?？]/.test(trimmed))
+  if (shortEnough) return { ok: true, text: trimmed, kind: marked }
 
   const lines = trimmed.split('\n').filter((l) => l.trim())
   const last = lines[lines.length - 1].trim().replace(/^[*_#>\s]+/, '')
