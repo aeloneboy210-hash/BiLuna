@@ -7,18 +7,10 @@ import { NETWORK_DOTS, NETWORK_LINES } from '@/lib/ui/intro-network'
 
 const LENGTH_MS = 3300
 
-/** An ellipse around the centre (150, 150), drawn as one path so an electron can travel along it. */
-const ORBIT_PATH = 'M10 150 A140 50 0 1 1 290 150 A140 50 0 1 1 10 150'
-const ORBITS = [
-  { tilt: 0, dur: '1.6s', begin: '0s' },
-  { tilt: 60, dur: '2s', begin: '0s' },
-  { tilt: 120, dur: '2.4s', begin: '0s' },
-]
-
 /**
  * BiLuna's opening animation on the welcome page, in the style of the ad's end card but in the site's
- * flat white-and-blue look: a network of lines and dots, rings rippling out, the logo, the name and the
- * tagline, then a fade into the page (about 3 seconds). Shown once per visit, skippable, and never shown
+ * flat white-and-blue look: a network of lines and dots, still orbits around the logo, the name, the tagline and a heartbeat
+ * line, then a fade into the page (about 3 seconds). Shown once per visit, skippable, and never shown
  * to people who ask their device to reduce motion.
  *
  * The CSS animation fades it out on its own, so it can never get stuck. INTRO_GATE_SCRIPT (rendered by the
@@ -64,25 +56,20 @@ export function IntroSplash({ tagline, skip }: { tagline: string; skip: string }
       </svg>
 
       <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-        {/* Rings rippling out from the logo. */}
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            className="intro-ripple pointer-events-none absolute inset-[22%] rounded-full border-2 border-cyan"
-            style={{ animationDelay: `${0.15 + i * 0.45}s` }}
-          />
-        ))}
-        {/* An atom: three tilted orbits, each with an electron circling the logo at its own speed. */}
+        {/* Three still, tilted orbits around the logo, drawn in once. */}
         <svg viewBox="0 0 300 300" className="intro-atom absolute inset-0 h-full w-full" fill="none">
-          <circle cx="150" cy="150" r="58" fill="#ffffff" />
-          {ORBITS.map((o) => (
-            <g key={o.tilt} transform={`rotate(${o.tilt} 150 150)`}>
-              <path d={ORBIT_PATH} stroke="#9cc2f2" strokeWidth="2" pathLength={1} className="intro-orbit-path" />
-              <circle r="7" fill="#2580eb" className="intro-electron">
-                <animateMotion dur={o.dur} begin={o.begin} repeatCount="indefinite" path={ORBIT_PATH} />
-              </circle>
-            </g>
+          {[0, 60, 120].map((tilt) => (
+            <path
+              key={tilt}
+              d="M10 150 A140 50 0 1 1 290 150 A140 50 0 1 1 10 150"
+              transform={`rotate(${tilt} 150 150)`}
+              stroke="#9cc2f2"
+              strokeWidth="2"
+              pathLength={1}
+              className="intro-orbit-path"
+            />
           ))}
+          <circle cx="150" cy="150" r="58" fill="#ffffff" />
         </svg>
         <Image src="/brand/logo-v4.webp" alt="" width={512} height={482} priority className="intro-logo relative h-[38%] w-auto" />
       </div>
