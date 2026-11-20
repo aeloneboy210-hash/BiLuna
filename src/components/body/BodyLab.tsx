@@ -1,78 +1,70 @@
 'use client'
 
-import { useState } from 'react'
-import { BodyViewer, type BodyPick, type BodyVariant } from '@/components/body/BodyViewer'
-import { BODY_PARTS, type OrganId, type PartId } from '@/lib/body/regions'
+import { useMemo, useState } from 'react'
+import { BodyViewer, type BodyLayers, type BodyPick } from '@/components/body/BodyViewer'
+import { describePart } from '@/lib/body/anatomy'
+import { BODY_PARTS, type OrganId } from '@/lib/body/regions'
 import type { Lang } from '@/lib/i18n/lang'
 
-const DEMO_LIGHTS: OrganId[] = ['lungs', 'heart', 'stomach', 'liver', 'brain', 'intestines', 'kidneys', 'bladder']
+const DEMO_LIGHTS: OrganId[] = ['brain', 'lungs', 'heart', 'liver', 'stomach', 'intestines', 'kidneys', 'bladder', 'pancreas', 'spleen']
 
-/** Owner's test page: the same features on both 3D bodies, to choose one. */
+/** Test page for the 3D body: every bone and organ, layers, tap to name, light up. */
 export function BodyLab({ lang }: { lang: Lang }) {
-  const [variant, setVariant] = useState<BodyVariant>('stylized')
-  const [lit, setLit] = useState<PartId | null>('lungs')
+  const [lit, setLit] = useState<string | null>('lungs')
   const [pick, setPick] = useState<BodyPick | null>(null)
-  const [load, setLoad] = useState<Partial<Record<BodyVariant, { ms: number; bytes: number }>>>({})
-  const name = (p: PartId) => BODY_PARTS[p][lang]
+  const [layers, setLayers] = useState<BodyLayers>({ skeleton: true, organs: true })
+  const [info, setInfo] = useState<{ ms: number; bytes: number; parts: number } | null>(null)
+  const stableLayers = useMemo(() => layers, [layers])
 
-  const tab = (v: BodyVariant, title: string) => (
+  const toggle = (k: keyof BodyLayers, title: string) => (
     <button
       type="button"
-      onClick={() => {
-        setVariant(v)
-        setPick(null)
-      }}
-      aria-pressed={variant === v}
-      className={`min-h-11 flex-1 rounded-full px-4 text-sm font-semibold ${variant === v ? 'bg-brand text-on-brand' : 'text-body hover:bg-soft'}`}
+      onClick={() => setLayers((l) => ({ ...l, [k]: !l[k] }))}
+      aria-pressed={layers[k]}
+      className={`min-h-11 flex-1 rounded-full px-4 text-sm font-semibold ${layers[k] ? 'bg-brand text-on-brand' : 'text-body hover:bg-soft'}`}
     >
       {title}
     </button>
   )
 
-  const info = load[variant]
-
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold">3D body: compare A and B</h1>
-        <p className="text-body">Drag to turn the body. Tap a spot to pick it. Use the buttons to light up a part as &ldquo;may be involved&rdquo;.</p>
+        <h1 className="text-3xl font-bold">3D body: every bone and organ</h1>
+        <p className="text-body">Drag to turn, pinch or scroll to zoom in. Tap any bone or organ to see its name.</p>
       </div>
 
       <div className="flex gap-1 rounded-full border border-line bg-surface p-1">
-        {tab('stylized', 'A · BiLuna style')}
-        {tab('anatomy', 'B · Real anatomy')}
+        {toggle('skeleton', 'Bones')}
+        {toggle('organs', 'Organs')}
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_20rem]">
-        <div className="glass relative h-[60vh] min-h-96 overflow-hidden rounded-2xl">
+        <div className="glass relative h-[65vh] min-h-96 overflow-hidden rounded-2xl">
           <BodyViewer
-            key={variant}
-            variant={variant}
             highlight={lit}
+            layers={stableLayers}
             onPick={(p) => {
               setPick(p)
-              setLit(p.organ ?? p.region)
+              if (p.part) setLit(p.part.id)
             }}
-            onLoaded={(i) => setLoad((l) => ({ ...l, [variant]: i }))}
+            onLoaded={setInfo}
             label="3D body"
           />
           <p className="pointer-events-none absolute top-3 left-3 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-muted">
-            {info ? (info.bytes ? `Loaded ${Math.round(info.bytes / 1024)} KB in ${info.ms} ms` : `Built in ${info.ms} ms · 0 KB download`) : 'Loading…'}
+            {info ? `${info.parts} parts · ${Math.round(info.bytes / 1024)} KB · ${info.ms} ms` : 'Loading…'}
           </p>
         </div>
 
         <div className="flex flex-col gap-4">
           <div className="glass flex flex-col gap-2 rounded-2xl p-4">
             <h2 className="font-bold">You tapped</h2>
-            {pick ? (
-              <p className="text-ink">
-                <span className="font-semibold">{name(pick.region)}</span>
-                {pick.organ ? <> · near the {name(pick.organ).toLowerCase()}</> : null}
-              </p>
+            {pick?.part ? (
+              <p className="font-semibold text-ink">{describePart(pick.part, lang)}</p>
             ) : (
-              <p className="text-sm text-muted">Nothing yet. Tap the body.</p>
+              <p className="text-sm text-muted">Nothing yet. Tap a bone or organ.</p>
             )}
-            <p className="text-xs text-muted">In the chat, BiLuna will use this spot in its questions and answer.</p>
+            {pick ? <p className="text-sm text-body">Area: {BODY_PARTS[pick.region][lang]}</p> : null}
           </div>
 
           <div className="glass flex flex-col gap-2 rounded-2xl p-4">
@@ -86,26 +78,19 @@ export function BodyLab({ lang }: { lang: Lang }) {
                   aria-pressed={lit === o}
                   className={`rounded-full border px-3 py-1.5 text-sm font-semibold ${lit === o ? 'border-brand bg-brand text-on-brand' : 'border-line text-body hover:bg-soft'}`}
                 >
-                  {name(o)}
+                  {BODY_PARTS[o][lang]}
                 </button>
               ))}
               <button type="button" onClick={() => setLit(null)} className="rounded-full border border-line px-3 py-1.5 text-sm text-muted hover:bg-soft">
                 None
               </button>
             </div>
-            {variant === 'anatomy' && lit === 'kidneys' ? (
-              <p className="text-xs text-warn">Kidneys are left out of B: that part of the free model is non-commercial only.</p>
-            ) : null}
           </div>
 
-          {variant === 'anatomy' ? (
-            <p className="text-xs leading-relaxed text-muted">
-              Model: derived from Z-Anatomy (CC BY-SA 4.0) and BodyParts3D, The Database Center for Life Science (CC BY-SA 2.1 Japan).
-              Shared under CC BY-SA 4.0.
-            </p>
-          ) : (
-            <p className="text-xs leading-relaxed text-muted">Built by BiLuna from simple shapes. Organ positions are approximate, for orientation only.</p>
-          )}
+          <p className="text-xs leading-relaxed text-muted">
+            3D model derived from Z-Anatomy (CC BY-SA 4.0) and BodyParts3D, The Database Center for Life Science (CC BY-SA 2.1 Japan),
+            shared under CC BY-SA 4.0. Kidneys: &ldquo;Kidney&rdquo; by Lissie Cowley (CC BY-NC 4.0), used non-commercially.
+          </p>
         </div>
       </div>
     </div>
