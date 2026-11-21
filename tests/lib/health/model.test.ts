@@ -188,3 +188,10 @@ test('an uploaded file goes to the AI with the last patient message, and the rul
   expect(f.calls[0].instructions).toContain('unclear')
   expect(f.calls[0].instructions).toContain('reference range')
 })
+
+test('the prescription rules cover Bangladeshi handwriting, sure/unsure marks and the packet check', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate })
+  const i = f.calls[0].instructions
+  for (const s of ['handwritten', '1+0+1', 'TDS', 'খাবারের', '✅', '⚠️', '❓', 'Yes, it matches']) expect(i).toContain(s)
+})

@@ -64,6 +64,14 @@ export function AttachPanel({
         <button
           type="button"
           disabled={busy}
+          onClick={() => onSample('/samples/sample-handwritten-prescription.jpg', 'Sample handwritten prescription.jpg')}
+          className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
+        >
+          ✍️ {t.sampleHandwritten}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
           onClick={() => onSample('/samples/sample-prescription.jpg', 'Sample prescription.jpg')}
           className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
         >
