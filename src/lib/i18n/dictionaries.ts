@@ -169,9 +169,9 @@ const en = {
     body: {
       button: 'Point on the body',
       pickTitle: 'Tap where it hurts',
-      pickHint: 'Tap the spot, or choose an area below. Use the buttons to turn and zoom.',
+      pickHint: 'Tap the exact spot, or choose an area below. Buttons turn, move and zoom; two fingers slide.',
       areas: 'Or choose an area:',
-      views: { front: 'Front', back: 'Back', left: 'Left side', right: 'Right side', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset' },
+      views: { front: 'Front', back: 'Back', left: 'Left side', right: 'Right side', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset', up: 'Move up', down: 'Move down' },
       clear: 'Remove',
       close: 'Close',
       pointed: 'You pointed at',
@@ -489,9 +489,9 @@ const bn: Dictionary = {
     body: {
       button: 'শরীরে দেখিয়ে দিন',
       pickTitle: 'যেখানে সমস্যা, সেখানে চাপুন',
-      pickHint: 'জায়গাটিতে চাপুন, বা নিচ থেকে একটি অংশ বেছে নিন। ঘোরাতে ও বড় করতে বোতাম ব্যবহার করুন।',
+      pickHint: 'ঠিক জায়গাটিতে চাপুন, বা নিচ থেকে একটি অংশ বেছে নিন। বোতাম দিয়ে ঘোরান, সরান ও বড় করুন; দুই আঙুলে টেনে সরান।',
       areas: 'অথবা একটি অংশ বেছে নিন:',
-      views: { front: 'সামনে', back: 'পেছনে', left: 'বাম পাশ', right: 'ডান পাশ', zoomIn: 'বড় করুন', zoomOut: 'ছোট করুন', reset: 'আগের মতো' },
+      views: { front: 'সামনে', back: 'পেছনে', left: 'বাম পাশ', right: 'ডান পাশ', zoomIn: 'বড় করুন', zoomOut: 'ছোট করুন', reset: 'আগের মতো', up: 'উপরে যান', down: 'নিচে যান' },
       clear: 'সরান',
       close: 'বন্ধ করুন',
       pointed: 'আপনি দেখিয়েছেন',

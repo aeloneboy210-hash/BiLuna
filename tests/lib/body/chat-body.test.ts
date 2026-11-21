@@ -37,3 +37,10 @@ test('splitPointed separates the pointed line from the words', () => {
   expect(splitPointed('📍 Where it hurts: Chest')).toEqual({ point: 'Where it hurts: Chest', rest: '' })
   expect(splitPointed('No point here')).toEqual({ point: null, rest: 'No point here' })
 })
+
+test('the pointed line names the exact spot on the part', () => {
+  const brain: AnatomyPart = { id: 'cerebrum', name: 'Cerebrum', side: null, group: 'Brain', layer: 'organs', file: 'organs-v1' }
+  expect(pointedLine({ region: 'head', part: brain, spot: { u: 0.5, v: 0.6, w: 0.85 } }, 'en')).toBe(
+    '📍 Where it hurts: Head · Cerebrum, left frontal lobe',
+  )
+})

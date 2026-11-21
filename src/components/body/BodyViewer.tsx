@@ -7,12 +7,13 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { partsFor, type AnatomyPart } from '@/lib/body/anatomy'
 import { regionAt, type RegionId } from '@/lib/body/regions'
+import type { Spot } from '@/lib/body/spot'
 import { cameraFor, viewCamera, VIEW_ANGLES, type CameraGoal, type ViewAngle } from '@/lib/body/views'
 
 export type BodyLayers = { skeleton: boolean; organs: boolean }
-export type BodyPick = { region: RegionId; part: AnatomyPart | null }
+export type BodyPick = { region: RegionId; part: AnatomyPart | null; spot: Spot | null }
 /** Labels for the on-body buttons; when given, the buttons are shown. */
-export type BodyControlLabels = Record<ViewAngle | 'zoomIn' | 'zoomOut' | 'reset', string>
+export type BodyControlLabels = Record<ViewAngle | 'zoomIn' | 'zoomOut' | 'reset' | 'up' | 'down', string>
 
 const BASE = '/models/anatomy/'
 /** Loaded in this order: bones first for the body shape, then organs, then the separately licensed kidneys. */
@@ -83,6 +84,7 @@ export function BodyViewer({
     fly: (g: CameraGoal, markAt?: [number, number, number]) => void
     view: (v: ViewAngle) => void
     zoom: (f: number) => void
+    move: (dy: number) => void
   } | null>(null)
   const pickRef = useRef(onPick)
   const loadedRef = useRef(onLoaded)
@@ -121,12 +123,14 @@ export function BodyViewer({
 
     const controls = new OrbitControls(camera, renderer.domElement)
     controls.target.set(0, 0.1, 0)
-    controls.enablePan = false
+    // Two fingers (or right mouse button) slide the body up and down; the view stays on the body.
+    controls.enablePan = true
+    controls.screenSpacePanning = true
     controls.enableDamping = true
     controls.minDistance = 0.6
     controls.maxDistance = 6.5
-    controls.minPolarAngle = Math.PI * 0.25
-    controls.maxPolarAngle = Math.PI * 0.75
+    controls.minPolarAngle = Math.PI * 0.08
+    controls.maxPolarAngle = Math.PI * 0.92
     controls.autoRotate = !picker
     controls.autoRotateSpeed = 1.2
     // The camera glides to a goal (area or view buttons); touching the body stops the glide.
@@ -138,7 +142,18 @@ export function BodyViewer({
 
     const root = new THREE.Group()
     scene.add(root)
-    const marker = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 12), new THREE.MeshBasicMaterial({ color: COLORS.marker }))
+    // The exact spot the finger touched: a glowing dot that shows through everything.
+    const marker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.016, 20, 14),
+      new THREE.MeshBasicMaterial({ color: COLORS.glow, depthTest: false, transparent: true }),
+    )
+    marker.renderOrder = 20
+    const halo = new THREE.Mesh(
+      new THREE.SphereGeometry(0.04, 20, 14),
+      new THREE.MeshBasicMaterial({ color: COLORS.glow, depthTest: false, transparent: true, opacity: 0.25 }),
+    )
+    halo.renderOrder = 19
+    marker.add(halo)
     marker.visible = false
     scene.add(marker)
 
@@ -184,6 +199,11 @@ export function BodyViewer({
         marker.visible = true
       }
     }
+    const move = (dy: number) => {
+      const t = controls.target
+      const y = THREE.MathUtils.clamp(t.y + dy, -0.95, 0.95) - t.y
+      fly({ position: [camera.position.x, camera.position.y + y, camera.position.z], target: [t.x, t.y + y, t.z] })
+    }
     const view = (v: ViewAngle) => fly(viewCamera(v, compact ? 3.6 : 4.1))
     const zoom = (f: number) => {
       const dir = camera.position.clone().sub(controls.target)
@@ -191,7 +211,7 @@ export function BodyViewer({
       const pos = controls.target.clone().add(dir.setLength(d))
       fly({ position: [pos.x, pos.y, pos.z], target: [controls.target.x, controls.target.y, controls.target.z] })
     }
-    api.current = { setHighlight, setLayers, fly, view, zoom }
+    api.current = { setHighlight, setLayers, fly, view, zoom, move }
 
     const loader = new GLTFLoader()
     loader.setMeshoptDecoder(MeshoptDecoder)
@@ -240,6 +260,7 @@ export function BodyViewer({
 
     // Tap (not drag) to pick a part.
     const ray = new THREE.Raycaster()
+    const boxes = new Map<Entry, THREE.Box3>()
     const entryOf = (o: THREE.Object3D) => entries.find((x) => x.mesh === o)
     /** What is under the pointer. When choosing, an organ just behind a bone (lungs behind ribs) wins. */
     const hitAt = (e: PointerEvent) => {
@@ -286,8 +307,24 @@ export function BodyViewer({
       marker.visible = true
       const local = root.worldToLocal(hit.point.clone())
       const entry = entries.find((x) => x.mesh === hit.object)
+      let spot: Spot | null = null
+      if (entry) {
+        let box = boxes.get(entry)
+        if (!box) {
+          box = new THREE.Box3().setFromObject(entry.mesh)
+          boxes.set(entry, box)
+        }
+        const size = box.getSize(new THREE.Vector3())
+        const c = box.getCenter(new THREE.Vector3())
+        const clamp = (n: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, n))
+        spot = {
+          u: clamp((hit.point.x - c.x) / Math.max(1e-6, size.x / 2), -1, 1),
+          v: clamp((hit.point.y - box.min.y) / Math.max(1e-6, size.y), 0, 1),
+          w: clamp((hit.point.z - box.min.z) / Math.max(1e-6, size.z), 0, 1),
+        }
+      }
       const region = regionAt({ y: (local.y + 1) / 2, x: local.x / 0.4, front: local.z >= 0 })
-      pickRef.current?.({ region, part: entry?.part ?? null })
+      pickRef.current?.({ region, part: entry?.part ?? null, spot })
     }
     renderer.domElement.addEventListener('pointerdown', onDown)
     renderer.domElement.addEventListener('pointerup', onUp)
@@ -311,6 +348,7 @@ export function BodyViewer({
       frame = requestAnimationFrame(tick)
       const pulse = 0.75 + 0.25 * Math.sin(clock.getElapsedTime() * 4)
       for (const e of entries) if (lit.has(e.part.id)) e.mat.emissiveIntensity = pulse
+      if (marker.visible) halo.scale.setScalar(0.8 + 0.5 * pulse)
       if (goal) {
         const p = new THREE.Vector3(...goal.position)
         const t = new THREE.Vector3(...goal.target)
@@ -318,6 +356,10 @@ export function BodyViewer({
         controls.target.lerp(t, 0.12)
         if (camera.position.distanceTo(p) < 0.005 && controls.target.distanceTo(t) < 0.005) goal = null
       }
+      // Sliding can never lose the body.
+      controls.target.x = THREE.MathUtils.clamp(controls.target.x, -0.5, 0.5)
+      controls.target.y = THREE.MathUtils.clamp(controls.target.y, -1, 1)
+      controls.target.z = THREE.MathUtils.clamp(controls.target.z, -0.3, 0.3)
       controls.update()
       renderer.render(scene, camera)
     }
@@ -377,6 +419,8 @@ export function BodyViewer({
           <div className="flex gap-1">
             {(
               [
+                ['up', '↑', 0],
+                ['down', '↓', 0],
                 ['zoomIn', '+', 0.7],
                 ['zoomOut', '−', 1.4],
               ] as const
@@ -384,7 +428,7 @@ export function BodyViewer({
               <button
                 key={k}
                 type="button"
-                onClick={() => api.current?.zoom(f)}
+                onClick={() => (k === 'up' ? api.current?.move(0.25) : k === 'down' ? api.current?.move(-0.25) : api.current?.zoom(f))}
                 aria-label={controlLabels[k]}
                 title={controlLabels[k]}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface/90 text-lg font-bold text-ink shadow-sm hover:bg-soft"

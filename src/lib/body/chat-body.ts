@@ -1,6 +1,7 @@
 import type { Lang } from '@/lib/i18n/lang'
 import { describePart, type AnatomyPart } from './anatomy'
 import { BODY_PARTS, type OrganId, type RegionId } from './regions'
+import { spotName, type Spot } from './spot'
 
 /** The organs BiLuna may light up in a reply, as "may be involved". */
 export const BODY_ORGANS: OrganId[] = [
@@ -36,13 +37,14 @@ export function extractBodyTag(text: string): { text: string; organ: OrganId | n
 export const POINT_MARK = '📍'
 const POINT_LABEL: Record<Lang, string> = { en: 'Where it hurts:', bn: 'কোথায় সমস্যা:' }
 
-export type BodyPoint = { region: RegionId; part: AnatomyPart | null }
+export type BodyPoint = { region: RegionId; part: AnatomyPart | null; spot?: Spot | null }
 
 /** What the patient pointed at, in words: "Left leg · Tibia (left)". */
 export function pointName(p: BodyPoint, lang: Lang): string {
   const area = BODY_PARTS[p.region][lang]
   if (!p.part) return area
-  return `${area} · ${describePart(p.part, lang).split(' · ')[0]}`
+  const name = describePart(p.part, lang).split(' · ')[0]
+  return p.spot ? `${area} · ${name}, ${spotName(p.part, p.spot, lang)}` : `${area} · ${name}`
 }
 
 /** First line of a message sent with a point on the body. */

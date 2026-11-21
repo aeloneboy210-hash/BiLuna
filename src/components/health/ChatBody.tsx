@@ -48,7 +48,7 @@ export function BodyPicker({
 }) {
   const [focus, setFocus] = useState<{ region: RegionId; n: number } | null>(null)
   const chooseArea = (region: RegionId) => {
-    onPoint({ region, part: null })
+    onPoint({ region, part: null, spot: null })
     setFocus((f) => ({ region, n: (f?.n ?? 0) + 1 }))
   }
   return (
@@ -68,7 +68,7 @@ export function BodyPicker({
           picker
           focus={focus}
           controlLabels={t.views}
-          highlight={point?.part?.id ?? null}
+          highlight={null}
           layers={ALL_LAYERS}
           onPick={(p) => onPoint(p)}
           label={t.label}
