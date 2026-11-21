@@ -169,7 +169,9 @@ const en = {
     body: {
       button: 'Point on the body',
       pickTitle: 'Tap where it hurts',
-      pickHint: 'Drag to turn, pinch or scroll to zoom.',
+      pickHint: 'Tap the spot, or choose an area below. Use the buttons to turn and zoom.',
+      areas: 'Or choose an area:',
+      views: { front: 'Front', back: 'Back', left: 'Left side', right: 'Right side', zoomIn: 'Zoom in', zoomOut: 'Zoom out', reset: 'Reset' },
       clear: 'Remove',
       close: 'Close',
       pointed: 'You pointed at',
@@ -487,7 +489,9 @@ const bn: Dictionary = {
     body: {
       button: 'শরীরে দেখিয়ে দিন',
       pickTitle: 'যেখানে সমস্যা, সেখানে চাপুন',
-      pickHint: 'ঘোরাতে টানুন, বড় করতে দুই আঙুলে ছড়ান।',
+      pickHint: 'জায়গাটিতে চাপুন, বা নিচ থেকে একটি অংশ বেছে নিন। ঘোরাতে ও বড় করতে বোতাম ব্যবহার করুন।',
+      areas: 'অথবা একটি অংশ বেছে নিন:',
+      views: { front: 'সামনে', back: 'পেছনে', left: 'বাম পাশ', right: 'ডান পাশ', zoomIn: 'বড় করুন', zoomOut: 'ছোট করুন', reset: 'আগের মতো' },
       clear: 'সরান',
       close: 'বন্ধ করুন',
       pointed: 'আপনি দেখিয়েছেন',
