@@ -26,6 +26,9 @@ export function ConversationList({
   const [confirm, setConfirm] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
+  // Chats deleted on this screen disappear at once, before the page's own list catches up.
+  const [gone, setGone] = useState<string[]>([])
+  const shown = gone.includes('all') ? [] : conversations.filter((c) => !gone.includes(c.id))
 
   async function remove(target: string) {
     setBusy(true)
@@ -34,6 +37,7 @@ export function ConversationList({
     setBusy(false)
     setConfirm(null)
     if (!ok) return setFailed(true)
+    setGone((g) => [...g, target])
     // The open chat was deleted: start a fresh one.
     if (target === 'all' || target === activeId) router.push('/patient/health')
     router.refresh()
@@ -73,11 +77,11 @@ export function ConversationList({
         {t.newChat}
       </Link>
       <h2 className="px-1 pt-1 text-sm font-semibold text-muted">{t.pastChats}</h2>
-      {conversations.length === 0 ? (
+      {shown.length === 0 ? (
         <p className="px-1 text-sm text-muted">{t.noChats}</p>
       ) : (
         <ul className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-y-auto lg:pb-0">
-          {conversations.map((c) => {
+          {shown.map((c) => {
             const active = c.id === activeId
             return (
               <li key={c.id} className="flex shrink-0 flex-col gap-1 lg:shrink">
@@ -107,7 +111,7 @@ export function ConversationList({
           })}
         </ul>
       )}
-      {conversations.length > 0 ? (
+      {shown.length > 0 ? (
         confirm === 'all' ? (
           confirmRow('all', t.del.confirmAll)
         ) : (
