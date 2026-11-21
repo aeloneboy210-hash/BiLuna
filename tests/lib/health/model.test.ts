@@ -163,3 +163,9 @@ describe('after pointing at the body, every reply asks a tap-to-answer question 
     expect(c.ok && c.text).toBe(good)
   })
 })
+
+test('a reply to a self-harm message has no confidence line and no tap-to-answer options', async () => {
+  const f = fake(`You are not alone. Please call 999.\n\n${CONFIDENCE_PREFIX.en} this is general information.\n[[options: A | B]]`)
+  const r = await askBiLuna([{ author: 'patient', body: 'I want to kill myself' }], 'en', { generate: f.generate })
+  expect(r.ok && r.text).toBe('You are not alone. Please call 999.')
+})

@@ -400,10 +400,10 @@ export function BodyViewer({
   }, [focus])
 
   return (
-    <div className="relative h-full w-full">
-      <div ref={mount} className="h-full w-full" role="img" aria-label={label} />
+    <div className="relative flex h-full w-full flex-col">
       {controlLabels && !failed ? (
-        <div className="absolute top-2 right-2 left-2 flex flex-wrap justify-between gap-2">
+        // A strip above the body (not on top of it), so the buttons never cover the head on a phone.
+        <div className="flex shrink-0 flex-wrap justify-between gap-2 border-b border-line/60 bg-surface/70 p-2">
           <div className="flex flex-wrap gap-1">
             {VIEW_ANGLES.map((v) => (
               <button
@@ -446,6 +446,7 @@ export function BodyViewer({
           </div>
         </div>
       ) : null}
+      <div ref={mount} className="min-h-0 w-full flex-1" role="img" aria-label={label} />
       {loading && !failed ? (
         <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">{loadingText}</p>
       ) : null}

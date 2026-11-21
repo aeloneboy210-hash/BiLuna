@@ -155,7 +155,8 @@ export function ChatPanel({
         setError(result.error)
         if (result.error === 'empty' || result.error === 'tooLong') setMessages((m) => m.slice(0, -1))
       }
-      router.refresh()
+      // Refresh the past-chats list in the background, so "thinking" ends as soon as the reply is shown.
+      window.setTimeout(() => router.refresh(), 0)
     })
   }
 
@@ -256,6 +257,9 @@ export function ChatPanel({
         {(() => {
           const last = messages[messages.length - 1]
           if (pending || messages.length < 2 || last?.author !== 'biluna' || last.id.startsWith('local-')) return null
+          // No "are you happy" check right after an emergency or self-harm message.
+          const asked = [...messages].reverse().find((m) => m.author === 'patient')
+          if (asked && detectDanger(asked.body)) return null
           if (cared === last.id) {
             return <p className="self-start rounded-2xl rounded-tl-sm bg-soft px-4 py-3 text-sm text-ink">💙 {t.care.thanks}</p>
           }

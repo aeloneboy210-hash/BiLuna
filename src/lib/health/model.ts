@@ -6,6 +6,8 @@ import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
 import { extractOptions, optionsTag } from './options'
 import { placeQuestion, placeRound } from './place-questions'
+import { detectDanger } from './danger'
+import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
@@ -68,6 +70,16 @@ export async function askBiLuna(
         if (round && !opts.options.length && checked.kind !== 'smallTalk') {
           const q = placeQuestion(round, lang)
           body += `\n\n${q.q}\n${optionsTag(q.options)}`
+        }
+        // Someone who spoke of self-harm gets warmth and the helplines, not a confidence rating or quiz buttons.
+        const last = [...history].reverse().find((m) => m.author === 'patient')
+        if (last && detectDanger(last.body) === 'selfHarm') {
+          const prefixes = Object.values(CONFIDENCE_PREFIX)
+          body = extractOptions(extractBodyTag(body).text)
+            .text.split('\n')
+            .filter((l) => !prefixes.some((p) => l.trim().startsWith(p)))
+            .join('\n')
+            .trim()
         }
         return { ok: true, text: body, kind: checked.kind, retried: extra !== '' }
       }
