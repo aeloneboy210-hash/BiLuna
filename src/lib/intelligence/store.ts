@@ -99,13 +99,11 @@ export async function todaysEvents(): Promise<{ kind: EventKind; lang: Lang | nu
   return (data ?? []) as { kind: EventKind; lang: Lang | null }[]
 }
 
+/** Today's count from the database's own tally, which deleting chats cannot reset. */
 export async function messagesSentToday(): Promise<number> {
-  const { count } = await (await db())
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('author', 'patient')
-    .gte('created_at', startOfDhakaDay())
-  return count ?? 0
+  const today = new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString().slice(0, 10) // Dhaka is UTC+6
+  const { data } = await (await db()).from('daily_usage').select('sent').eq('day', today).maybeSingle()
+  return (data?.sent as number | undefined) ?? 0
 }
 
 /**

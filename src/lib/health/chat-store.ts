@@ -60,3 +60,15 @@ export async function addMessage(
 export async function loadHistory(conversationId: string): Promise<ChatTurn[]> {
   return (await getMessages(conversationId)).map(({ author, body }) => ({ author, body }))
 }
+
+/** Deletes one of the patient's own chats (its messages and ratings go with it). Another patient's id deletes nothing. */
+export async function deleteConversation(conversationId: string): Promise<boolean> {
+  const { error } = await (await db()).from('conversations').delete().eq('id', conversationId)
+  return !error
+}
+
+/** Deletes all of the signed-in patient's chats; the database's rules limit it to their own. */
+export async function deleteAllConversations(): Promise<boolean> {
+  const { error } = await (await db()).from('conversations').delete().not('id', 'is', null)
+  return !error
+}

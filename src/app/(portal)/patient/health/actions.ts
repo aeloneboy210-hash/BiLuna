@@ -1,7 +1,8 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { requirePortal } from '@/lib/auth/require-portal'
-import { addMessage, createConversation, loadHistory } from '@/lib/health/chat-store'
+import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory } from '@/lib/health/chat-store'
 import { askBiLuna } from '@/lib/health/model'
 import { profileForPrompt } from '@/lib/health/profile-prompt'
 import { handleSend, type SendResult } from '@/lib/health/send'
@@ -38,5 +39,16 @@ export async function rateReply(input: { messageId: string; rating: 1 | -1 }): P
   if (input.rating !== 1 && input.rating !== -1) return false
   const ok = await setFeedback(input.messageId, input.rating)
   if (ok) await logEvent(input.rating === 1 ? 'feedback_up' : 'feedback_down').catch(() => {})
+  return ok
+}
+
+/** Deletes one past chat, or all of them. The database lets a patient delete only their own chats. */
+export async function deleteChats(input: { conversationId: string | 'all' }): Promise<boolean> {
+  await requirePortal('patient')
+  const id = input.conversationId
+  let ok = false
+  if (id === 'all') ok = await deleteAllConversations()
+  else if (typeof id === 'string' && UUID.test(id)) ok = await deleteConversation(id)
+  if (ok) revalidatePath('/patient/health')
   return ok
 }
