@@ -123,19 +123,7 @@ export function PointChip({ point, onClear, lang, t }: { point: BodyPoint; onCle
 }
 
 /** Under a reply: the organ that may be involved, lit up in 3D. Never shown as the cause. */
-export function BodyCard({
-  organ,
-  open,
-  onToggle,
-  lang,
-  t,
-}: {
-  organ: OrganId
-  open: boolean
-  onToggle: () => void
-  lang: Lang
-  t: T
-}) {
+export function BodyCard({ organ, open, onToggle, lang, t }: { organ: OrganId; open: boolean; onToggle: () => void; lang: Lang; t: T }) {
   return (
     <div className="mt-2 flex flex-col gap-2 rounded-xl border border-tint bg-soft p-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -156,7 +144,15 @@ export function BodyCard({
       </div>
       {open ? (
         <div className="relative h-80 overflow-hidden rounded-lg bg-surface sm:h-96">
-          <BodyViewer compact highlight={organ} layers={ALL_LAYERS} controlLabels={t.views} label={`${t.label}: ${BODY_PARTS[organ][lang]}`} loadingText={t.loading} failedText={t.failed} />
+          <BodyViewer
+            compact
+            highlight={organ}
+            layers={ALL_LAYERS}
+            controlLabels={t.views}
+            label={`${t.label}: ${BODY_PARTS[organ][lang]}`}
+            loadingText={t.loading}
+            failedText={t.failed}
+          />
         </div>
       ) : null}
       <p className="text-xs text-muted">{t.notCause}</p>

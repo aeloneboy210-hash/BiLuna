@@ -35,6 +35,9 @@ export function loadParts(): Promise<AnatomyPart[]> {
   return partsCache
 }
 
+/** Thin linings around organs that patients would not recognise as a place that hurts. */
+const THIN = new Set(['pleura', 'greater-omentum', 'lesser-omentum'])
+
 type Entry = { mesh: THREE.Mesh; part: AnatomyPart; mat: THREE.MeshStandardMaterial }
 
 function baseColor(p: AnatomyPart) {
@@ -243,13 +246,16 @@ export function BodyViewer({
       const rect = renderer.domElement.getBoundingClientRect()
       const ndc = new THREE.Vector2(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1)
       ray.setFromCamera(ndc, camera)
-      const hits = ray.intersectObjects(root.children, true).filter((h) => h.object.visible)
+      // When choosing, thin linings (pleura, omentum) are skipped so the tap lands on the organ inside.
+      const hits = ray
+        .intersectObjects(root.children, true)
+        .filter((h) => h.object.visible && !(picker && THIN.has(entryOf(h.object)?.part.id ?? '')))
       const first = hits[0]
       if (!first || !picker) return first
       if (entryOf(first.object)?.part.layer !== 'skeleton') return first
       const organ = hits.find((h) => {
         const p = entryOf(h.object)?.part
-        return p && p.layer !== 'skeleton' && p.group !== 'Lymphoid system' && h.distance - first.distance < 0.3
+        return p && p.layer !== 'skeleton' && !THIN.has(p.id) && p.group !== 'Lymphoid system' && h.distance - first.distance < 0.3
       })
       return organ ?? first
     }
@@ -399,9 +405,7 @@ export function BodyViewer({
       {loading && !failed ? (
         <p className="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted">{loadingText}</p>
       ) : null}
-      {failed ? (
-        <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-warn">{failedText}</p>
-      ) : null}
+      {failed ? <p className="absolute inset-0 flex items-center justify-center p-6 text-center text-sm text-warn">{failedText}</p> : null}
     </div>
   )
 }
