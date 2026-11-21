@@ -2,9 +2,11 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
+import { EmergencyCard } from '@/components/health/EmergencyCard'
+import { detectDanger } from '@/lib/health/danger'
 import { Icon } from '@/components/ui/Icon'
 import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
 import { detectLang } from '@/lib/health/lang-detect'
@@ -117,6 +119,8 @@ export function ChatPanel({
   const [point, setPoint] = useState<BodyPoint | null>(null)
   // The care check under the newest answer: which reply the patient said they were happy with.
   const [cared, setCared] = useState<string | null>(null)
+  // Emergency cards the patient closed with "I'm safe".
+  const [safe, setSafe] = useState<string[]>([])
   // Only one 3D view at a time: 'picker', a reply's id, or none. The newest reply's card starts open.
   const [open3d, setOpen3d] = useState<string | null>(() => {
     const last = initial[initial.length - 1]
@@ -188,16 +192,23 @@ export function ChatPanel({
         {messages.map((m) => {
           if (m.author === 'patient') {
             const { point: pointed, rest } = splitPointed(m.body)
+            // The fixed danger-word check, apart from the AI: the card shows the moment the message is sent.
+            const danger = detectDanger(m.body)
             return (
-              <div key={m.id} className="flex justify-end">
-                <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand">
-                  <span className="sr-only">{t.you}: </span>
-                  {pointed ? (
-                    <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">📍 {pointed}</span>
-                  ) : null}
-                  {rest ? <p className="whitespace-pre-wrap">{rest}</p> : null}
+              <Fragment key={m.id}>
+                <div className="flex justify-end">
+                  <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand">
+                    <span className="sr-only">{t.you}: </span>
+                    {pointed ? (
+                      <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">📍 {pointed}</span>
+                    ) : null}
+                    {rest ? <p className="whitespace-pre-wrap">{rest}</p> : null}
+                  </div>
                 </div>
-              </div>
+                {danger && !safe.includes(m.id) ? (
+                  <EmergencyCard kind={danger} onSafe={() => setSafe((s) => [...s, m.id])} t={t.danger} />
+                ) : null}
+              </Fragment>
             )
           }
           const reply = extractBodyTag(m.body)
