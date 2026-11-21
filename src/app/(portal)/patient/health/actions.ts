@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { requirePortal } from '@/lib/auth/require-portal'
+import type { Attachment } from '@/lib/health/attachment'
+import type { Lang } from '@/lib/i18n/lang'
 import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory } from '@/lib/health/chat-store'
 import { askBiLuna } from '@/lib/health/model'
 import { profileForPrompt } from '@/lib/health/profile-prompt'
@@ -11,18 +13,30 @@ import { getProfile, logEvent, setFeedback } from '@/lib/intelligence/store'
 const UUID = /^[0-9a-f-]{36}$/i
 
 /** Sends one patient message and returns BiLuna's checked reply. */
-export async function sendMessage(input: { conversationId: string | null; text: string }): Promise<SendResult> {
+export async function sendMessage(input: {
+  conversationId: string | null
+  text: string
+  attachment?: Attachment | null
+  lang?: Lang
+}): Promise<SendResult> {
   await requirePortal('patient')
   const conversationId = typeof input.conversationId === 'string' && UUID.test(input.conversationId) ? input.conversationId : null
+  const a = input.attachment
+  // Only plain strings get through; the file is checked again inside handleSend and never saved.
+  const attachment =
+    a && typeof a.name === 'string' && typeof a.mediaType === 'string' && typeof a.data === 'string'
+      ? { name: a.name, mediaType: a.mediaType, data: a.data }
+      : undefined
+  const lang = input.lang === 'bn' || input.lang === 'en' ? input.lang : undefined
   try {
     return await handleSend(
-      { conversationId, text: String(input.text ?? '') },
+      { conversationId, text: String(input.text ?? ''), attachment, lang },
       {
         createConversation,
         addMessage,
         loadHistory,
         loadProfile: async () => profileForPrompt(await getProfile()),
-        ask: (history, lang, profile) => askBiLuna(history, lang, { profile }),
+        ask: (history, lang, profile, file) => askBiLuna(history, lang, { profile, attachment: file }),
         logEvent,
       },
     )

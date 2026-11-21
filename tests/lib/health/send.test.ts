@@ -100,3 +100,28 @@ test('a failed event log never breaks the chat', async () => {
   const r = await handleSend({ conversationId: 'c1', text: 'hello' }, d)
   expect(r.ok).toBe(true)
 })
+
+describe('a report or prescription upload', () => {
+  const file = { name: 'report.jpg', mediaType: 'image/jpeg', data: Buffer.from('x').toString('base64') }
+
+  test('can be sent with no words; the chat keeps only a 📎 line and BiLuna gets the file once', async () => {
+    const { d, log } = deps()
+    const r = await handleSend({ conversationId: 'c1', text: '', attachment: file }, d)
+    expect(r.ok).toBe(true)
+    expect(log).toContain('add:c1:patient:en:📎 report.jpg')
+    expect(d.ask).toHaveBeenCalledWith(expect.anything(), 'en', null, file)
+  })
+
+  test('words go under the 📎 line', async () => {
+    const { d, log } = deps()
+    await handleSend({ conversationId: 'c1', text: 'what does this mean', attachment: file }, d)
+    expect(log).toContain('add:c1:patient:en:📎 report.jpg\nwhat does this mean')
+  })
+
+  test('a wrong file type is refused before anything is saved', async () => {
+    const { d, log } = deps()
+    const r = await handleSend({ conversationId: 'c1', text: '', attachment: { ...file, mediaType: 'image/gif' } }, d)
+    expect(r).toEqual({ ok: false, error: 'fileType' })
+    expect(log).toEqual([])
+  })
+})

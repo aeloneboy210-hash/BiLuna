@@ -175,3 +175,16 @@ test('the instructions give the Bangla spelling of the name', async () => {
   await askBiLuna(history, 'bn', { generate: f.generate })
   expect(f.calls[0].instructions).toContain('"বিলুনা"')
 })
+
+test('an uploaded file goes to the AI with the last patient message, and the rules cover reports', async () => {
+  const f = fake(good)
+  const file = { name: 'r.png', mediaType: 'image/png', data: 'AAAA' }
+  await askBiLuna([{ author: 'patient', body: '📎 r.png' }], 'en', { generate: f.generate, attachment: file })
+  const last = f.calls[0].messages.at(-1)
+  expect(last?.content).toEqual([
+    { type: 'text', text: '📎 r.png' },
+    { type: 'file', data: 'AAAA', mediaType: 'image/png', filename: 'r.png' },
+  ])
+  expect(f.calls[0].instructions).toContain('unclear')
+  expect(f.calls[0].instructions).toContain('reference range')
+})

@@ -4,6 +4,7 @@ import { APICallError, generateText } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
 import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
+import type { Attachment } from './attachment'
 import { extractOptions, optionsTag } from './options'
 import { placeQuestion, placeRound } from './place-questions'
 import { detectDanger } from './danger'
@@ -11,7 +12,8 @@ import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
-type ModelMessage = { role: 'user' | 'assistant'; content: string }
+type ModelPart = { type: 'text'; text: string } | { type: 'file'; data: string; mediaType: string; filename: string }
+type ModelMessage = { role: 'user' | 'assistant'; content: string | ModelPart[] }
 
 /** The one call to the model, kept small so tests can replace it. */
 export type Generate = (opts: { instructions: string; messages: ModelMessage[] }) => Promise<{ text: string }>
@@ -45,13 +47,27 @@ const defaultGenerate: Generate = async ({ instructions, messages }) => {
 export async function askBiLuna(
   history: ChatTurn[],
   lang: Lang,
-  deps: { generate?: Generate; profile?: string | null } = {},
+  deps: { generate?: Generate; profile?: string | null; attachment?: Attachment } = {},
 ): Promise<AskResult> {
   const generate = deps.generate ?? defaultGenerate
   const messages: ModelMessage[] = history.slice(-HISTORY_LIMIT).map((m) => ({
     role: m.author === 'patient' ? 'user' : 'assistant',
     content: m.body,
   }))
+  // An uploaded report or prescription goes with the newest patient message, this one time only.
+  const file = deps.attachment
+  if (file) {
+    const i = messages.map((m) => m.role).lastIndexOf('user')
+    if (i >= 0) {
+      messages[i] = {
+        role: 'user',
+        content: [
+          { type: 'text', text: messages[i].content as string },
+          { type: 'file', data: file.data, mediaType: file.mediaType, filename: file.name },
+        ],
+      }
+    }
+  }
   const instructions = buildInstructions(lang, deps.profile ?? null)
 
   try {

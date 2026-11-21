@@ -1,10 +1,11 @@
 import type { Lang } from '@/lib/i18n/lang'
+import { attachmentLine, checkAttachment, type Attachment } from './attachment'
 import { detectLang } from './lang-detect'
 import type { AskResult, ChatTurn } from './model'
 
 export const MAX_MESSAGE_LENGTH = 2000
 
-export type SendError = 'limit' | 'busy' | 'unsafe' | 'error' | 'empty' | 'tooLong'
+export type SendError = 'limit' | 'busy' | 'unsafe' | 'error' | 'empty' | 'tooLong' | 'fileType' | 'fileSize'
 
 export type SendResult =
   | { ok: true; conversationId: string; reply: { id: string; body: string; lang: Lang } }
@@ -23,7 +24,7 @@ export type SendDeps = {
   loadHistory: (conversationId: string) => Promise<ChatTurn[]>
   /** The profile lines for the AI, or null unless the patient switched on "use my profile in chats". */
   loadProfile: () => Promise<string | null>
-  ask: (history: ChatTurn[], lang: Lang, profile: string | null) => Promise<AskResult>
+  ask: (history: ChatTurn[], lang: Lang, profile: string | null, attachment?: Attachment) => Promise<AskResult>
   logEvent: (kind: AiEventKind, lang?: Lang) => Promise<void>
 }
 
@@ -32,10 +33,20 @@ export type SendDeps = {
  * AI layer did for the Intelligence page. When the AI fails, the patient's message stays saved and nothing
  * from the AI is stored. A failed log never breaks the chat.
  */
-export async function handleSend(input: { conversationId: string | null; text: string }, deps: SendDeps): Promise<SendResult> {
-  const text = input.text.trim()
-  if (!text) return { ok: false, error: 'empty' }
-  if (text.length > MAX_MESSAGE_LENGTH) return { ok: false, error: 'tooLong' }
+export async function handleSend(
+  input: { conversationId: string | null; text: string; attachment?: Attachment; lang?: Lang },
+  deps: SendDeps,
+): Promise<SendResult> {
+  const words = input.text.trim()
+  const file = input.attachment
+  if (!words && !file) return { ok: false, error: 'empty' }
+  if (words.length > MAX_MESSAGE_LENGTH) return { ok: false, error: 'tooLong' }
+  if (file) {
+    const checked = checkAttachment(file)
+    if (!checked.ok) return { ok: false, error: checked.error }
+  }
+  // The file itself is never saved: the chat keeps a "📎 name" line, with any words under it.
+  const text = file ? `${attachmentLine(file.name)}${words ? `\n${words}` : ''}` : words
 
   const log = async (kind: AiEventKind, lang?: Lang) => {
     try {
@@ -45,7 +56,7 @@ export async function handleSend(input: { conversationId: string | null; text: s
     }
   }
 
-  const lang = detectLang(text)
+  const lang = words ? detectLang(words) : (input.lang ?? 'en')
   const conversationId = input.conversationId ?? (await deps.createConversation(text.slice(0, 60)))
 
   const saved = await deps.addMessage(conversationId, 'patient', text, lang)
@@ -54,7 +65,7 @@ export async function handleSend(input: { conversationId: string | null; text: s
   const [history, profile] = await Promise.all([deps.loadHistory(conversationId), deps.loadProfile()])
   if (profile) await log('profile_used')
 
-  const answer = await deps.ask(history, lang, profile)
+  const answer = file ? await deps.ask(history, lang, profile, file) : await deps.ask(history, lang, profile)
   if (!answer.ok) {
     if (answer.reason === 'unsafe') await log('blocked', lang)
     return { ok: false, error: answer.reason, conversationId }

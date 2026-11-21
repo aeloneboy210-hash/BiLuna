@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
+import { AttachPanel } from '@/components/health/AttachPanel'
 import { EmergencyCard } from '@/components/health/EmergencyCard'
+import { attachmentLine, type Attachment } from '@/lib/health/attachment'
+import { prepareAttachment } from '@/lib/health/attachment-client'
 import { detectDanger } from '@/lib/health/danger'
 import { extractOptions } from '@/lib/health/options'
 import { Icon } from '@/components/ui/Icon'
@@ -120,6 +123,9 @@ export function ChatPanel({
   const endRef = useRef<HTMLDivElement>(null)
   const sentFirst = useRef(false)
   const [point, setPoint] = useState<BodyPoint | null>(null)
+  // A report or prescription waiting to be sent (read once by BiLuna, never saved).
+  const [file, setFile] = useState<Attachment | null>(null)
+  const [preparing, setPreparing] = useState(false)
   // The care check under the newest answer: which reply the patient said they were happy with.
   const [cared, setCared] = useState<string | null>(null)
   // Emergency cards the patient closed with "I'm safe".
@@ -134,21 +140,23 @@ export function ChatPanel({
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, pending])
 
-  function send(raw: string) {
+  function send(raw: string, attached: Attachment | null = file) {
     const words = raw.trim()
-    if ((!words && !point) || pending) return
+    if ((!words && !point && !attached) || pending) return
     // The pointed line uses the language of the words typed, so BiLuna replies in that language.
     const value = point ? `${pointedLine(point, words ? detectLang(words) : lang)}${words ? `\n${words}` : ''}` : words
     setError(null)
     setText('')
     setPoint(null)
-    if (open3d === 'picker') setOpen3d(null)
-    setMessages((m) => [...m, { id: `local-${Date.now()}`, author: 'patient', body: value }])
+    setFile(null)
+    if (open3d === 'picker' || open3d === 'attach') setOpen3d(null)
+    const shown = attached ? `${attachmentLine(attached.name)}${value ? `\n${value}` : ''}` : value
+    setMessages((m) => [...m, { id: `local-${Date.now()}`, author: 'patient', body: shown }])
     setPending(true)
     void (async () => {
       let result: Awaited<ReturnType<typeof sendMessage>>
       try {
-        result = await sendMessage({ conversationId, text: value })
+        result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
       } catch {
         result = { ok: false, error: 'error' }
       }
@@ -178,6 +186,25 @@ export function ChatPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /** A chosen file or a sample: shrink it in the browser, then send a sample at once or wait for the patient. */
+  async function attach(blob: Blob, name: string, sendNow: boolean) {
+    setError(null)
+    setPreparing(true)
+    try {
+      const ready = await prepareAttachment(blob, name)
+      if (typeof ready === 'string') return setError(ready)
+      setOpen3d(null)
+      if (sendNow) {
+        setPreparing(false)
+        send('', ready)
+      } else setFile(ready)
+    } catch {
+      setError('fileType')
+    } finally {
+      setPreparing(false)
+    }
+  }
+
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     send(text)
@@ -202,7 +229,9 @@ export function ChatPanel({
 
         {messages.map((m) => {
           if (m.author === 'patient') {
-            const { point: pointed, rest } = splitPointed(m.body)
+            const clipped = m.body.startsWith('📎') ? m.body.split('\n')[0] : null
+            const afterClip = clipped ? m.body.slice(clipped.length).replace(/^\n/, '') : m.body
+            const { point: pointed, rest } = splitPointed(afterClip)
             // The fixed danger-word check, apart from the AI: the card shows the moment the message is sent.
             const danger = detectDanger(m.body)
             return (
@@ -210,6 +239,9 @@ export function ChatPanel({
                 <div className="flex justify-end">
                   <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand">
                     <span className="sr-only">{t.you}: </span>
+                    {clipped ? (
+                      <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">{clipped}</span>
+                    ) : null}
                     {pointed ? (
                       <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">📍 {pointed}</span>
                     ) : null}
@@ -330,7 +362,37 @@ export function ChatPanel({
             t={t.body}
           />
         ) : null}
+        {open3d === 'attach' ? (
+          <AttachPanel
+            busy={preparing || pending}
+            onFile={(f) => attach(f, f.name, false)}
+            onSample={async (path, name) => {
+              try {
+                const res = await fetch(path)
+                await attach(await res.blob(), name, true)
+              } catch {
+                setError('error')
+              }
+            }}
+            onClose={() => setOpen3d(null)}
+            t={t.attach}
+          />
+        ) : null}
         {point ? <PointChip point={point} onClear={() => setPoint(null)} lang={lang} t={t.body} /> : null}
+        {preparing ? <p className="text-sm text-muted">{t.attach.preparing}</p> : null}
+        {file ? (
+          <div className="flex items-center gap-2 self-start rounded-full border border-tint bg-soft py-1 pr-1 pl-3 text-sm font-semibold text-ink">
+            <span>{attachmentLine(file.name)}</span>
+            <button
+              type="button"
+              onClick={() => setFile(null)}
+              aria-label={t.attach.remove}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface"
+            >
+              ✕
+            </button>
+          </div>
+        ) : null}
         <div className="flex items-end gap-2">
           <button
             type="button"
@@ -341,6 +403,16 @@ export function ChatPanel({
             className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${open3d === 'picker' ? 'border-brand bg-brand text-on-brand' : 'border-field text-brand hover:bg-soft'}`}
           >
             <Icon name="body" className="h-6 w-6" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen3d((o) => (o === 'attach' ? null : 'attach'))}
+            aria-pressed={open3d === 'attach'}
+            aria-label={t.attach.button}
+            title={t.attach.button}
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border ${open3d === 'attach' ? 'border-brand bg-brand text-on-brand' : 'border-field text-brand hover:bg-soft'}`}
+          >
+            <Icon name="clip" className="h-6 w-6" />
           </button>
           <label htmlFor="health-input" className="sr-only">
             {t.placeholder}
@@ -357,7 +429,7 @@ export function ChatPanel({
           />
           <button
             type="submit"
-            disabled={pending || (!text.trim() && !point)}
+            disabled={pending || preparing || (!text.trim() && !point && !file)}
             aria-label={t.send}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand text-on-brand hover:bg-aqua disabled:opacity-50"
           >
