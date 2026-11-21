@@ -49,6 +49,7 @@ export function BodyPicker({
   t: T
 }) {
   const [focus, setFocus] = useState<{ region: RegionId; n: number } | null>(null)
+  const [ready, setReady] = useState(false)
   const chooseArea = (region: RegionId) => {
     onPoint({ region, part: null, spot: null })
     setFocus((f) => ({ region, n: (f?.n ?? 0) + 1 }))
@@ -65,15 +66,20 @@ export function BodyPicker({
         </button>
       </div>
       <div className="relative h-[58vh] max-h-[34rem] min-h-80 overflow-hidden rounded-xl bg-soft">
-        {/* A scan line sweeps down the body once when it opens. */}
-        <div className="body-scan pointer-events-none absolute inset-x-0 z-10 h-1 rounded-full bg-brand" aria-hidden="true" />
-        <p className="body-scan-label pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-brand">
-          {t.scanning}
-        </p>
+        {/* A scan line sweeps down the body once it is on screen. */}
+        {ready ? (
+          <>
+            <div className="body-scan pointer-events-none absolute inset-x-0 z-10 h-1 rounded-full bg-brand" aria-hidden="true" />
+            <p className="body-scan-label pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-brand">
+              {t.scanning}
+            </p>
+          </>
+        ) : null}
         <BodyViewer
           compact
           picker
           focus={focus}
+          onLoaded={() => setReady(true)}
           controlLabels={t.views}
           highlight={null}
           layers={ALL_LAYERS}
