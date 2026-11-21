@@ -130,3 +130,36 @@ test('the instructions explain the place guide and the options tag', async () =>
   expect(f.calls[0].instructions).toContain('What it could be')
   expect(f.calls[0].instructions).toContain('[[options:')
 })
+
+describe('after pointing at the body, every reply asks a tap-to-answer question for three rounds', () => {
+  const pointed = { author: 'patient' as const, body: '📍 Where it hurts: Lower belly' }
+  const reply = { author: 'biluna' as const, body: 'Some answer' }
+
+  test('round 1: a reply without options gets the "what does it feel like" question', async () => {
+    const f = fake(good)
+    const r = await askBiLuna([pointed], 'en', { generate: f.generate })
+    expect(r.ok && r.text.endsWith('What does it feel like?\n[[options: Sharp or stabbing | Dull ache | Burning | Comes and goes]]')).toBe(true)
+  })
+
+  test('round 2 and 3 ask when it started, then other signs; Bangla works', async () => {
+    const two = await askBiLuna([pointed, reply, { author: 'patient', body: 'Burning' }], 'en', { generate: fake(good).generate })
+    expect(two.ok && two.text).toContain('When did it start?')
+    const three = await askBiLuna(
+      [pointed, reply, { author: 'patient', body: 'x' }, reply, { author: 'patient', body: 'y' }],
+      'bn',
+      { generate: fake(`হতে পারে।\n\n${CONFIDENCE_PREFIX.bn} নিশ্চিত নই।`).generate },
+    )
+    expect(three.ok && three.text).toContain('এগুলোর কোনোটি কি আছে?')
+  })
+
+  test('a reply that already has options, round 4, or no pointing is left as it is', async () => {
+    const withOpts = `${good}\n[[options: A | B]]`
+    const a = await askBiLuna([pointed], 'en', { generate: fake(withOpts).generate })
+    expect(a.ok && a.text).toBe(withOpts)
+    const four = [pointed, reply, { author: 'patient' as const, body: 'a' }, reply, { author: 'patient' as const, body: 'b' }, reply, { author: 'patient' as const, body: 'c' }]
+    const b = await askBiLuna(four, 'en', { generate: fake(good).generate })
+    expect(b.ok && b.text).toBe(good)
+    const c = await askBiLuna(history, 'en', { generate: fake(good).generate })
+    expect(c.ok && c.text).toBe(good)
+  })
+})

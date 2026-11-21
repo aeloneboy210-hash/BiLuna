@@ -5,6 +5,7 @@ import type { Lang } from '@/lib/i18n/lang'
 import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
 import { extractOptions, optionsTag } from './options'
+import { placeQuestion, placeRound } from './place-questions'
 import { checkReply, type ReplyKind } from './safety-filter'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
@@ -13,9 +14,7 @@ type ModelMessage = { role: 'user' | 'assistant'; content: string }
 /** The one call to the model, kept small so tests can replace it. */
 export type Generate = (opts: { instructions: string; messages: ModelMessage[] }) => Promise<{ text: string }>
 
-export type AskResult =
-  | { ok: true; text: string; kind: ReplyKind; retried: boolean }
-  | { ok: false; reason: 'busy' | 'unsafe' | 'error' }
+export type AskResult = { ok: true; text: string; kind: ReplyKind; retried: boolean } | { ok: false; reason: 'busy' | 'unsafe' | 'error' }
 
 /** Free-tier model; set BILUNA_AI_MODEL in Vercel to change it without a code change. */
 const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
@@ -64,6 +63,12 @@ export async function askBiLuna(
       if (checked.ok) {
         let body = tagged.organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(tagged.organ)}` : checked.text
         if (opts.options.length && checked.kind !== 'smallTalk') body += `\n${optionsTag(opts.options)}`
+        // After pointing at the body, every reply for three rounds must end with a question the patient can tap.
+        const round = placeRound(history)
+        if (round && !opts.options.length && checked.kind !== 'smallTalk') {
+          const q = placeQuestion(round, lang)
+          body += `\n\n${q.q}\n${optionsTag(q.options)}`
+        }
         return { ok: true, text: body, kind: checked.kind, retried: extra !== '' }
       }
       if (checked.reason === 'empty') return { ok: false, reason: 'error' }
