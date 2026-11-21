@@ -10,6 +10,7 @@ const en = {
   description:
     "BiLuna — your personal healthcare AI companion. Feeling sick? Just tell me how you feel. I'll help you understand what might be going on, explain it in simple words, and show it to you in 3D. I'll tell you how to stay safe and when to see a doctor. Give me a medicine name and I'll explain what it's for. Worried about finding a good hospital or doctor? I'll find ones near you that fit your need and help you request an appointment. I'll help you choose the most affordable option too. And that's not all: you can learn about health and medicine with me, and get help with your research.",
   nav: {
+    loading: 'Loading…',
     home: 'Home',
     roadmap: 'Roadmap',
     signIn: 'Sign in',
@@ -99,8 +100,9 @@ const en = {
   },
   patient: {
     welcomeBack: 'Welcome back,',
+    helloIm: "Hello, I'm",
     heroLine: 'Your health, our priority — always.',
-    explore: 'Explore your health',
+    explore: 'Tell me how you feel',
     botName: 'BiLuna Bot',
     botHello: "Hello! I'm BiLuna.",
     botAsk: 'How can I help you today?',
@@ -326,6 +328,7 @@ const bn: Dictionary = {
   description:
     'বাইলুনা — আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী। অসুস্থ লাগছে? শুধু বলুন কেমন লাগছে। কী হতে পারে তা বুঝতে আমি সাহায্য করব, সহজ ভাষায় ব্যাখ্যা করব এবং থ্রিডিতে দেখাব। কীভাবে নিরাপদ থাকবেন আর কখন ডাক্তার দেখাবেন তা জানাব। ওষুধের নাম দিন, সেটি কীসের জন্য তা বুঝিয়ে বলব। ভালো হাসপাতাল বা ডাক্তার খুঁজে পাওয়া নিয়ে চিন্তিত? আপনার প্রয়োজন অনুযায়ী কাছের হাসপাতাল ও ডাক্তার খুঁজে দেব এবং অ্যাপয়েন্টমেন্টের অনুরোধ করতে সাহায্য করব। সবচেয়ে সাশ্রয়ী বিকল্প বেছে নিতেও সাহায্য করব। শুধু তা-ই নয়: আমার সঙ্গে স্বাস্থ্য ও চিকিৎসা বিষয়ে শিখতে পারবেন এবং গবেষণায় সাহায্য পাবেন।',
   nav: {
+    loading: 'লোড হচ্ছে…',
     home: 'হোম',
     roadmap: 'রোডম্যাপ',
     signIn: 'সাইন ইন',
@@ -415,8 +418,9 @@ const bn: Dictionary = {
   },
   patient: {
     welcomeBack: 'আবার স্বাগতম,',
+    helloIm: 'হ্যালো, আমি',
     heroLine: 'আপনার স্বাস্থ্যই আমাদের অগ্রাধিকার — সবসময়।',
-    explore: 'আপনার স্বাস্থ্য দেখুন',
+    explore: 'আপনার কেমন লাগছে বলুন',
     botName: 'বাইলুনা বট',
     botHello: 'হ্যালো! আমি বাইলুনা।',
     botAsk: 'আজ আপনাকে কীভাবে সাহায্য করতে পারি?',

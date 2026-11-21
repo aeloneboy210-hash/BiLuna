@@ -105,11 +105,10 @@ function quickLinks(dict: Dictionary): { href: string; icon: IconName; label: st
 }
 
 export default async function PatientPortal() {
-  const session = await requirePortal('patient')
+  await requirePortal('patient')
   const { dict, lang } = await getDict()
   const t = dict.patient
 
-  const firstName = session.displayName.split(' ')[0]
   // The health profile the patient keeps in BiLuna Intelligence; the area stays sample data.
   const saved = await getProfile().catch(() => null)
   const profile: [IconName, string, string | null][] = [
@@ -128,11 +127,11 @@ export default async function PatientPortal() {
       <section className="motion-safe:animate-rise relative overflow-hidden rounded-3xl border border-tint bg-soft">
         <div className="relative z-10 flex flex-col gap-5 px-6 py-8 sm:px-10 sm:py-10 md:max-w-[62%]">
           <h1 className="text-3xl leading-tight font-bold sm:text-5xl">
-            {t.welcomeBack}
+            {t.helloIm}
             <br />
-            <span className="text-gradient">{firstName}!</span>
+            <span className="text-gradient">BiLuna</span>
           </h1>
-          <p className="text-lg text-body">{t.heroLine}</p>
+          <p className="text-lg text-body">{dict.brand.tagline}</p>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-4">
             <Link href={hrefOf('health')} className={buttonClass('primary')}>
               {t.explore}
@@ -219,7 +218,7 @@ export default async function PatientPortal() {
           <div className="flex items-end gap-2.5">
             <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-8 w-auto" />
             <p className="rounded-2xl rounded-bl-sm bg-soft px-4 py-3 text-sm leading-relaxed">
-              {t.welcomeBack.replace(/,$/, '')} {firstName}! {t.botAsk}
+              {t.botHello} {t.botAsk}
             </p>
           </div>
           {/* A plain GET form: the Health page reads ?q= and sends it as the first question. */}

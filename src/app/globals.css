@@ -254,3 +254,34 @@ html[lang="bn"] :is(h1, h2, h3) {
 @media (prefers-reduced-motion: reduce) {
   .intro-splash { display: none; }
 }
+
+/* Loading screen between pages (NavLoader): the intro's orbits, logo and heartbeat, looping. */
+.nav-loader {
+  animation: intro-fade 0.2s ease-out both;
+}
+.nav-loader-dot {
+  offset-path: path('M10 150 A140 50 0 1 1 290 150 A140 50 0 1 1 10 150');
+  animation: nav-orbit 1.6s linear infinite;
+}
+.nav-loader-logo {
+  animation: nav-pulse 1.2s ease-in-out infinite;
+}
+.nav-loader-beat path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: nav-beat 1.4s ease-in-out infinite;
+}
+@keyframes nav-orbit {
+  to { offset-distance: 100%; }
+}
+@keyframes nav-pulse {
+  50% { transform: scale(1.08); }
+}
+@keyframes nav-beat {
+  0% { stroke-dashoffset: 1; }
+  60% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-loader-dot, .nav-loader-logo, .nav-loader-beat path { animation: none; stroke-dashoffset: 0; }
+}
