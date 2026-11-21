@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Fragment, useEffect, useRef, useState, useTransition, type FormEvent, type KeyboardEvent } from 'react'
+import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { EmergencyCard } from '@/components/health/EmergencyCard'
@@ -114,7 +114,9 @@ export function ChatPanel({
   const [conversationId, setConversationId] = useState(initialId)
   const [text, setText] = useState('')
   const [error, setError] = useState<SendError | null>(null)
-  const [pending, startTransition] = useTransition()
+  // Our own "waiting for BiLuna" flag. A transition would also wait for Next.js to reload the page
+  // after the sign-in cookie refresh, keeping "thinking" on screen for seconds after the reply.
+  const [pending, setPending] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   const sentFirst = useRef(false)
   const [point, setPoint] = useState<BodyPoint | null>(null)
@@ -142,8 +144,15 @@ export function ChatPanel({
     setPoint(null)
     if (open3d === 'picker') setOpen3d(null)
     setMessages((m) => [...m, { id: `local-${Date.now()}`, author: 'patient', body: value }])
-    startTransition(async () => {
-      const result = await sendMessage({ conversationId, text: value })
+    setPending(true)
+    void (async () => {
+      let result: Awaited<ReturnType<typeof sendMessage>>
+      try {
+        result = await sendMessage({ conversationId, text: value })
+      } catch {
+        result = { ok: false, error: 'error' }
+      }
+      setPending(false)
       if (result.conversationId && result.conversationId !== conversationId) {
         setConversationId(result.conversationId)
         window.history.replaceState(null, '', `/patient/health?c=${result.conversationId}`)
@@ -157,7 +166,7 @@ export function ChatPanel({
       }
       // Refresh the past-chats list in the background, so "thinking" ends as soon as the reply is shown.
       window.setTimeout(() => router.refresh(), 0)
-    })
+    })()
   }
 
   // A question typed on the dashboard arrives as ?q= and is sent once.
