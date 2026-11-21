@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import type { BodyLayers } from '@/components/body/BodyViewer'
 import type { BodyPoint } from '@/lib/body/chat-body'
-import { pointName } from '@/lib/body/chat-body'
+import { painFace, pointName } from '@/lib/body/chat-body'
 import { BODY_PARTS, type OrganId, type RegionId } from '@/lib/body/regions'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
@@ -36,12 +36,14 @@ const AREAS: RegionId[] = [
 export function BodyPicker({
   point,
   onPoint,
+  onPain,
   onClose,
   lang,
   t,
 }: {
   point: BodyPoint | null
   onPoint: (p: BodyPoint) => void
+  onPain: (n: number) => void
   onClose: () => void
   lang: Lang
   t: T
@@ -63,6 +65,11 @@ export function BodyPicker({
         </button>
       </div>
       <div className="relative h-[58vh] max-h-[34rem] min-h-80 overflow-hidden rounded-xl bg-soft">
+        {/* A scan line sweeps down the body once when it opens. */}
+        <div className="body-scan pointer-events-none absolute inset-x-0 z-10 h-1 rounded-full bg-brand" aria-hidden="true" />
+        <p className="body-scan-label pointer-events-none absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-surface/90 px-3 py-1 text-xs font-semibold text-brand">
+          {t.scanning}
+        </p>
         <BodyViewer
           compact
           picker
@@ -96,6 +103,34 @@ export function BodyPicker({
         </div>
       </div>
       {point ? (
+        <div className="rounded-xl border border-tint bg-soft p-3">
+          <p className="mb-2 text-sm font-bold text-ink">{t.painTitle}</p>
+          <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-10">
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => {
+              const on = point.pain === n
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => onPain(n)}
+                  aria-pressed={on}
+                  className={`flex min-h-12 flex-col items-center justify-center rounded-lg border text-sm font-bold ${on ? 'border-brand bg-brand text-on-brand' : 'border-line bg-surface text-ink hover:bg-surface/60'}`}
+                >
+                  <span aria-hidden="true" className="text-lg leading-none">
+                    {painFace(n)}
+                  </span>
+                  {n}
+                </button>
+              )
+            })}
+          </div>
+          <div className="mt-1 flex justify-between text-xs text-muted">
+            <span>{t.painLow}</span>
+            <span>{t.painHigh}</span>
+          </div>
+        </div>
+      ) : null}
+      {point ? (
         <p className="text-sm text-body">
           {t.pointed}: <span className="font-semibold text-ink">{pointName(point, lang)}</span>
         </p>
@@ -109,7 +144,10 @@ export function PointChip({ point, onClear, lang, t }: { point: BodyPoint; onCle
   return (
     <div className="flex items-center gap-2 self-start rounded-full border border-tint bg-soft py-1 pr-1 pl-3 text-sm font-semibold text-ink">
       <span aria-hidden="true">📍</span>
-      <span>{pointName(point, lang)}</span>
+      <span>
+        {pointName(point, lang)}
+        {point.pain ? ` · ${painFace(point.pain)} ${point.pain}/10` : ''}
+      </span>
       <button
         type="button"
         onClick={onClear}

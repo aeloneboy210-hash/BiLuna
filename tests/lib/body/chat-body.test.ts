@@ -1,4 +1,4 @@
-import { bodyTag, extractBodyTag, pointedLine, splitPointed } from '@/lib/body/chat-body'
+import { bodyTag, extractBodyTag, painFace, pointedLine, splitPointed } from '@/lib/body/chat-body'
 import type { AnatomyPart } from '@/lib/body/anatomy'
 
 const tibia: AnatomyPart = { id: 'tibia_l', name: 'Tibia', side: 'left', group: 'Bones of lower limb', layer: 'skeleton', file: 'skeleton-v1' }
@@ -43,4 +43,16 @@ test('the pointed line names the exact spot on the part', () => {
   expect(pointedLine({ region: 'head', part: brain, spot: { u: 0.5, v: 0.6, w: 0.85 } }, 'en')).toBe(
     '📍 Where it hurts: Head · Cerebrum, left frontal lobe',
   )
+})
+
+test('the pain level goes at the end of the pointed line', () => {
+  expect(pointedLine({ region: 'chest', part: null, pain: 7 }, 'en')).toBe('📍 Where it hurts: Chest · Pain 7/10')
+  expect(pointedLine({ region: 'chest', part: null, pain: 3 }, 'bn')).toBe('📍 কোথায় সমস্যা: বুক · ব্যথা 3/10')
+  expect(pointedLine({ region: 'chest', part: null, pain: null }, 'en')).toBe('📍 Where it hurts: Chest')
+})
+
+test('pain faces go from calm to crying', () => {
+  expect(painFace(1)).toBe('😀')
+  expect(painFace(5)).toBe('😐')
+  expect(painFace(10)).toBe('😭')
 })

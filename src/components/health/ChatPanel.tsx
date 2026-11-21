@@ -115,6 +115,8 @@ export function ChatPanel({
   const endRef = useRef<HTMLDivElement>(null)
   const sentFirst = useRef(false)
   const [point, setPoint] = useState<BodyPoint | null>(null)
+  // The care check under the newest answer: which reply the patient said they were happy with.
+  const [cared, setCared] = useState<string | null>(null)
   // Only one 3D view at a time: 'picker', a reply's id, or none. The newest reply's card starts open.
   const [open3d, setOpen3d] = useState<string | null>(() => {
     const last = initial[initial.length - 1]
@@ -222,6 +224,32 @@ export function ChatPanel({
           )
         })}
 
+        {(() => {
+          const last = messages[messages.length - 1]
+          if (pending || messages.length < 2 || last?.author !== 'biluna' || last.id.startsWith('local-')) return null
+          if (cared === last.id) {
+            return <p className="self-start rounded-2xl rounded-tl-sm bg-soft px-4 py-3 text-sm text-ink">💙 {t.care.thanks}</p>
+          }
+          return (
+            <div className="flex flex-wrap items-center gap-2 self-start">
+              <span className="text-sm text-body">{t.care.question}</span>
+              <button
+                type="button"
+                onClick={() => setCared(last.id)}
+                className="min-h-9 rounded-full border border-brand px-3 text-sm font-semibold text-brand hover:bg-soft"
+              >
+                {t.care.satisfied}
+              </button>
+              <button
+                type="button"
+                onClick={() => send(t.care.moreMsg)}
+                className="min-h-9 rounded-full border border-line px-3 text-sm font-semibold text-ink hover:bg-soft"
+              >
+                {t.care.more}
+              </button>
+            </div>
+          )
+        })()}
         {pending ? (
           <div className="flex items-end gap-2.5" role="status">
             <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-9 w-auto shrink-0" />
@@ -249,7 +277,14 @@ export function ChatPanel({
 
       <form onSubmit={onSubmit} className="flex flex-col gap-2 border-t border-line p-3 sm:p-4">
         {open3d === 'picker' ? (
-          <BodyPicker point={point} onPoint={setPoint} onClose={() => setOpen3d(null)} lang={lang} t={t.body} />
+          <BodyPicker
+            point={point}
+            onPoint={(p) => setPoint((prev) => ({ ...p, pain: prev?.pain ?? null }))}
+            onPain={(n) => setPoint((prev) => (prev ? { ...prev, pain: n } : prev))}
+            onClose={() => setOpen3d(null)}
+            lang={lang}
+            t={t.body}
+          />
         ) : null}
         {point ? <PointChip point={point} onClear={() => setPoint(null)} lang={lang} t={t.body} /> : null}
         <div className="flex items-end gap-2">

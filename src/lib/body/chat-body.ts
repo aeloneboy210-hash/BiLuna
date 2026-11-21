@@ -37,7 +37,19 @@ export function extractBodyTag(text: string): { text: string; organ: OrganId | n
 export const POINT_MARK = '📍'
 const POINT_LABEL: Record<Lang, string> = { en: 'Where it hurts:', bn: 'কোথায় সমস্যা:' }
 
-export type BodyPoint = { region: RegionId; part: AnatomyPart | null; spot?: Spot | null }
+/** pain: the patient's own 1 to 10 rating, a standard pain scale. */
+export type BodyPoint = { region: RegionId; part: AnatomyPart | null; spot?: Spot | null; pain?: number | null }
+
+const PAIN_WORD: Record<Lang, string> = { en: 'Pain', bn: 'ব্যথা' }
+
+/** The face shown above each number on the 1 to 10 pain scale. */
+export function painFace(n: number): string {
+  if (n <= 2) return '😀'
+  if (n <= 4) return '🙂'
+  if (n <= 6) return '😐'
+  if (n <= 8) return '😣'
+  return '😭'
+}
 
 /** What the patient pointed at, in words: "Left leg · Tibia (left)". */
 export function pointName(p: BodyPoint, lang: Lang): string {
@@ -49,7 +61,8 @@ export function pointName(p: BodyPoint, lang: Lang): string {
 
 /** First line of a message sent with a point on the body. */
 export function pointedLine(p: BodyPoint, lang: Lang): string {
-  return `${POINT_MARK} ${POINT_LABEL[lang]} ${pointName(p, lang)}`
+  const pain = p.pain ? ` · ${PAIN_WORD[lang]} ${p.pain}/10` : ''
+  return `${POINT_MARK} ${POINT_LABEL[lang]} ${pointName(p, lang)}${pain}`
 }
 
 /** Splits a patient message into its pointed line (without the pin) and the rest. */

@@ -285,3 +285,21 @@ html[lang="bn"] :is(h1, h2, h3) {
 @media (prefers-reduced-motion: reduce) {
   .nav-loader-dot, .nav-loader-logo, .nav-loader-beat path { animation: none; stroke-dashoffset: 0; }
 }
+
+/* The body scan when the 3D body opens: a glowing line sweeps from head to feet once. */
+.body-scan {
+  box-shadow: 0 0 18px 4px #2580eb88;
+  animation: body-scan 1.8s ease-in-out both;
+}
+.body-scan-label {
+  animation: intro-out 0.4s ease-in 1.8s forwards;
+}
+@keyframes body-scan {
+  0% { top: 0; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: calc(100% - 4px); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .body-scan, .body-scan-label { display: none; }
+}

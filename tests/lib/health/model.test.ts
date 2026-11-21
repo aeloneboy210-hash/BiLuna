@@ -105,3 +105,10 @@ test('the instructions explain the 3D body tag and the organ list', async () => 
   expect(f.calls[0].instructions).toContain('[[body:')
   expect(f.calls[0].instructions).toContain('gallbladder')
 })
+
+test('the instructions ask for a 1 to 10 pain level and a caring tone', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate })
+  expect(f.calls[0].instructions).toContain('1 to 10')
+  expect(f.calls[0].instructions).toContain('Pain 7/10')
+})
