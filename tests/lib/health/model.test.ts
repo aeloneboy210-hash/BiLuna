@@ -169,3 +169,9 @@ test('a reply to a self-harm message has no confidence line and no tap-to-answer
   const r = await askBiLuna([{ author: 'patient', body: 'I want to kill myself' }], 'en', { generate: f.generate })
   expect(r.ok && r.text).toBe('You are not alone. Please call 999.')
 })
+
+test('the instructions give the Bangla spelling of the name', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'bn', { generate: f.generate })
+  expect(f.calls[0].instructions).toContain('"বিলুনা"')
+})
