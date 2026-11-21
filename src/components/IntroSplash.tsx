@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { INTRO_KEY as KEY } from '@/lib/ui/intro'
 import { NETWORK_DOTS, NETWORK_LINES } from '@/lib/ui/intro-network'
 
 const LENGTH_MS = 3300
@@ -10,7 +9,7 @@ const LENGTH_MS = 3300
 /**
  * BiLuna's opening animation on the welcome page, in the style of the ad's end card but in the site's
  * flat white-and-blue look: a network of lines and dots, still orbits around the logo, the name, the tagline and a heartbeat
- * line, then a fade into the page (about 3 seconds). Shown once per visit, skippable, and never shown
+ * line, then a fade into the page (about 3 seconds). Shown every time the welcome page opens, skippable, and never shown
  * to people who ask their device to reduce motion.
  *
  * The CSS animation fades it out on its own, so it can never get stuck. INTRO_GATE_SCRIPT (rendered by the
@@ -20,16 +19,9 @@ export function IntroSplash({ tagline, skip }: { tagline: string; skip: string }
   const [gone, setGone] = useState(false)
 
   useEffect(() => {
-    let seen = false
-    try {
-      seen = sessionStorage.getItem(KEY) === '1'
-      sessionStorage.setItem(KEY, '1')
-    } catch {
-      // Storage can be blocked; the animation then simply plays.
-    }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    // Already seen, or motion reduced: remove at once (it is already hidden before paint).
-    const timer = window.setTimeout(() => setGone(true), seen || reduce ? 0 : LENGTH_MS)
+    // Plays every time the welcome page opens. Motion reduced: remove at once (it is already hidden before paint).
+    const timer = window.setTimeout(() => setGone(true), reduce ? 0 : LENGTH_MS)
     return () => window.clearTimeout(timer)
   }, [])
 
