@@ -112,3 +112,21 @@ test('the instructions ask for a 1 to 10 pain level and a caring tone', async ()
   expect(f.calls[0].instructions).toContain('1 to 10')
   expect(f.calls[0].instructions).toContain('Pain 7/10')
 })
+
+test('answers and follow-up questions keep their tap-to-answer options at the end', async () => {
+  const f = fake(
+    `It might be acid.\n\n${CONFIDENCE_PREFIX.en} unsure.\n[[options: Burning | Dull]]\n[[body:stomach]]`,
+    '[ASK] What does it feel like? [[options: Burning | Stabbing]]',
+  )
+  const a = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(a.ok && a.text.endsWith('[[body:stomach]]\n[[options: Burning | Dull]]')).toBe(true)
+  const b = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(b).toEqual({ ok: true, text: 'What does it feel like?\n[[options: Burning | Stabbing]]', kind: 'clarify', retried: false })
+})
+
+test('the instructions explain the place guide and the options tag', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate })
+  expect(f.calls[0].instructions).toContain('What it could be')
+  expect(f.calls[0].instructions).toContain('[[options:')
+})

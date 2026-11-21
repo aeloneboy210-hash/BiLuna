@@ -4,6 +4,7 @@ import { APICallError, generateText } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
 import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
+import { extractOptions, optionsTag } from './options'
 import { checkReply, type ReplyKind } from './safety-filter'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
@@ -57,9 +58,12 @@ export async function askBiLuna(
       const { text } = await generate({ instructions: instructions + extra, messages })
       // The 3D body tag comes off before the safety check and goes back at the very end, answers only.
       const tagged = extractBodyTag(text)
-      const checked = checkReply(tagged.text, lang)
+      // Tap-to-answer options also come off before the check, and go back on answers and follow-up questions.
+      const opts = extractOptions(tagged.text)
+      const checked = checkReply(opts.text, lang)
       if (checked.ok) {
-        const body = tagged.organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(tagged.organ)}` : checked.text
+        let body = tagged.organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(tagged.organ)}` : checked.text
+        if (opts.options.length && checked.kind !== 'smallTalk') body += `\n${optionsTag(opts.options)}`
         return { ok: true, text: body, kind: checked.kind, retried: extra !== '' }
       }
       if (checked.reason === 'empty') return { ok: false, reason: 'error' }

@@ -166,6 +166,7 @@ const en = {
     notHelpful: 'Not helpful',
     feedbackThanks: 'Thanks. BiLuna uses this only for reviewed improvements, never as training data.',
     feedbackFailed: 'Could not save your rating. Please try again.',
+    tapAnswer: 'Tap an answer',
     danger: {
       title: 'This could be an emergency',
       call: 'Call 999 now',
@@ -207,6 +208,7 @@ const en = {
       pickHint: 'Tap the exact spot, or choose an area below. Buttons turn, move and zoom; two fingers slide.',
       areas: 'Or choose an area:',
       scanning: 'Scanning…',
+      ask: 'Ask BiLuna about this place',
       painTitle: 'How strong is the pain?',
       painLow: 'No pain',
       painHigh: 'Worst pain',
@@ -525,6 +527,7 @@ const bn: Dictionary = {
     notHelpful: 'কাজে লাগেনি',
     feedbackThanks: 'ধন্যবাদ। বাইলুনা এটি শুধু যাচাই করা উন্নয়নে ব্যবহার করে, কখনো ট্রেনিং ডেটা হিসেবে নয়।',
     feedbackFailed: 'রেটিং সেভ করা যায়নি। আবার চেষ্টা করুন।',
+    tapAnswer: 'একটি উত্তর বেছে নিন',
     danger: {
       title: 'এটি জরুরি অবস্থা হতে পারে',
       call: 'এখনই ৯৯৯ নম্বরে কল করুন',
@@ -566,6 +569,7 @@ const bn: Dictionary = {
       pickHint: 'ঠিক জায়গাটিতে চাপুন, বা নিচ থেকে একটি অংশ বেছে নিন। বোতাম দিয়ে ঘোরান, সরান ও বড় করুন; দুই আঙুলে টেনে সরান।',
       areas: 'অথবা একটি অংশ বেছে নিন:',
       scanning: 'স্ক্যান হচ্ছে…',
+      ask: 'এই জায়গা নিয়ে বাইলুনাকে জিজ্ঞেস করুন',
       painTitle: 'ব্যথা কতটা তীব্র?',
       painLow: 'ব্যথা নেই',
       painHigh: 'সবচেয়ে বেশি ব্যথা',

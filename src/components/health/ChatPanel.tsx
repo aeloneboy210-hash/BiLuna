@@ -7,6 +7,7 @@ import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { EmergencyCard } from '@/components/health/EmergencyCard'
 import { detectDanger } from '@/lib/health/danger'
+import { extractOptions } from '@/lib/health/options'
 import { Icon } from '@/components/ui/Icon'
 import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
 import { detectLang } from '@/lib/health/lang-detect'
@@ -211,7 +212,10 @@ export function ChatPanel({
               </Fragment>
             )
           }
-          const reply = extractBodyTag(m.body)
+          const tagged = extractBodyTag(m.body)
+          const opts = extractOptions(tagged.text)
+          const reply = { text: opts.text, organ: tagged.organ }
+          const isLatest = m.id === messages[messages.length - 1]?.id && !pending
           return (
             <div key={m.id} className="flex items-start gap-2.5">
               <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="mt-1 h-9 w-auto shrink-0" />
@@ -219,6 +223,20 @@ export function ChatPanel({
                 <div className="rounded-2xl rounded-tl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
                   <span className="sr-only">{t.biluna}: </span>
                   <ReplyText body={reply.text} />
+                  {opts.options.length && isLatest ? (
+                    <div className="mt-1 flex flex-wrap gap-2" role="group" aria-label={t.tapAnswer}>
+                      {opts.options.map((o) => (
+                        <button
+                          key={o}
+                          type="button"
+                          onClick={() => send(o)}
+                          className="min-h-10 rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
+                        >
+                          {o}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
                   {reply.organ ? (
                     <BodyCard
                       organ={reply.organ}
@@ -292,6 +310,8 @@ export function ChatPanel({
             point={point}
             onPoint={(p) => setPoint((prev) => ({ ...p, pain: prev?.pain ?? null }))}
             onPain={(n) => setPoint((prev) => (prev ? { ...prev, pain: n } : prev))}
+            onAsk={() => send(text)}
+            pending={pending}
             onClose={() => setOpen3d(null)}
             lang={lang}
             t={t.body}

@@ -37,6 +37,8 @@ export function BodyPicker({
   point,
   onPoint,
   onPain,
+  onAsk,
+  pending,
   onClose,
   lang,
   t,
@@ -44,6 +46,8 @@ export function BodyPicker({
   point: BodyPoint | null
   onPoint: (p: BodyPoint) => void
   onPain: (n: number) => void
+  onAsk: () => void
+  pending: boolean
   onClose: () => void
   lang: Lang
   t: T
@@ -135,6 +139,17 @@ export function BodyPicker({
             <span>{t.painHigh}</span>
           </div>
         </div>
+      ) : null}
+      {point ? (
+        <button
+          type="button"
+          onClick={onAsk}
+          disabled={pending}
+          className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 text-base font-bold text-on-brand hover:bg-aqua disabled:opacity-60"
+        >
+          <Icon name="send" className="h-5 w-5" />
+          {t.ask}
+        </button>
       ) : null}
       {point ? (
         <p className="text-sm text-body">
