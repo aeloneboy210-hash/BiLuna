@@ -83,7 +83,6 @@ export async function prepareSummary(input: { conversationId: string; lang?: Lan
   if (!made.ok) return { ok: false, error: made.reason }
   const summaryId = await saveSummary({ conversationId: id, patientName: session.displayName, lang, content: made.content })
   if (!summaryId) return { ok: false, error: 'error' }
-  revalidatePath('/doctor')
   const summary = await summaryForConversation(id)
   return summary ? { ok: true, summary } : { ok: false, error: 'error' }
 }
@@ -106,7 +105,7 @@ export async function updateSummary(input: {
         : action === 'stop'
           ? await stopSharing(summaryId)
           : false
+  // No page reload needed: the doctor's pages always read fresh from the database.
   if (!ok) return null
-  revalidatePath('/doctor')
   return summaryForConversation(conversationId)
 }
