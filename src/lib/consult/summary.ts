@@ -48,7 +48,7 @@ Reply with JSON only, with exactly these keys:
  "pain": "pain level such as 6/10, or empty",
  "since": "since when, or empty",
  "symptoms": ["other symptoms the patient mentioned"],
- "possibilities": ["what BiLuna said it may be, each starting with 'may' (or Bangla 'হতে পারে')"],
+ "possibilities": ["what BiLuna said it may be, each a short sentence such as 'May be a viral throat infection' (Bangla: 'ভাইরাল গলা সংক্রমণ হতে পারে')"],
  "medicines": ["medicines the patient takes or that were on an uploaded prescription, exactly as written"],
  "questions": ["two to four useful questions to ask the doctor"],
  "redFlags": ["warning signs BiLuna said need urgent care"]}

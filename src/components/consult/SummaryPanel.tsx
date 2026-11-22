@@ -13,6 +13,7 @@ type ErrorKey = keyof T['errors']
 
 const dateFmt = (iso: string, lang: Lang) =>
   new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
+    timeZone: 'Asia/Dhaka',
     day: 'numeric',
     month: 'short',
     hour: 'numeric',

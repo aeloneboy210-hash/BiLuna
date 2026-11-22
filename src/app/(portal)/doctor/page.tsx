@@ -21,6 +21,7 @@ export default async function DoctorPortal() {
   const newToday = shared.filter((s) => dhakaDay(s.sharedAt) === today).length
   const when = (iso: string) =>
     new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
+      timeZone: 'Asia/Dhaka',
       day: 'numeric',
       month: 'short',
       hour: 'numeric',

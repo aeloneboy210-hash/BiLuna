@@ -19,6 +19,7 @@ export default async function SharedSummaryPage({ params }: { params: Promise<{ 
   const summary = /^[0-9a-f-]{36}$/i.test(id) ? await sharedSummary(id) : null
   if (!summary) notFound()
   const when = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
+    timeZone: 'Asia/Dhaka',
     day: 'numeric',
     month: 'short',
     hour: 'numeric',
