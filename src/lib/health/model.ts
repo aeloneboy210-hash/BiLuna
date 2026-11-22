@@ -28,7 +28,7 @@ const TIMEOUT_MS = 25_000
 const RETRY_NOTE =
   '\n\nYour previous draft stated a diagnosis or a single cause. Rewrite it as two or three possibilities, and do not use the words "the cause is" or "diagnosis".'
 
-const defaultGenerate: Generate = async ({ instructions, messages }) => {
+export const defaultGenerate: Generate = async ({ instructions, messages }) => {
   const result = await generateText({
     model: google(process.env.BILUNA_AI_MODEL || DEFAULT_MODEL),
     instructions,

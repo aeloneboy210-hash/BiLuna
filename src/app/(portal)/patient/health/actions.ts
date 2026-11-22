@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import { requirePortal } from '@/lib/auth/require-portal'
+import { saveNote, saveSummary, shareSummary, stopSharing, summaryForConversation, type PatientSummary } from '@/lib/consult/store'
+import { makeSummary } from '@/lib/consult/summary'
 import type { Attachment } from '@/lib/health/attachment'
 import type { Lang } from '@/lib/i18n/lang'
 import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory } from '@/lib/health/chat-store'
@@ -65,4 +67,46 @@ export async function deleteChats(input: { conversationId: string | 'all' }): Pr
   else if (typeof id === 'string' && UUID.test(id)) ok = await deleteConversation(id)
   if (ok) revalidatePath('/patient/health')
   return ok
+}
+
+export type PrepResult = { ok: true; summary: PatientSummary } | { ok: false; error: 'busy' | 'error' | 'unsafe' | 'empty' }
+
+/** Makes (or remakes) the Consultation Prep summary for a chat. Nothing is shared until the patient taps Share. */
+export async function prepareSummary(input: { conversationId: string; lang?: Lang }): Promise<PrepResult> {
+  const session = await requirePortal('patient')
+  const id = input.conversationId
+  if (typeof id !== 'string' || !UUID.test(id)) return { ok: false, error: 'error' }
+  const lang: Lang = input.lang === 'bn' ? 'bn' : 'en'
+  const history = await loadHistory(id)
+  if (!history.some((m) => m.author === 'patient')) return { ok: false, error: 'empty' }
+  const made = await makeSummary(history, lang)
+  if (!made.ok) return { ok: false, error: made.reason }
+  const summaryId = await saveSummary({ conversationId: id, patientName: session.displayName, lang, content: made.content })
+  if (!summaryId) return { ok: false, error: 'error' }
+  revalidatePath('/doctor')
+  const summary = await summaryForConversation(id)
+  return summary ? { ok: true, summary } : { ok: false, error: 'error' }
+}
+
+/** Save the patient's note, share with the doctor, or stop sharing. Returns the summary as it now stands. */
+export async function updateSummary(input: {
+  conversationId: string
+  summaryId: string
+  action: 'note' | 'share' | 'stop'
+  note?: string
+}): Promise<PatientSummary | null> {
+  await requirePortal('patient')
+  const { conversationId, summaryId, action } = input
+  if (!UUID.test(String(conversationId)) || !UUID.test(String(summaryId))) return null
+  const ok =
+    action === 'note'
+      ? await saveNote(summaryId, String(input.note ?? ''))
+      : action === 'share'
+        ? await shareSummary(summaryId)
+        : action === 'stop'
+          ? await stopSharing(summaryId)
+          : false
+  if (!ok) return null
+  revalidatePath('/doctor')
+  return summaryForConversation(conversationId)
 }

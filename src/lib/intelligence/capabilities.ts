@@ -30,7 +30,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
       c('safety', 'Medical Safety Engine', 'চিকিৎসা নিরাপত্তা ইঞ্জিন', 'working', 'Checks every reply before you see it', 'প্রতিটি উত্তর দেখানোর আগে যাচাই'),
       c('sourceVerification', 'Source Verification', 'উৎস যাচাই', 'roadmap', 'Checking answers against official sources', 'সরকারি উৎসের সঙ্গে উত্তর মেলানো'),
       c('visualization3d', '3D Visualization Engine', 'থ্রিডি ভিজ্যুয়ালাইজেশন ইঞ্জিন', 'working', 'The 3D body: point where it hurts; replies light the organ', 'থ্রিডি শরীর: ব্যথার জায়গা দেখান; উত্তরে অঙ্গ জ্বলে ওঠে'),
-      c('summarization', 'AI Summarization', 'এআই সারাংশ', 'demo', 'Consultation Prep summary', 'কনসালটেশন প্রস্তুতির সারাংশ'),
+      c('summarization', 'AI Summarization', 'এআই সারাংশ', 'working', 'Consultation Prep summary', 'কনসালটেশন প্রস্তুতির সারাংশ'),
       c('translation', 'AI Translation', 'এআই অনুবাদ', 'roadmap', 'Translating reports and documents', 'রিপোর্ট ও নথি অনুবাদ'),
     ],
   },
@@ -52,7 +52,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     items: [
       c('coordinator', 'Central AI Coordinator', 'কেন্দ্রীয় এআই সমন্বয়ক', 'roadmap', 'Routing a request to the right modules', 'অনুরোধ সঠিক মডিউলে পাঠানো'),
       c('crossModule', 'Cross-Module Communication', 'মডিউল-মধ্যবর্তী যোগাযোগ', 'roadmap', 'Modules working together', 'মডিউলগুলোর একসঙ্গে কাজ'),
-      c('contextSharing', 'Context Sharing', 'প্রসঙ্গ শেয়ারিং', 'demo', 'Share a summary with your doctor, logged', 'ডাক্তারের সঙ্গে সারাংশ শেয়ার, রেকর্ডসহ'),
+      c('contextSharing', 'Context Sharing', 'প্রসঙ্গ শেয়ারিং', 'working', 'Share a summary with your doctor, logged', 'ডাক্তারের সঙ্গে সারাংশ শেয়ার, রেকর্ডসহ'),
       c('orchestration', 'Task Orchestration', 'কাজের সমন্বয়', 'roadmap', 'Multi-step tasks across modules', 'একাধিক ধাপের কাজ'),
       c('unifiedResponse', 'Unified Response Engine', 'সমন্বিত উত্তর ইঞ্জিন', 'roadmap', 'One answer from several modules', 'কয়েকটি মডিউল থেকে একটি উত্তর'),
       c('permissions', 'Permission Controller', 'অনুমতি নিয়ন্ত্রক', 'working', 'Database rules: who can see what', 'ডেটাবেস নিয়ম: কে কী দেখতে পারে'),

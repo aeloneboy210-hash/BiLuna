@@ -6,7 +6,9 @@ import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEve
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { AttachPanel } from '@/components/health/AttachPanel'
+import { SummaryPanel } from '@/components/consult/SummaryPanel'
 import { EmergencyCard } from '@/components/health/EmergencyCard'
+import type { PatientSummary } from '@/lib/consult/store'
 import { attachmentLine, type Attachment } from '@/lib/health/attachment'
 import { prepareAttachment } from '@/lib/health/attachment-client'
 import { detectDanger } from '@/lib/health/danger'
@@ -103,6 +105,9 @@ export function ChatPanel({
   t,
   lang,
   emergency,
+  summary,
+  doctorName,
+  tSummary,
 }: {
   conversationId: string | null
   initial: Bubble[]
@@ -111,6 +116,9 @@ export function ChatPanel({
   t: Dictionary['health']
   lang: Lang
   emergency: string
+  summary: PatientSummary | null
+  doctorName: string
+  tSummary: Dictionary['summary']
 }) {
   const router = useRouter()
   const [messages, setMessages] = useState<Bubble[]>(initial)
@@ -123,6 +131,8 @@ export function ChatPanel({
   const endRef = useRef<HTMLDivElement>(null)
   const sentFirst = useRef(false)
   const [point, setPoint] = useState<BodyPoint | null>(null)
+  // The chat's Consultation Prep summary, kept here so closing and reopening the panel does not remake it.
+  const [prep, setPrep] = useState<PatientSummary | null>(summary)
   // A report or prescription waiting to be sent (read once by BiLuna, never saved).
   const [file, setFile] = useState<Attachment | null>(null)
   const [preparing, setPreparing] = useState(false)
@@ -350,6 +360,27 @@ export function ChatPanel({
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-2 border-t border-line p-3 sm:p-4">
+        {conversationId && open3d === 'summary' ? (
+          <SummaryPanel
+            conversationId={conversationId}
+            initial={prep}
+            onChange={setPrep}
+            doctorName={doctorName}
+            lang={lang}
+            onClose={() => setOpen3d(null)}
+            t={tSummary}
+          />
+        ) : null}
+        {conversationId && open3d !== 'summary' && messages.some((m) => m.author === 'patient' && !m.id.startsWith('local-')) ? (
+          <button
+            type="button"
+            onClick={() => setOpen3d('summary')}
+            className="flex min-h-10 items-center justify-center gap-2 self-start rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
+          >
+            <Icon name="share" className="h-4 w-4" />
+            📋 {tSummary.button}
+          </button>
+        ) : null}
         {open3d === 'picker' ? (
           <BodyPicker
             point={point}

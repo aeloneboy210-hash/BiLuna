@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { ChatPanel } from '@/components/health/ChatPanel'
 import { ConversationList } from '@/components/health/ConversationList'
 import { requirePortal } from '@/lib/auth/require-portal'
+import { demoDoctor, summaryForConversation } from '@/lib/consult/store'
 import { getMessages, listConversations } from '@/lib/health/chat-store'
 import { getDict } from '@/lib/i18n/server'
 import { feedbackFor } from '@/lib/intelligence/store'
@@ -13,11 +14,7 @@ export const maxDuration = 60
 
 const UUID = /^[0-9a-f-]{36}$/i
 
-export default async function HealthPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
+export default async function HealthPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requirePortal('patient')
   const { dict, lang } = await getDict()
   const params = await searchParams
@@ -46,6 +43,9 @@ export default async function HealthPage({
           t={dict.health}
           lang={lang}
           emergency={dict.common.emergency}
+          summary={owned ? await summaryForConversation(owned) : null}
+          doctorName={(await demoDoctor())?.name ?? 'Dr. Karim (demo doctor)'}
+          tSummary={dict.summary}
         />
       </div>
     </div>

@@ -5,16 +5,27 @@ import { Icon } from '@/components/ui/Icon'
 import { Notice } from '@/components/ui/Notice'
 import { StatTile } from '@/components/ui/StatTile'
 import { requirePortal } from '@/lib/auth/require-portal'
-import { SAMPLE_SHARED } from '@/lib/demo/sample'
+import Link from 'next/link'
+import { sharedWithMe } from '@/lib/consult/store'
 import { getDict } from '@/lib/i18n/server'
 
 export const metadata: Metadata = { title: 'Healthcare Professional Portal' }
 
 export default async function DoctorPortal() {
   const session = await requirePortal('doctor')
-  const { dict } = await getDict()
-
-  const newToday = SAMPLE_SHARED.filter((item) => item.when === 'today').length
+  const { dict, lang } = await getDict()
+  // Only summaries a patient chose to share, and still shares: the database decides.
+  const shared = await sharedWithMe()
+  const dhakaDay = (iso: string) => new Date(new Date(iso).getTime() + 6 * 3600_000).toISOString().slice(0, 10)
+  const today = dhakaDay(new Date().toISOString())
+  const newToday = shared.filter((s) => dhakaDay(s.sharedAt) === today).length
+  const when = (iso: string) =>
+    new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
+      day: 'numeric',
+      month: 'short',
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(new Date(iso))
 
   return (
     <PortalShell
@@ -25,7 +36,7 @@ export default async function DoctorPortal() {
       sampleLabel={dict.common.sampleData}
     >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <StatTile icon="share" value={SAMPLE_SHARED.length} label={dict.doctor.sharedCount} />
+        <StatTile icon="share" value={shared.length} label={dict.doctor.sharedCount} />
         <StatTile icon="sparkles" value={newToday} label={dict.doctor.newToday} />
       </div>
 
@@ -37,36 +48,38 @@ export default async function DoctorPortal() {
             </h2>
             <p className="text-sm text-body">{dict.doctor.intro}</p>
           </div>
-          <ul className="flex flex-col gap-3">
-            {SAMPLE_SHARED.map((item, i) => {
-              const name = dict.sample[item.patient]
-              return (
+          {shared.length === 0 ? (
+            <Card className="p-5 text-body">{dict.doctor.none}</Card>
+          ) : (
+            <ul className="flex flex-col gap-3">
+              {shared.map((item, i) => (
                 <li key={item.id} className="motion-safe:animate-rise" style={{ animationDelay: `${i * 80}ms` }}>
-                  <Card interactive className="flex items-start gap-4 p-5">
-                    <span
-                      aria-hidden="true"
-                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand font-display text-lg font-bold text-on-brand"
-                    >
-                      {name.slice(0, 1)}
-                    </span>
-                    <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                        <span className="font-display text-lg font-semibold">{name}</span>
-                        <span className="inline-flex items-center gap-1.5 text-sm text-muted">
-                          <Icon name="calendar" className="h-4 w-4" />
-                          {dict.doctor.shared} {dict.sample[item.when]}
-                        </span>
-                      </div>
-                      <span className="text-xs font-semibold tracking-wide text-aqua uppercase">
-                        {dict.doctor.summaryLabel}
+                  <Link href={`/doctor/summary/${item.id}`} className="block rounded-2xl">
+                    <Card interactive className="flex items-start gap-4 p-5">
+                      <span
+                        aria-hidden="true"
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand font-display text-lg font-bold text-on-brand"
+                      >
+                        {item.patientName.slice(0, 1)}
                       </span>
-                      <p className="leading-relaxed text-body">{dict.sample[item.concern]}</p>
-                    </div>
-                  </Card>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                          <span className="font-display text-lg font-semibold">{item.patientName}</span>
+                          <span className="inline-flex items-center gap-1.5 text-sm text-muted">
+                            <Icon name="calendar" className="h-4 w-4" />
+                            {dict.doctor.shared} {when(item.sharedAt)}
+                          </span>
+                        </div>
+                        <span className="text-xs font-semibold tracking-wide text-aqua uppercase">{dict.doctor.summaryLabel}</span>
+                        <p className="leading-relaxed text-body">{item.content.concern}</p>
+                        <span className="text-sm font-semibold text-brand">{dict.doctor.open} →</span>
+                      </div>
+                    </Card>
+                  </Link>
                 </li>
-              )
-            })}
-          </ul>
+              ))}
+            </ul>
+          )}
           <p className="text-sm text-muted">{dict.doctor.later}</p>
         </section>
 
