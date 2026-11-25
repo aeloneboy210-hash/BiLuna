@@ -1,7 +1,11 @@
 import 'server-only'
 import type { Lang } from '@/lib/i18n/lang'
 import { db } from '@/lib/health/chat-store'
+import { cleanReview } from './review'
 import { EMPTY_SUMMARY, type SummaryContent } from './summary'
+
+/** A doctor's note on a shared summary. Written by the doctor, never by BiLuna. */
+export type Review = { body: string; updatedAt: string }
 
 /** What the patient sees for a chat's summary: the content, and whether (and since when) a doctor has it. */
 export type PatientSummary = {
@@ -11,6 +15,8 @@ export type PatientSummary = {
   createdAt: string
   sharedAt: string | null
   doctorName: string | null
+  /** The doctor's note, if one arrived. The patient keeps it even after stopping the share. */
+  review: (Review & { doctorName: string }) | null
 }
 
 /** What the doctor sees: only summaries shared with them and still shared. */
@@ -20,6 +26,8 @@ export type SharedSummary = {
   lang: Lang
   content: SummaryContent
   sharedAt: string
+  /** This doctor's own note on the summary, if written. */
+  review: Review | null
 }
 
 const asContent = (v: unknown): SummaryContent => ({ ...EMPTY_SUMMARY, ...(v && typeof v === 'object' ? (v as object) : {}) })
@@ -46,7 +54,14 @@ export async function summaryForConversation(conversationId: string): Promise<Pa
     .eq('summary_id', data.id)
     .is('revoked_at', null)
     .maybeSingle()
-  const doctor = share ? await demoDoctor() : null
+  const { data: review } = await supabase
+    .from('summary_reviews')
+    .select('body, updated_at')
+    .eq('summary_id', data.id)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const doctor = share || review ? await demoDoctor() : null
   return {
     id: data.id as string,
     lang: data.lang as Lang,
@@ -54,6 +69,9 @@ export async function summaryForConversation(conversationId: string): Promise<Pa
     createdAt: data.created_at as string,
     sharedAt: (share?.shared_at as string | undefined) ?? null,
     doctorName: doctor?.name ?? null,
+    review: review
+      ? { body: String(review.body), updatedAt: review.updated_at as string, doctorName: doctor?.name ?? '' }
+      : null,
   }
 }
 
@@ -141,6 +159,11 @@ export async function sharedWithMe(): Promise<SharedSummary[]> {
       shares.map((s) => s.summary_id),
     )
   const byId = new Map((rows ?? []).map((r) => [r.id as string, r]))
+  // The database returns only this doctor's own notes, and only on summaries still shared.
+  const { data: reviews } = await supabase.from('summary_reviews').select('summary_id, body, updated_at')
+  const reviewOf = new Map(
+    (reviews ?? []).map((r) => [r.summary_id as string, { body: String(r.body), updatedAt: r.updated_at as string }]),
+  )
   return shares.flatMap((s) => {
     const r = byId.get(s.summary_id as string)
     return r
@@ -151,6 +174,7 @@ export async function sharedWithMe(): Promise<SharedSummary[]> {
             lang: r.lang as Lang,
             content: asContent(r.content),
             sharedAt: s.shared_at as string,
+            review: reviewOf.get(r.id as string) ?? null,
           },
         ]
       : []
@@ -159,4 +183,28 @@ export async function sharedWithMe(): Promise<SharedSummary[]> {
 
 export async function sharedSummary(id: string): Promise<SharedSummary | null> {
   return (await sharedWithMe()).find((s) => s.id === id) ?? null
+}
+
+/**
+ * The doctor writes or edits their note on a shared summary. The database refuses it once the patient
+ * stops sharing, and fills in which patient it belongs to from the summary itself.
+ */
+export async function saveReview(summaryId: string, body: unknown): Promise<Review | null> {
+  const text = cleanReview(body)
+  if (!text) return null
+  const supabase = await db()
+  const now = new Date().toISOString()
+  const { data: updated } = await supabase
+    .from('summary_reviews')
+    .update({ body: text, updated_at: now })
+    .eq('summary_id', summaryId)
+    .select('body, updated_at')
+    .maybeSingle()
+  if (updated) return { body: String(updated.body), updatedAt: updated.updated_at as string }
+  const { data, error } = await supabase
+    .from('summary_reviews')
+    .insert({ summary_id: summaryId, body: text })
+    .select('body, updated_at')
+    .single()
+  return error ? null : { body: String(data.body), updatedAt: data.updated_at as string }
 }

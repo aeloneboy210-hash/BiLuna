@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ReviewForm } from '@/components/consult/ReviewForm'
 import { SummaryView } from '@/components/consult/SummaryView'
 import { PortalShell } from '@/components/PortalShell'
 import { Card } from '@/components/ui/Card'
@@ -42,8 +43,10 @@ export default async function SharedSummaryPage({ params }: { params: Promise<{ 
           <SummaryView content={summary.content} t={{ ...dict.summary, note: dict.summary.patientNote }} />
         </Card>
         <aside className="flex min-w-0 flex-1 flex-col gap-4 lg:sticky lg:top-24">
+          <Card className="p-5">
+            <ReviewForm summaryId={summary.id} initial={summary.review} lang={lang} t={dict.review} />
+          </Card>
           <Notice>{dict.doctor.readOnly}</Notice>
-          <p className="text-sm text-muted">{dict.doctor.later}</p>
         </aside>
       </div>
     </PortalShell>

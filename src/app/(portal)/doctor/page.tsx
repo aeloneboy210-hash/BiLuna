@@ -73,7 +73,14 @@ export default async function DoctorPortal() {
                         </div>
                         <span className="text-xs font-semibold tracking-wide text-aqua uppercase">{dict.doctor.summaryLabel}</span>
                         <p className="leading-relaxed text-body">{item.content.concern}</p>
-                        <span className="text-sm font-semibold text-brand">{dict.doctor.open} →</span>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <span className="text-sm font-semibold text-brand">{dict.doctor.open} →</span>
+                          {item.review ? (
+                            <span className="rounded-full bg-soft px-2.5 py-0.5 text-xs font-semibold text-brand">
+                              ✅ {dict.doctor.replied}
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
                     </Card>
                   </Link>
@@ -81,7 +88,6 @@ export default async function DoctorPortal() {
               ))}
             </ul>
           )}
-          <p className="text-sm text-muted">{dict.doctor.later}</p>
         </section>
 
         <aside className="min-w-0 flex-1 lg:sticky lg:top-24">

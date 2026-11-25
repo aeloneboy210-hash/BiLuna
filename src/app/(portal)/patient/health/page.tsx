@@ -46,6 +46,7 @@ export default async function HealthPage({ searchParams }: { searchParams: Promi
           summary={owned ? await summaryForConversation(owned) : null}
           doctorName={(await demoDoctor())?.name ?? 'Dr. Karim (demo doctor)'}
           tSummary={dict.summary}
+          tReview={dict.review}
         />
       </div>
     </div>

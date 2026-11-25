@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { prepareSummary, updateSummary } from '@/app/(portal)/patient/health/actions'
+import { DoctorReply } from '@/components/consult/DoctorReply'
 import { SummaryView } from '@/components/consult/SummaryView'
 import { Icon } from '@/components/ui/Icon'
 import type { PatientSummary } from '@/lib/consult/store'
@@ -32,6 +33,7 @@ export function SummaryPanel({
   onClose,
   onChange,
   t,
+  tReview,
 }: {
   conversationId: string
   initial: PatientSummary | null
@@ -40,6 +42,7 @@ export function SummaryPanel({
   onClose: () => void
   onChange: (s: PatientSummary) => void
   t: T
+  tReview: Dictionary['review']
 }) {
   const [summary, setSummary] = useState<PatientSummary | null>(initial)
   const [note, setNote] = useState(initial?.content.note ?? '')
@@ -111,6 +114,8 @@ export function SummaryPanel({
           {t.errors[error]}
         </p>
       ) : null}
+
+      {summary?.review ? <DoctorReply review={summary.review} lang={lang} t={tReview} /> : null}
 
       {summary && !making ? (
         <>

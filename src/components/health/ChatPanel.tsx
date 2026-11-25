@@ -108,6 +108,7 @@ export function ChatPanel({
   summary,
   doctorName,
   tSummary,
+  tReview,
 }: {
   conversationId: string | null
   initial: Bubble[]
@@ -119,6 +120,7 @@ export function ChatPanel({
   summary: PatientSummary | null
   doctorName: string
   tSummary: Dictionary['summary']
+  tReview: Dictionary['review']
 }) {
   const router = useRouter()
   const [messages, setMessages] = useState<Bubble[]>(initial)
@@ -369,6 +371,7 @@ export function ChatPanel({
             lang={lang}
             onClose={() => setOpen3d(null)}
             t={tSummary}
+            tReview={tReview}
           />
         ) : null}
         {conversationId && open3d !== 'summary' && messages.some((m) => m.author === 'patient' && !m.id.startsWith('local-')) ? (
@@ -379,6 +382,9 @@ export function ChatPanel({
           >
             <Icon name="share" className="h-4 w-4" />
             📋 {tSummary.button}
+            {prep?.review ? (
+              <span className="rounded-full bg-brand px-2 py-0.5 text-xs font-bold text-on-brand">🩺 {tReview.badge}</span>
+            ) : null}
           </button>
         ) : null}
         {open3d === 'picker' ? (
