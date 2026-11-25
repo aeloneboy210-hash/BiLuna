@@ -19,3 +19,10 @@ test('a note longer than the limit is refused, not cut', () => {
 test('line breaks inside a note are kept', () => {
   expect(cleanReview('Line one\nLine two')).toBe('Line one\nLine two')
 })
+
+import { dictionaries } from '@/lib/i18n/dictionaries'
+
+test("the doctor's name goes into the note heading in both languages", () => {
+  for (const d of [dictionaries.en, dictionaries.bn]) expect(d.review.fromDoctor).toContain('{name}')
+  expect(dictionaries.bn.review.fromDoctor.replace('{name}', 'Dr. Karim')).toBe('Dr. Karim-এর নোট')
+})

@@ -24,7 +24,7 @@ export function DoctorReply({
     <div className="flex flex-col gap-1.5 rounded-xl border-2 border-brand/40 bg-surface px-4 py-3">
       <p className="flex items-center gap-2 text-sm font-bold text-brand">
         <Icon name="stethoscope" className="h-4 w-4" />
-        {t.fromDoctor} {review.doctorName}
+        {t.fromDoctor.replace('{name}', review.doctorName)}
       </p>
       <p className="whitespace-pre-wrap text-[0.95rem] leading-relaxed text-ink">{review.body}</p>
       <p className="text-xs text-muted">

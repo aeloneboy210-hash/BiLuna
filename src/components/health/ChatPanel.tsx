@@ -374,7 +374,8 @@ export function ChatPanel({
             tReview={tReview}
           />
         ) : null}
-        {conversationId && open3d !== 'summary' && messages.some((m) => m.author === 'patient' && !m.id.startsWith('local-')) ? (
+        {/* Shown once something is saved: a saved reply means the patient's message was saved too. */}
+        {conversationId && open3d !== 'summary' && messages.some((m) => !m.id.startsWith('local-')) ? (
           <button
             type="button"
             onClick={() => setOpen3d('summary')}
