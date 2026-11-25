@@ -208,3 +208,43 @@ export async function saveReview(summaryId: string, body: unknown): Promise<Revi
     .single()
   return error ? null : { body: String(data.body), updatedAt: data.updated_at as string }
 }
+
+/** For the patient's home page: every doctor's note on their summaries, newest first. */
+export type DoctorNote = {
+  summaryId: string
+  conversationId: string | null
+  concern: string
+  review: Review & { doctorName: string }
+}
+
+export async function doctorNotesForMe(): Promise<DoctorNote[]> {
+  const supabase = await db()
+  const { data: reviews } = await supabase
+    .from('summary_reviews')
+    .select('summary_id, body, updated_at')
+    .order('updated_at', { ascending: false })
+    .limit(10)
+  if (!reviews?.length) return []
+  const { data: rows } = await supabase
+    .from('consult_summaries')
+    .select('id, conversation_id, content')
+    .in(
+      'id',
+      reviews.map((r) => r.summary_id),
+    )
+  const byId = new Map((rows ?? []).map((r) => [r.id as string, r]))
+  const doctor = await demoDoctor()
+  return reviews.flatMap((r) => {
+    const s = byId.get(r.summary_id as string)
+    return s
+      ? [
+          {
+            summaryId: s.id as string,
+            conversationId: (s.conversation_id as string | null) ?? null,
+            concern: asContent(s.content).concern,
+            review: { body: String(r.body), updatedAt: r.updated_at as string, doctorName: doctor?.name ?? '' },
+          },
+        ]
+      : []
+  })
+}

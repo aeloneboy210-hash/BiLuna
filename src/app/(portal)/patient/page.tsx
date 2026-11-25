@@ -2,11 +2,13 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { DoctorReply } from '@/components/consult/DoctorReply'
 import { buttonClass } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
 import { SampleTag } from '@/components/ui/SampleTag'
 import { requirePortal } from '@/lib/auth/require-portal'
+import { doctorNotesForMe } from '@/lib/consult/store'
 import { BUILD_UPDATES, profileCompleteness } from '@/lib/demo/sample'
 import { getProfile } from '@/lib/intelligence/store'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
@@ -111,6 +113,8 @@ export default async function PatientPortal() {
 
   // The health profile the patient keeps in BiLuna Intelligence; the area stays sample data.
   const saved = await getProfile().catch(() => null)
+  // Notes doctors wrote back on summaries this patient shared (the database shows only their own).
+  const notes = await doctorNotesForMe().catch(() => [])
   const profile: [IconName, string, string | null][] = [
     ['calendar', t.age, saved?.age != null ? String(saved.age) : null],
     ['mapPin', t.area, dict.sample.areaValue],
@@ -160,6 +164,29 @@ export default async function PatientPortal() {
           </div>
         </div>
       </section>
+
+      {notes.length ? (
+        <Panel icon="stethoscope" title={dict.review.homeTitle}>
+          <ul className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {notes.map((n) => (
+              <li key={n.summaryId} className="flex flex-col gap-2">
+                <p className="text-sm text-body">
+                  <span className="font-semibold text-ink">{dict.review.about}:</span> {n.concern}
+                </p>
+                <DoctorReply review={n.review} lang={lang} t={dict.review} />
+                {n.conversationId ? (
+                  <Link
+                    href={`${hrefOf('health')}?c=${n.conversationId}`}
+                    className="self-start text-sm font-semibold text-brand underline-offset-4 hover:underline"
+                  >
+                    {dict.review.openChat} →
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      ) : null}
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
         {/* What BiLuna knows about this (fictional) patient: no invented vital signs. */}

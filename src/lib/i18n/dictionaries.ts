@@ -384,6 +384,9 @@ const en = {
     fromDoctor: 'Note from',
     byDoctor: 'Written by the doctor, not by BiLuna.',
     badge: 'Doctor replied',
+    homeTitle: 'Notes from your doctor',
+    about: 'About',
+    openChat: 'Open the chat',
   },
   org: {
     heroSub: 'How BiLuna helped your patients this month.',
@@ -823,6 +826,9 @@ const bn: Dictionary = {
     fromDoctor: 'নোট পাঠিয়েছেন',
     byDoctor: 'এটি ডাক্তারের লেখা, বিলুনার নয়।',
     badge: 'ডাক্তার উত্তর দিয়েছেন',
+    homeTitle: 'আপনার ডাক্তারের নোট',
+    about: 'বিষয়',
+    openChat: 'চ্যাটটি খুলুন',
   },
   org: {
     heroSub: 'এই মাসে বিলুনা আপনার রোগীদের কীভাবে সাহায্য করেছে।',
