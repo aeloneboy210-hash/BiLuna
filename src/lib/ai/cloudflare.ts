@@ -23,7 +23,8 @@ export async function cloudflareChat(model: string, system: string, user: string
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model,
-        max_tokens: 1200,
+        // Thinking models use part of this before they answer, so it must be generous.
+        max_tokens: 4000,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
