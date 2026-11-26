@@ -16,17 +16,12 @@ begin
   select id into d from auth.users where email = 'doctor@biluna.demo';
   if d is null then d := gen_random_uuid(); insert into auth.users (id, email) values (d, 'doctor@biluna.demo'); end if;
 
-  -- No public sign-up: an email that is not a demo account cannot become an account at all.
-  begin
-    insert into auth.users (id, email) values (s, 'stranger@example.com');
-    raise exception 'stranger account was created';
-  exception when others then
-    if sqlerrm = 'stranger account was created' then raise; end if;
-  end;
-  select count(*) into n from auth.users where id = s;
-  if n <> 0 then raise exception 'stranger account exists'; end if;
+  -- Since 0014 anyone may sign up, and always becomes a real (not demo) patient, never a doctor.
+  insert into auth.users (id, email) values (s, 'stranger@example.com');
+  select role::text into r from public.profiles where id = s and not is_demo;
+  if r is distinct from 'patient' then raise exception 'new sign-up became %', r; end if;
 
-  -- Profiles come from demo_accounts; an unknown email gets none.
+  -- Demo emails get their listed demo profile.
   select role::text into r from public.profiles where id = p;
   if r is distinct from 'patient' then raise exception 'patient profile role is %', r; end if;
   select role::text into r from public.profiles where id = d;

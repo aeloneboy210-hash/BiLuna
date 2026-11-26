@@ -53,8 +53,10 @@ begin
     and encrypted_password = extensions.crypt('correct-horse-1', encrypted_password);
   if n <> 3 then raise exception 'expected 3 accounts with the chosen password, got %', n; end if;
 
-  select count(*) into n from auth.users where email not in (select email from public.demo_accounts);
-  if n <> 0 then raise exception '% accounts exist that are not demo accounts', n; end if;
+  -- Since 0014 real people may sign up, but only as patients: no doctor or hospital account outside the
+  -- demo list unless the owner made it by hand (none yet).
+  select count(*) into n from public.profiles where not is_demo and role <> 'patient';
+  if n <> 0 then raise exception '% non-demo accounts are not patients', n; end if;
 end $$;
 
 rollback;
