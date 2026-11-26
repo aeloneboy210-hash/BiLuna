@@ -1,7 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { SettingsMenu } from '@/components/SettingsMenu'
 import { Icon } from '@/components/ui/Icon'
+import type { Lang } from '@/lib/i18n/lang'
 import type { Session } from '@/lib/auth/session'
 import { signOut } from '@/lib/auth/sign-out'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
@@ -19,10 +21,12 @@ function labelFor(key: NavKey, dict: Dictionary): string {
 export function PortalFrame({
   session,
   dict,
+  lang,
   children,
 }: {
   session: Session
   dict: Dictionary
+  lang: Lang
   children: ReactNode
 }) {
   const links: SidebarLink[] = navFor(session.role).map((item) => ({
@@ -81,6 +85,7 @@ export function PortalFrame({
           </label>
 
           <div className="ml-auto flex items-center gap-3">
+            <SettingsMenu current={lang} t={dict.nav} />
             <span
               title={dict.shell.notifications}
               className="glass hidden h-11 w-11 items-center justify-center rounded-full text-cyan sm:flex"

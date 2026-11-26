@@ -1,15 +1,13 @@
-import { cookies, headers } from 'next/headers'
+import { cookies } from 'next/headers'
 import { getDictionary, type Dictionary } from './dictionaries'
-import { LANG_COOKIE, langFromHeader, parseLang, type Lang } from './lang'
+import { LANG_COOKIE, parseLang, type Lang } from './lang'
 
 /**
- * There is no language button: the language is the one the patient last typed to BiLuna in (stored by the
- * chat), or, before they have typed, their phone or browser's language.
+ * BiLuna opens in English. The language changes when the visitor picks one under Settings, or when a
+ * patient types to BiLuna in Bangla (the chat saves it the same way).
  */
 export async function getLang(): Promise<Lang> {
-  const saved = (await cookies()).get(LANG_COOKIE)?.value
-  if (saved !== undefined) return parseLang(saved)
-  return langFromHeader((await headers()).get('accept-language'))
+  return parseLang((await cookies()).get(LANG_COOKIE)?.value)
 }
 
 export async function getDict(): Promise<{ lang: Lang; dict: Dictionary }> {

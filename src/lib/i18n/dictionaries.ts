@@ -18,6 +18,8 @@ const en = {
     myPortal: 'My portal',
     skip: 'Skip to content',
     dashboard: 'Dashboard',
+    settings: 'Settings',
+    language: 'Language',
     menu: 'Portal menu',
   },
   shell: {
@@ -468,6 +470,8 @@ const bn: Dictionary = {
     myPortal: 'আমার পোর্টাল',
     skip: 'মূল অংশে যান',
     dashboard: 'ড্যাশবোর্ড',
+    settings: 'সেটিংস',
+    language: 'ভাষা',
     menu: 'পোর্টাল মেনু',
   },
   shell: {

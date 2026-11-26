@@ -37,28 +37,3 @@ test.each([undefined, '', 'fr', 'EN', 'BN', '<script>', 'bn '])('parseLang(%p) i
 })
 test('parseLang keeps bn', () => expect(parseLang('bn')).toBe('bn'))
 
-import { langFromHeader } from '@/lib/i18n/lang'
-
-test.each([
-  ['bn-BD,bn;q=0.9,en-US;q=0.8', 'bn'],
-  ['bn', 'bn'],
-  ['en-US,en;q=0.9,bn;q=0.8', 'en'],
-  ['en-GB', 'en'],
-  ['fr-FR,bn;q=0.5', 'bn'],
-  ['bn;q=0,en', 'en'],
-  ['', 'en'],
-  [null, 'en'],
-  ['*', 'en'],
-] as const)('first-visit language from the browser list %p is %p', (header, lang) => {
-  expect(langFromHeader(header)).toBe(lang)
-})
-
-test.each([
-  ['bn;q=0.0,en', 'en'],
-  ['bn;q=0.00', 'en'],
-  ['bn_BD,en', 'bn'],
-  ['en;q=0.1, bn;q=0.9', 'bn'],
-  ['bn;q=abc,en', 'en'],
-] as const)('browser list %p is %p, by its weights', (header, lang) => {
-  expect(langFromHeader(header)).toBe(lang)
-})

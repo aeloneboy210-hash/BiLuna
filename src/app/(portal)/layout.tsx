@@ -7,11 +7,11 @@ import { getDict } from '@/lib/i18n/server'
  * so a missing session here only means the page will redirect before showing anything.
  */
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
-  const [{ dict }, session] = await Promise.all([getDict(), getSession()])
+  const [{ lang, dict }, session] = await Promise.all([getDict(), getSession()])
   if (!session) return <>{children}</>
 
   return (
-    <PortalFrame session={session} dict={dict}>
+    <PortalFrame session={session} dict={dict} lang={lang}>
       {children}
     </PortalFrame>
   )

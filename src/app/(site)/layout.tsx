@@ -4,11 +4,11 @@ import { getDict } from '@/lib/i18n/server'
 
 /** Public pages: top menu, page content, footer. */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [{ dict }, session] = await Promise.all([getDict(), getSession()])
+  const [{ lang, dict }, session] = await Promise.all([getDict(), getSession()])
 
   return (
     <>
-      <SiteHeader dict={dict} session={session} />
+      <SiteHeader dict={dict} lang={lang} session={session} />
       <main id="content" className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {children}
       </main>
