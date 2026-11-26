@@ -10,6 +10,7 @@ import { extractOptions, optionsTag } from './options'
 import { placeQuestion, placeRound } from './place-questions'
 import { detectDanger } from './danger'
 import { unexplainedDoses } from './dose-guard'
+import { strayWords } from './stray-words'
 import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 
@@ -33,6 +34,9 @@ const ASKS_ABOUT_MEDICINE =
 
 const MEDICINE_RETRY_NOTE =
   '\n\nThe patient asked about a medicine. This is a health question, not small talk: explain what the medicine is usually used for and its generic name if you know it, say this is an AI explanation and not official information, give no dose, and end with the confidence line.'
+
+const LANGUAGE_RETRY_NOTE =
+  '\n\nYour previous draft had a word from another language inside the Bangla. Write the whole reply in only Bangla (Bengali script); medicine names may stay in English inside brackets.'
 
 const DOSE_RETRY_NOTE =
   '\n\nYour previous draft gave a medicine amount or dose. Rewrite it with no amounts, no mg or ml, no number of tablets and no schedule; say that a doctor or pharmacist must decide the dose.'
@@ -105,6 +109,11 @@ export async function askBiLuna(
       const shown = `${checked.ok ? checked.text : ''}\n${opts.options.join('\n')}`
       if (checked.ok && !file && unexplainedDoses(shown, history.map((m) => m.body).join('\n')).length) {
         extra = DOSE_RETRY_NOTE
+        continue
+      }
+      // A stray word from another language inside Bangla: write it again once; if it stays, show it anyway.
+      if (checked.ok && lang === 'bn' && attempt === 0 && strayWords(checked.text).length) {
+        extra = LANGUAGE_RETRY_NOTE
         continue
       }
       if (checked.ok && checked.kind === 'smallTalk' && attempt === 0 && ASKS_ABOUT_MEDICINE.test(said)) {

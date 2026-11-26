@@ -280,3 +280,18 @@ test('a real greeting stays small talk', async () => {
   expect(r.ok && r.kind).toBe('smallTalk')
   expect(f.calls).toHaveLength(1)
 })
+
+test('a Bangla reply with a stray foreign word is written again once', async () => {
+  const stray = `নাপা জ্বর menurunkan ব্যবহৃত হয়।\n${CONFIDENCE_PREFIX.bn} সাধারণ তথ্য।`
+  const clean = `নাপা জ্বর কমাতে ব্যবহৃত হয়।\n${CONFIDENCE_PREFIX.bn} সাধারণ তথ্য।`
+  const f = fake(stray, clean)
+  const r = await askBiLuna([{ author: 'patient', body: 'নাপা কিসের জন্য?' }], 'bn', { generate: f.generate })
+  expect(r.ok && r.text).toBe(clean)
+  expect(f.calls[1].instructions).toMatch(/only Bangla/i)
+})
+
+test('if the rewrite still has the stray word, the reply is shown rather than refused', async () => {
+  const stray = `নাপা জ্বর menurunkan ব্যবহৃত হয়।\n${CONFIDENCE_PREFIX.bn} সাধারণ তথ্য।`
+  const r = await askBiLuna([{ author: 'patient', body: 'নাপা কিসের জন্য?' }], 'bn', { generate: fake(stray, stray).generate })
+  expect(r.ok).toBe(true)
+})
