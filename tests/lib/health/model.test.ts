@@ -250,7 +250,7 @@ test('a dose the patient wrote, or one from their uploaded prescription, may be 
 test('a follow-up about an uploaded prescription may repeat the dose BiLuna already read from it', async () => {
   const history = [
     { author: 'patient' as const, body: '📎 rx.jpg' },
-    { author: 'biluna' as const, body: `Line 1: Napa 500 mg, 1+0+1.\n\n${CONFIDENCE_PREFIX.en} general.` },
+    { author: 'biluna' as const, body: `A prescription.\n✅ Napa 500 mg, 1+0+1, 5 days.\n\n${CONFIDENCE_PREFIX.en} general.` },
     { author: 'patient' as const, body: 'What does line 1 mean?' },
   ]
   const r = await askBiLuna(history, 'en', {
@@ -294,4 +294,28 @@ test('if the rewrite still has the stray word, the reply is shown rather than re
   const stray = `নাপা জ্বর menurunkan ব্যবহৃত হয়।\n${CONFIDENCE_PREFIX.bn} সাধারণ তথ্য।`
   const r = await askBiLuna([{ author: 'patient', body: 'নাপা কিসের জন্য?' }], 'bn', { generate: fake(stray, stray).generate })
   expect(r.ok).toBe(true)
+})
+
+test('with a file attached, doses may only appear on the medicine lines read from it', async () => {
+  const file = { name: 'rx.jpg', mediaType: 'image/jpeg', data: 'AAAA' }
+  const read = `A prescription.\n✅ Napa 500 mg, 1+0+1, 5 days.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const ok = await askBiLuna([{ author: 'patient', body: '📎 rx.jpg' }], 'en', { attachment: file, generate: fake(read).generate })
+  expect(ok.ok).toBe(true)
+  const invented = `This is a blood test report. Your haemoglobin is low.\nYou can take 1 tablet of iron 200 mg daily.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const bad = await askBiLuna([{ author: 'patient', body: '📎 cbc.jpg' }], 'en', {
+    attachment: file,
+    generate: fake(invented, invented).generate,
+  })
+  expect(bad).toEqual({ ok: false, reason: 'unsafe' })
+})
+
+test('a dose BiLuna once wrote outside a medicine line does not become allowed later', async () => {
+  const history = [
+    { author: 'patient' as const, body: 'fever' },
+    { author: 'biluna' as const, body: `Rest well. 500 mg.\n\n${CONFIDENCE_PREFIX.en} general.` },
+    { author: 'patient' as const, body: 'and then?' },
+  ]
+  const again = `You may take 500 mg.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const r = await askBiLuna(history, 'en', { generate: fake(again, again).generate })
+  expect(r).toEqual({ ok: false, reason: 'unsafe' })
 })

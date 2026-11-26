@@ -52,3 +52,13 @@ test.each([
 ] as const)('first-visit language from the browser list %p is %p', (header, lang) => {
   expect(langFromHeader(header)).toBe(lang)
 })
+
+test.each([
+  ['bn;q=0.0,en', 'en'],
+  ['bn;q=0.00', 'en'],
+  ['bn_BD,en', 'bn'],
+  ['en;q=0.1, bn;q=0.9', 'bn'],
+  ['bn;q=abc,en', 'en'],
+] as const)('browser list %p is %p, by its weights', (header, lang) => {
+  expect(langFromHeader(header)).toBe(lang)
+})

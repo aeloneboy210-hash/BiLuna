@@ -16,11 +16,14 @@ import { detectDanger } from '@/lib/health/danger'
 import { extractOptions } from '@/lib/health/options'
 import { Icon } from '@/components/ui/Icon'
 import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
-import { chatLang as langOfChat, detectLang } from '@/lib/health/lang-detect'
+import { chatLang as langOfChat, typedLang as langOfText } from '@/lib/health/lang-detect'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
+
+/** A mouse or trackpad: a computer with a real keyboard, not a phone. */
+const hasKeyboard = () => typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches
 
 type Bubble = { id: string; author: 'patient' | 'biluna'; body: string }
 type Rating = 1 | -1
@@ -43,7 +46,7 @@ function FeedbackButtons({ messageId, initial, t }: { messageId: string; initial
     }
     setBusy(false)
   }
-  const base = 'flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm transition-colors'
+  const base = 'flex h-11 min-w-11 items-center justify-center rounded-full border px-2 text-sm transition-colors'
   return (
     <div className="mt-1.5 flex items-center gap-1.5 pl-1" role="group" aria-label={t.feedbackLabel}>
       <button
@@ -137,6 +140,9 @@ export function ChatPanel({
     setTypedLang(null)
   }
   const chatLang = typedLang ?? pageLang
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  // The language last saved for the site (the page's, until the patient types another).
+  const savedLang = useRef(pageLang)
   const strings =
     chatLang === pageLang ? { t: pageT, emergency: pageEmergency, tSummary: pageTSummary, tReview: pageTReview } : other
   const { t, emergency, tSummary, tReview } = strings
@@ -153,6 +159,12 @@ export function ChatPanel({
   const [point, setPoint] = useState<BodyPoint | null>(null)
   // The chat's Consultation Prep summary, kept here so closing and reopening the panel does not remake it.
   const [prep, setPrep] = useState<PatientSummary | null>(summary)
+  // A newer summary from the server (a doctor's note arrived, seen after a refresh) replaces the one on screen.
+  const [seenSummary, setSeenSummary] = useState(summary)
+  if (seenSummary !== summary) {
+    setSeenSummary(summary)
+    if (summary && (summary.id !== prep?.id || summary.review?.updatedAt !== prep?.review?.updatedAt)) setPrep(summary)
+  }
   // A report or prescription waiting to be sent (read once by BiLuna, never saved).
   const [file, setFile] = useState<Attachment | null>(null)
   const [preparing, setPreparing] = useState(false)
@@ -160,6 +172,7 @@ export function ChatPanel({
   const [cared, setCared] = useState<string | null>(null)
   // Emergency cards the patient closed with "I'm safe".
   const [safe, setSafe] = useState<string[]>([])
+  const openDanger = messages.some((m) => m.author === 'patient' && !safe.includes(m.id) && detectDanger(m.body))
   // Only one 3D view at a time: 'picker', a reply's id, or none. The newest reply's card starts open.
   const [open3d, setOpen3d] = useState<string | null>(() => {
     const last = initial[initial.length - 1]
@@ -175,15 +188,17 @@ export function ChatPanel({
     const words = raw.trim()
     if ((!words && !point && !attached) || pending) return
     // The pointed line uses the language of the words typed, so BiLuna replies in that language.
-    const value = point ? `${pointedLine(point, words ? detectLang(words) : lang)}${words ? `\n${words}` : ''}` : words
+    const value = point ? `${pointedLine(point, langOfText(words) ?? lang)}${words ? `\n${words}` : ''}` : words
     setError(null)
     // The whole chat follows the patient's language: typing Bangla switches the buttons, the emergency card
     // and everything else to Bangla straight away (and English back to English).
-    const typed = words ? detectLang(words) : null
+    const typed = langOfText(words)
     if (typed) setTypedLang(typed)
     setText('')
     setPoint(null)
     setFile(null)
+    // On a computer the typing goes on in the box; on a phone the keyboard closes, so the reply is seen.
+    if (hasKeyboard()) inputRef.current?.focus()
     if (open3d === 'picker' || open3d === 'attach') setOpen3d(null)
     const shown = attached ? `${attachmentLine(attached.name)}${value ? `\n${value}` : ''}` : value
     setMessages((m) => [...m, { id: `local-${Date.now()}`, author: 'patient', body: shown }])
@@ -192,7 +207,11 @@ export function ChatPanel({
       let result: Awaited<ReturnType<typeof sendMessage>>
       try {
         // Set first, so the refresh after the reply brings the page back in the new language with the reply.
-        if (typed && typed !== pageLang) await setLang(typed).catch(() => undefined)
+        // Compared with what was last saved, not the page: on a slow phone the page can still be the old one.
+        if (typed && typed !== savedLang.current) {
+          savedLang.current = typed
+          await setLang(typed).catch(() => undefined)
+        }
         result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
       } catch {
         result = { ok: false, error: 'error' }
@@ -248,7 +267,9 @@ export function ChatPanel({
   }
 
   function onKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+    // Enter sends with a real keyboard. A phone keyboard has no Shift, so there Enter makes a new line and
+    // the send button sends.
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && hasKeyboard()) {
       e.preventDefault()
       send(text)
     }
@@ -260,10 +281,14 @@ export function ChatPanel({
       // and the messages keep their own scroll area; otherwise the card fills the screen height.
       className={`glass flex min-h-[32rem] flex-col rounded-2xl ${panelOpen ? 'lg:min-h-[calc(100vh-16rem)]' : 'lg:h-[calc(100vh-16rem)]'}`}
       aria-label={t.title}
+      lang={lang}
     >
       <div
         className={`flex flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-6 ${panelOpen ? 'lg:max-h-[45vh]' : ''}`}
+        // A log: screen readers read each new message once, not the whole chat again when its words change.
+        role="log"
         aria-live="polite"
+        aria-relevant="additions"
       >
         <div className="flex items-end gap-2.5">
           <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-9 w-auto shrink-0" />
@@ -282,7 +307,10 @@ export function ChatPanel({
             return (
               <Fragment key={m.id}>
                 <div className="flex justify-end">
-                  <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand">
+                  <div
+                    lang={langOfText(m.body) ?? undefined}
+                    className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-br-sm bg-brand px-4 py-3 text-[0.95rem] leading-relaxed text-on-brand"
+                  >
                     <span className="sr-only">{t.you}: </span>
                     {clipped ? (
                       <span className="self-start rounded-full bg-on-brand/15 px-3 py-1 text-sm font-semibold">{clipped}</span>
@@ -307,7 +335,10 @@ export function ChatPanel({
             <div key={m.id} className="flex items-start gap-2.5">
               <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="mt-1 h-9 w-auto shrink-0" />
               <div className="flex max-w-[85%] flex-col">
-                <div className="rounded-2xl rounded-tl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
+                <div
+                  lang={langOfText(reply.text) ?? undefined}
+                  className="rounded-2xl rounded-tl-sm border border-line bg-surface px-4 py-3 text-[0.95rem] leading-relaxed text-ink"
+                >
                   <span className="sr-only">{t.biluna}: </span>
                   <ReplyText body={reply.text} />
                   {opts.options.length && isLatest ? (
@@ -317,7 +348,7 @@ export function ChatPanel({
                           key={o}
                           type="button"
                           onClick={() => send(o)}
-                          className="min-h-10 rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
+                          className="min-h-11 rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
                         >
                           {o}
                         </button>
@@ -355,14 +386,14 @@ export function ChatPanel({
               <button
                 type="button"
                 onClick={() => setCared(last.id)}
-                className="min-h-9 rounded-full border border-brand px-3 text-sm font-semibold text-brand hover:bg-soft"
+                className="min-h-11 rounded-full border border-brand px-3 text-sm font-semibold text-brand hover:bg-soft"
               >
                 {t.care.satisfied}
               </button>
               <button
                 type="button"
                 onClick={() => send(t.care.moreMsg)}
-                className="min-h-9 rounded-full border border-line px-3 text-sm font-semibold text-ink hover:bg-soft"
+                className="min-h-11 rounded-full border border-line px-3 text-sm font-semibold text-ink hover:bg-soft"
               >
                 {t.care.more}
               </button>
@@ -412,7 +443,7 @@ export function ChatPanel({
           <button
             type="button"
             onClick={() => setOpen3d('summary')}
-            className="flex min-h-10 items-center justify-center gap-2 self-start rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
+            className="flex min-h-11 items-center justify-center gap-2 self-start rounded-full border border-brand bg-surface px-4 text-sm font-semibold text-brand hover:bg-soft"
           >
             <Icon name="share" className="h-4 w-4" />
             📋 {tSummary.button}
@@ -449,6 +480,16 @@ export function ChatPanel({
             t={t.attach}
           />
         ) : null}
+        {openDanger ? (
+          // While an emergency card is open, the call button also stays here by the message box, so it
+          // cannot scroll out of sight when BiLuna's reply arrives.
+          <a
+            href="tel:999"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-danger px-4 text-base font-bold text-surface hover:opacity-90"
+          >
+            📞 {t.danger.call999}
+          </a>
+        ) : null}
         {point ? <PointChip point={point} onClear={() => setPoint(null)} lang={lang} t={t.body} /> : null}
         {preparing ? <p className="text-sm text-muted">{t.attach.preparing}</p> : null}
         {file ? (
@@ -458,7 +499,7 @@ export function ChatPanel({
               type="button"
               onClick={() => setFile(null)}
               aria-label={t.attach.remove}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-surface"
             >
               ✕
             </button>
@@ -489,6 +530,7 @@ export function ChatPanel({
             {t.placeholder}
           </label>
           <textarea
+            ref={inputRef}
             id="health-input"
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -510,7 +552,7 @@ export function ChatPanel({
         <p className="text-xs text-muted">
           {t.fictional} <span className="hidden sm:inline">· {t.enterHint}</span>
         </p>
-        <p className="text-xs text-danger">{emergency}</p>
+        <p className="text-sm text-danger">{emergency}</p>
       </form>
     </section>
   )

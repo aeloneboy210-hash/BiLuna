@@ -47,13 +47,17 @@ const ORGAN_WORDS: [OrganId, RegExp][] = [
   ['liver', /\b(jaundice|liver)|জন্ডিস|লিভার/i],
   ['stomach', /\b(heartburn|acidity|gastric|stomach|vomit|nausea)|অম্বল|গ্যাস্ট্রিক|গ্যাস|বমি|পেট/i],
   ['heart', /\b(palpitation|heart)|বুক ধড়ফড়|হৃদ/i],
-  ['lungs', /\b(cough|breath|wheez|asthma|phlegm)|কাশি|শ্বাস|হাঁপানি|কফ(?!ি)/i],
+  ['lungs', /\b(cough|breath|wheez|asthma|phlegm)|কাশি|(?<![\u0980-\u09FF])(?:নিঃ)?শ্বাস|হাঁপানি|কফ(?!ি)/i],
   ['trachea', /\b(throat|swallow)|গলা/i],
   ['brain', /\b(headache|migraine|dizz)|মাথা ব্যথা|মাথাব্যথা|মাথা ঘোরা/i],
 ]
 
+const ORGANS: [OrganId, RegExp][] = ORGAN_WORDS.map(([o, r]) => [o, new RegExp(r.source.normalize('NFC'), r.flags)])
+
 export function guessOrgan(text: string): OrganId | null {
-  for (const [organ, words] of ORGAN_WORDS) if (words.test(text)) return organ
+  // Same spelling as the rules whichever keyboard typed it (one- or two-character ড়/য়, ব্যাথা for ব্যথা).
+  const t = text.normalize('NFC').replace(/ব্যাথা/g, 'ব্যথা')
+  for (const [organ, words] of ORGANS) if (words.test(t)) return organ
   return null
 }
 

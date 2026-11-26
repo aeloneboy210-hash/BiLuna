@@ -1,3 +1,4 @@
+import { labAllowed } from '@/lib/ai/lab-allowed'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -13,7 +14,7 @@ export const maxDuration = 300
  * made-up questions with BiLuna's real instructions and scores each answer. Nothing is saved.
  */
 export default async function ModelCheckPage({ searchParams }: { searchParams: Promise<{ model?: string }> }) {
-  if (process.env.VERCEL_ENV === 'production') notFound()
+  if (!labAllowed()) notFound()
   const { model } = await searchParams
   const chosen = CANDIDATES.find((m) => m === model)
 

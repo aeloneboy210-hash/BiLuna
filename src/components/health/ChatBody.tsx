@@ -65,7 +65,7 @@ export function BodyPicker({
           <p className="font-bold text-ink">{t.pickTitle}</p>
           <p className="text-xs text-muted">{t.pickHint}</p>
         </div>
-        <button type="button" onClick={onClose} className="min-h-9 rounded-full border border-line px-3 text-sm text-body hover:bg-soft">
+        <button type="button" onClick={onClose} className="min-h-11 rounded-full border border-line px-3 text-sm text-body hover:bg-soft">
           {t.close}
         </button>
       </div>
@@ -104,7 +104,7 @@ export function BodyPicker({
                 type="button"
                 onClick={() => chooseArea(region)}
                 aria-pressed={on}
-                className={`min-h-10 rounded-full border px-3 text-sm font-semibold ${on ? 'border-brand bg-brand text-on-brand' : 'border-line bg-surface text-ink hover:bg-soft'}`}
+                className={`min-h-11 rounded-full border px-3 text-sm font-semibold ${on ? 'border-brand bg-brand text-on-brand' : 'border-line bg-surface text-ink hover:bg-soft'}`}
               >
                 {BODY_PARTS[region][lang]}
               </button>
@@ -173,7 +173,7 @@ export function PointChip({ point, onClear, lang, t }: { point: BodyPoint; onCle
         type="button"
         onClick={onClear}
         aria-label={t.clear}
-        className="flex h-7 w-7 items-center justify-center rounded-full text-muted hover:bg-surface"
+        className="flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-surface"
       >
         ✕
       </button>
@@ -196,7 +196,7 @@ export function BodyCard({ organ, open, onToggle, lang, t }: { organ: OrganId; o
           type="button"
           onClick={onToggle}
           aria-expanded={open}
-          className="min-h-9 rounded-full bg-brand px-3 text-sm font-semibold text-on-brand hover:bg-aqua"
+          className="min-h-11 rounded-full bg-brand px-3 text-sm font-semibold text-on-brand hover:bg-aqua"
         >
           {open ? t.hide : t.show}
         </button>

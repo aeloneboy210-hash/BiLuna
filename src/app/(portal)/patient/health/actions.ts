@@ -7,7 +7,7 @@ import { makeSummary } from '@/lib/consult/summary'
 import type { Attachment } from '@/lib/health/attachment'
 import type { Lang } from '@/lib/i18n/lang'
 import { chatLang } from '@/lib/health/lang-detect'
-import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory } from '@/lib/health/chat-store'
+import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory, spendAiQuota } from '@/lib/health/chat-store'
 import { askBiLuna } from '@/lib/health/model'
 import { profileForPrompt } from '@/lib/health/profile-prompt'
 import { handleSend, type SendResult } from '@/lib/health/send'
@@ -70,7 +70,7 @@ export async function deleteChats(input: { conversationId: string | 'all' }): Pr
   return ok
 }
 
-export type PrepResult = { ok: true; summary: PatientSummary } | { ok: false; error: 'busy' | 'error' | 'unsafe' | 'empty' }
+export type PrepResult = { ok: true; summary: PatientSummary } | { ok: false; error: 'busy' | 'error' | 'unsafe' | 'empty' | 'limit' }
 
 /** Makes (or remakes) the Consultation Prep summary for a chat. Nothing is shared until the patient taps Share. */
 export async function prepareSummary(input: { conversationId: string; lang?: Lang }): Promise<PrepResult> {
@@ -81,7 +81,11 @@ export async function prepareSummary(input: { conversationId: string; lang?: Lan
   // Written in the language the patient used in the chat; the site's language only if they typed no words.
   const lang: Lang = chatLang(history) ?? (input.lang === 'bn' ? 'bn' : 'en')
   if (!history.some((m) => m.author === 'patient')) return { ok: false, error: 'empty' }
-  const made = await makeSummary(history, lang)
+  // A summary is one AI call, so it counts toward the same daily limit as a message.
+  const quota = await spendAiQuota()
+  if (quota !== 'ok') return { ok: false, error: quota }
+  // Only the most recent part of a very long chat, so one summary cannot be a huge AI request.
+  const made = await makeSummary(history.slice(-40), lang)
   if (!made.ok) return { ok: false, error: made.reason }
   const summaryId = await saveSummary({ conversationId: id, patientName: session.displayName, lang, content: made.content })
   if (!summaryId) return { ok: false, error: 'error' }

@@ -102,7 +102,7 @@ test('a failed event log never breaks the chat', async () => {
 })
 
 describe('a report or prescription upload', () => {
-  const file = { name: 'report.jpg', mediaType: 'image/jpeg', data: Buffer.from('x').toString('base64') }
+  const file = { name: 'report.jpg', mediaType: 'image/jpeg', data: Buffer.from([0xff, 0xd8, 0xff, 0xe0]).toString('base64') }
 
   test('can be sent with no words; the chat keeps only a 📎 line and BiLuna gets the file once', async () => {
     const { d, log } = deps()

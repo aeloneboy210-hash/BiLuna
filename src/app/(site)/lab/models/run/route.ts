@@ -1,3 +1,4 @@
+import { labAllowed } from '@/lib/ai/lab-allowed'
 import { NextResponse } from 'next/server'
 import { cloudflareChat } from '@/lib/ai/cloudflare'
 import { CANDIDATES, QUESTIONS, scoreReply } from '@/lib/ai/model-check'
@@ -7,7 +8,8 @@ export const maxDuration = 300
 
 /** The same check as the page, as plain JSON (preview links only). Made-up questions; nothing is saved. */
 export async function GET(request: Request) {
-  if (process.env.VERCEL_ENV === 'production') return new NextResponse('Not found', { status: 404 })
+  // Only on preview links and on a developer's own computer; anywhere else it does not exist.
+  if (!labAllowed()) return new NextResponse('Not found', { status: 404 })
   const model = CANDIDATES.find((m) => m === new URL(request.url).searchParams.get('model'))
   if (!model) return NextResponse.json({ error: 'unknown model', models: CANDIDATES }, { status: 400 })
   const results = await Promise.all(

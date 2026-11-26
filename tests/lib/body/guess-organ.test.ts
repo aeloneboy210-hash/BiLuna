@@ -30,3 +30,15 @@ test('words that only contain an organ word do not count', () => {
   expect(guessOrgan('Burning when I urinate')).toBe('bladder')
   expect(guessOrgan('Painful urination')).toBe('bladder')
 })
+
+test('spelling and keyboard differences do not matter', () => {
+  expect(guessOrgan('ডায়রিয়া হচ্ছে')).toBe('intestines') // ডায়রিয়া with one-character য়
+  expect(guessOrgan('বুক ধড়ফড় করছে')).toBe('heart')
+  expect(guessOrgan('মাথা ব্যাথা')).toBe('brain')
+  expect(guessOrgan('নিঃশ্বাস নিতে কষ্ট')).toBe('lungs')
+})
+
+test('words that only contain শ্বাস are not the lungs', () => {
+  expect(guessOrgan('আমি ডাক্তারকে বিশ্বাস করি')).toBeNull()
+  expect(guessOrgan('একটু আশ্বাস দিন')).toBeNull()
+})

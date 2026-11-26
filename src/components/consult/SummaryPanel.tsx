@@ -50,7 +50,8 @@ export function SummaryPanel({
   async function make() {
     setMaking(true)
     setError(null)
-    const r = await prepareSummary({ conversationId, lang })
+    // A dropped connection must not leave the panel spinning: it becomes the usual error message.
+    const r = await prepareSummary({ conversationId, lang }).catch(() => ({ ok: false, error: 'error' }) as const)
     setMaking(false)
     if (!r.ok) return setError(r.error)
     setSummary(r.summary)
@@ -71,7 +72,7 @@ export function SummaryPanel({
     if (!summary) return
     setBusy(true)
     setError(null)
-    const next = await updateSummary({ conversationId, summaryId: summary.id, action, note })
+    const next = await updateSummary({ conversationId, summaryId: summary.id, action, note }).catch(() => null)
     setBusy(false)
     if (!next) return setError('update')
     setSummary(next)
@@ -92,7 +93,7 @@ export function SummaryPanel({
         <button
           type="button"
           onClick={onClose}
-          className="min-h-9 shrink-0 rounded-full border border-line px-3 text-sm text-body hover:bg-soft"
+          className="min-h-11 shrink-0 rounded-full border border-line px-3 text-sm text-body hover:bg-soft"
         >
           {t.close}
         </button>
@@ -114,7 +115,7 @@ export function SummaryPanel({
 
       {summary && !making ? (
         <>
-          <SummaryView content={{ ...summary.content, note: '' }} t={t} />
+          <SummaryView content={{ ...summary.content, note: '' }} t={t} contentLang={summary.lang} />
           <label className="flex flex-col gap-1.5">
             <span className="text-sm font-semibold text-ink">{t.note}</span>
             <textarea
@@ -134,7 +135,7 @@ export function SummaryPanel({
               type="button"
               disabled={busy || note === summary.content.note}
               onClick={() => act('note')}
-              className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-50"
+              className="min-h-11 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-50"
             >
               {t.saveNote}
             </button>

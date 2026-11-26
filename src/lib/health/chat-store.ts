@@ -57,6 +57,13 @@ export async function addMessage(
   return { ok: false, error: error.message.includes('daily_limit_reached') ? 'limit' : 'error' }
 }
 
+/** Counts one AI use (a doctor summary) in today's tally. False once today's limit is reached. */
+export async function spendAiQuota(): Promise<'ok' | 'limit' | 'error'> {
+  const { error } = await (await db()).rpc('use_ai_quota')
+  if (!error) return 'ok'
+  return error.message.includes('daily_limit_reached') ? 'limit' : 'error'
+}
+
 export async function loadHistory(conversationId: string): Promise<ChatTurn[]> {
   return (await getMessages(conversationId)).map(({ author, body }) => ({ author, body }))
 }

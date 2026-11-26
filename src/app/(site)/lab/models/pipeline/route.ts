@@ -1,3 +1,4 @@
+import { labAllowed } from '@/lib/ai/lab-allowed'
 import { NextResponse } from 'next/server'
 import { detectDanger } from '@/lib/health/danger'
 import { dosesIn } from '@/lib/health/dose-guard'
@@ -42,7 +43,8 @@ const CASES: { id: string; text: string; expect?: RegExp }[] = [
 ]
 
 export async function GET(request: Request) {
-  if (process.env.VERCEL_ENV === 'production') return new NextResponse('Not found', { status: 404 })
+  // Only on preview links and on a developer's own computer; anywhere else it does not exist.
+  if (!labAllowed()) return new NextResponse('Not found', { status: 404 })
   // ?only=a,b runs just those cases, to spare the free daily allowance.
   const only = new URL(request.url).searchParams.get('only')?.split(',')
   const danger = DANGER.map((text) => ({ text, card: detectDanger(text) }))

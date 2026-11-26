@@ -51,7 +51,7 @@ export function ConversationList({
           type="button"
           disabled={busy}
           onClick={() => remove(target)}
-          className="min-h-9 rounded-full bg-danger px-4 text-sm font-semibold text-surface hover:opacity-90 disabled:opacity-60"
+          className="min-h-11 rounded-full bg-danger px-4 text-sm font-semibold text-surface hover:opacity-90 disabled:opacity-60"
         >
           {t.del.yes}
         </button>
@@ -59,7 +59,7 @@ export function ConversationList({
           type="button"
           disabled={busy}
           onClick={() => setConfirm(null)}
-          className="min-h-9 rounded-full border border-line bg-surface px-4 text-sm font-semibold text-body hover:bg-soft"
+          className="min-h-11 rounded-full border border-line bg-surface px-4 text-sm font-semibold text-body hover:bg-soft"
         >
           {t.del.no}
         </button>
@@ -100,7 +100,7 @@ export function ConversationList({
                     onClick={() => setConfirm(c.id)}
                     aria-label={`${t.del.one}: ${c.title}`}
                     title={t.del.one}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted hover:bg-danger/10 hover:text-danger"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-danger/10 hover:text-danger"
                   >
                     <Icon name="trash" className="h-4 w-4" />
                   </button>
@@ -118,7 +118,7 @@ export function ConversationList({
           <button
             type="button"
             onClick={() => setConfirm('all')}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-danger/40 px-4 text-sm font-semibold text-danger hover:bg-danger/10"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-danger/40 px-4 text-sm font-semibold text-danger hover:bg-danger/10"
           >
             <Icon name="trash" className="h-4 w-4" />
             {t.del.all}

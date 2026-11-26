@@ -50,18 +50,20 @@ export function checkReply(text: string, lang: Lang): CheckResult {
   trimmed = trimmed.split(SMALL_TALK_MARK).join('').split(CLARIFY_MARK).join('').trim()
   if (!trimmed) return { ok: false, reason: 'empty' }
 
-  const lower = trimmed.toLowerCase()
-  const phrases = [...FORBIDDEN.en, ...FORBIDDEN.bn]
-  if (phrases.some((p) => lower.includes(p.toLowerCase()))) return { ok: false, reason: 'diagnosis' }
+  if (statesDiagnosis(trimmed)) return { ok: false, reason: 'diagnosis' }
 
+  // A greeting or a follow-up question may skip the confidence line, but not if it also gives advice or
+  // says what the illness may be: then it is an answer, and gets the line.
+  const advises = ADVICE.test(statements(trimmed))
   const shortEnough =
-    (marked === 'smallTalk' && trimmed.length <= SMALL_TALK_MAX) ||
-    (marked === 'clarify' && trimmed.length <= CLARIFY_MAX && /[?？]/.test(trimmed))
+    !advises &&
+    ((marked === 'smallTalk' && trimmed.length <= SMALL_TALK_MAX) ||
+      (marked === 'clarify' && trimmed.length <= CLARIFY_MAX && /[?？]/.test(trimmed)))
   if (shortEnough) return { ok: true, text: trimmed, kind: marked }
   // Some models ask their follow-up questions without the [ASK] mark. A short reply that ends with a
   // question and has no confidence line is a follow-up, so no "How sure I am" is added under a question.
   const hasConfidence = trimmed.includes(CONFIDENCE_PREFIX.en) || trimmed.includes(CONFIDENCE_PREFIX.bn)
-  if (marked === 'answer' && !hasConfidence && onlyAsks(trimmed)) {
+  if (marked === 'answer' && !hasConfidence && !advises && onlyAsks(trimmed)) {
     return { ok: true, text: trimmed, kind: 'clarify' }
   }
 
@@ -72,6 +74,60 @@ export function checkReply(text: string, lang: Lang): CheckResult {
     return { ok: true, text: trimmed, kind: 'answer' }
   }
   return { ok: true, text: `${trimmed}\n\n${DEFAULT_CONFIDENCE[lang]}`, kind: 'answer' }
+}
+
+const DISEASES_EN =
+  'dengue|typhoid|malaria|covid|corona|tuberculosis|tb|pneumonia|cancer|diabetes|asthma|migraine|jaundice|hepatitis|cholera|appendicitis|gastritis|an? ulcer|chikungunya|bronchitis|sinusitis|tonsillitis|a uti|kidney stones?|a heart attack|a stroke'
+const DISEASES_BN =
+  'ডেঙ্গু|টাইফয়েড|ম্যালেরিয়া|কোভিড|করোনা|যক্ষ্মা|নিউমোনিয়া|ক্যান্সার|ডায়াবেটিস|হাঁপানি|অ্যাজমা|মাইগ্রেন|জন্ডিস|হেপাটাইটিস|কলেরা|অ্যাপেন্ডিসাইটিস|গ্যাস্ট্রিক|আলসার|চিকুনগুনিয়া|স্ট্রোক|হার্ট অ্যাটাক'
+
+/** Sentences that name the illness as a fact. Questions ("Do you have asthma?") and "if you have…" do not count. */
+const DIAGNOSIS: RegExp[] = [
+  new RegExp(String.raw`(?<!\b(?:if|whether|when|unless|do|does|did|may|might|could)\s)\byou (?:have|'ve got|have got|are suffering from|suffer from)\s+(?:an? )?(?:${DISEASES_EN})\b`),
+  new RegExp(String.raw`\b(?:this|it) (?:is|'s) (?:most likely|definitely|certainly|clearly|surely) (?:an? )?(?:${DISEASES_EN})\b`),
+  /\byou are suffering from\b/,
+  new RegExp(String.raw`আপনার (?:${DISEASES_BN})(?: রোগ)? (?:হয়েছে|আছে)`.normalize('NFC')),
+  new RegExp(String.raw`^(?:এটা|এটি|এটাই|এটিই) (?:${DISEASES_BN})(?: রোগ)?\s*(?:হয়েছে)?\s*[।.!]?$`.normalize('NFC')),
+]
+
+/** After a forbidden phrase, words that turn it into a careful sentence: "the cause is not clear", "…কারণ নয়". */
+const CAREFUL_AFTER = /^(?:n['’]?t\b|\s+(?:not|unclear|unknown|uncertain|hard|difficult)\b|\s*(?:নয়|না)(?:\s|[,।.]|$))/
+/** In the same sentence, words that make it careful: only a doctor can say, it cannot be said for sure. */
+const CAREFUL_SENTENCE =
+  /\bonly a doctor\b|\ba doctor (?:can|must|will|needs to)\b|\bwithout (?:a |any )?(?:tests?|exam)|ডাক্তার|বলা যায় না|বলা সম্ভব নয়|জানা যায় না/
+
+function statesDiagnosis(text: string): boolean {
+  const sentences = text
+    .normalize('NFC')
+    .toLowerCase()
+    .replace(/[ \t]+/g, ' ')
+    .split(/(?<=[.!?।？])\s+|\n+/)
+    .map((x) => x.trim())
+    .filter(Boolean)
+  const phrases = [...FORBIDDEN.en, ...FORBIDDEN.bn].map((p) => p.toLowerCase())
+  for (const sentence of sentences) {
+    if (/[?？]$/.test(sentence)) continue
+    if (DIAGNOSIS.some((d) => d.test(sentence))) return true
+    for (const p of phrases) {
+      let at = sentence.indexOf(p)
+      while (at >= 0) {
+        const after = sentence.slice(at + p.length)
+        if (!CAREFUL_AFTER.test(after) && !CAREFUL_SENTENCE.test(sentence)) return true
+        at = sentence.indexOf(p, at + 1)
+      }
+    }
+  }
+  return false
+}
+
+/** Advice or a guess at the illness: such a reply is an answer, whatever mark it starts with. */
+const ADVICE =
+  /\b(?:take|rest|drink|eat|avoid|apply|likely|probably|possibly|may be|might be|could be|sounds like|seems like)\b|খান|খাবেন|নিন|বিশ্রাম|পান করুন|সম্ভবত|হতে পারে|মনে হচ্ছে/i
+
+/** The parts of a reply that are not questions. */
+function statements(text: string): string {
+  const sentences = text.match(/[^.!?।？\n]+[.!?।？]*/g) ?? []
+  return sentences.filter((x) => !/[?？]\s*$/.test(x)).join(' ')
 }
 
 /**

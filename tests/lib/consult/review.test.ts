@@ -34,3 +34,11 @@ test('a note written before the summary last changed is marked older', () => {
   expect(noteIsOlder('2026-11-26T10:05:00Z', '2026-11-26T10:00:00Z')).toBe(false)
   expect(noteIsOlder('2026-11-26T10:00:00Z', null)).toBe(false)
 })
+
+test('invisible characters and control codes are taken out; emoji count as one character', () => {
+  expect(cleanReview('​')).toBeNull()
+  expect(cleanReview('a\u0000b')).toBe('ab')
+  expect(cleanReview('line one\nline two')).toBe('line one\nline two')
+  expect(cleanReview('😀'.repeat(600))).not.toBeNull()
+  expect(cleanReview('😀'.repeat(1001))).toBeNull()
+})

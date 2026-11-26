@@ -15,3 +15,10 @@ test('English text and English at the edges are not flagged', () => {
   expect(strayWords('It may be a cold.')).toEqual([])
   expect(strayWords('আমি কতটা নিশ্চিত: সাধারণ তথ্য। see a doctor')).toEqual([])
 })
+
+test('common English medical words are not slips; quoted or hyphen-joined slips are', () => {
+  expect(strayWords('জ্বরের জন্য paracetamol খাওয়া হয়')).toEqual([])
+  expect(strayWords('এটি dengue হতে পারে')).toEqual([])
+  expect(strayWords('জ্বর “menurunkan” করে')).toEqual(['menurunkan'])
+  expect(strayWords('জ্বর menurunkan-এর জন্য')).toEqual(['menurunkan'])
+})

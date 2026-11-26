@@ -65,6 +65,15 @@ export const defaultGenerate: Generate = async ({ instructions, messages }) => {
  * Asks BiLuna to reply to a conversation. Every reply goes through the safety filter before it is returned;
  * a reply that states a diagnosis is regenerated once, then refused.
  */
+/**
+ * A line where BiLuna reads one medicine off an uploaded prescription: it starts with ✅, ⚠️ or ❓ (as the
+ * instructions ask), with "Line 3" / "লাইন ৩", or is a numbered item naming a dosage form (Tab, Cap, Syp…).
+ */
+const MEDICINE_LINE =
+  /^\s*(?:[-*•]\s*)?(?:\*\*)?(?:✅|⚠️|⚠|❓|(?:line|লাইন)\s*[\d০-৯]|[\d০-৯]+[.)]\s.*\b(?:tab|tablet|cap|capsule|syp|syrup|susp|inj|drop)s?\b|[\d০-৯]+[.)]\s.*(?:ট্যাব|ক্যাপ|সিরাপ|ড্রপ))/iu
+const medicineLines = (text: string) => text.split('\n').filter((l) => MEDICINE_LINE.test(l))
+const otherLines = (text: string) => text.split('\n').filter((l) => !MEDICINE_LINE.test(l))
+
 export async function askBiLuna(
   history: ChatTurn[],
   lang: Lang,
@@ -101,13 +110,17 @@ export async function askBiLuna(
       // Tap-to-answer options also come off before the check, and go back on answers and follow-up questions.
       const opts = extractOptions(tagged.text)
       const checked = checkReply(opts.text, lang)
-      // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription,
-      // may be repeated; any other amount means the draft is written again.
+      // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription
+      // (the ✅ ⚠️ ❓ lines BiLuna writes for each medicine it reads), may be repeated; any other amount, in
+      // the answer or in its tap-to-answer options, means the draft is written again. This holds with a file
+      // attached too: only the medicine lines may carry doses, so a lab report or a photo cannot bring one in.
       const said = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
-      // Doses are checked in the answer and in its tap-to-answer options, against the whole chat so far
-      // (a prescription BiLuna read earlier may be talked about again).
       const shown = `${checked.ok ? checked.text : ''}\n${opts.options.join('\n')}`
-      if (checked.ok && !file && unexplainedDoses(shown, history.map((m) => m.body).join('\n')).length) {
+      const known = history
+        .map((m) => (m.author === 'patient' ? m.body : medicineLines(m.body).join('\n')))
+        .join('\n')
+      const toCheck = file ? otherLines(shown).join('\n') : shown
+      if (checked.ok && unexplainedDoses(toCheck, known).length) {
         extra = DOSE_RETRY_NOTE
         continue
       }

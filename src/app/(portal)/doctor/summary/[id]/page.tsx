@@ -52,7 +52,11 @@ export default async function SharedSummaryPage({ params }: { params: Promise<{ 
       </Link>
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         <Card className="min-w-0 flex-[2] p-5 sm:p-6">
-          <SummaryView content={summary.content} t={{ ...dict.summary, note: dict.summary.patientNote }} />
+          <SummaryView
+            content={summary.content}
+            t={{ ...dict.summary, note: dict.summary.patientNote }}
+            contentLang={summary.lang}
+          />
         </Card>
         <aside className="flex min-w-0 flex-1 flex-col gap-4 lg:sticky lg:top-24">
           <Card className="p-5">

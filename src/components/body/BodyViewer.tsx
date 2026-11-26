@@ -111,7 +111,8 @@ export function BodyViewer({
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
-    renderer.domElement.style.touchAction = 'none'
+    // The view-only card in the chat lets an up-down swipe scroll the chat; sideways still turns the body.
+    renderer.domElement.style.touchAction = picker ? 'none' : 'pan-y'
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 50)

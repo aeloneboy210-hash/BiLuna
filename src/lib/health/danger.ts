@@ -42,6 +42,10 @@ const RULES: [DangerKind, RegExp[]][] = [
       /\bmor(e)? (jete|jabo|jaite) chai\b/,
       /\bbach(t|th)e chai na\b/,
       /\batmohotta\b/,
+      /\batmoh[oa]t+y?a\b/,
+      /\b(wanna|wan to|want ta) die\b/,
+      /\bending it all\b|\bend it all\b/,
+      /\bmore jabo\b/,
     ],
   ],
   [
@@ -52,6 +56,7 @@ const RULES: [DangerKind, RegExp[]][] = [
       /বুকে?র?[^·\n]{0,25}(ব্যথা|চাপ)/,
       /\bbuke?r? \w+ (betha|bytha|batha|chap)\b/,
       /\bheart attack\b/,
+      /\bbuke?y?r? (\w+ )?(betha|bytha|batha|byatha|beatha|chap)\b/,
     ],
   ],
   [
@@ -74,6 +79,10 @@ const RULES: [DangerKind, RegExp[]][] = [
       /শ্বাস (বন্ধ|নিচ্ছে না)/,
       /\b(ni)?shash nite (parchi na|parche na|kosto|kashto|kosto hocche)\b/,
       /\bshash kosto\b/,
+      /শ্বাস ?কষ্ট/,
+      /\b(ni?s+h?)?sha+s+h? nite (parchi na|parche na|kosto|kashto)\b/,
+      /\bsha+s+h? kosto\b/,
+      /\b(lips|face) (are |is )?(turning |turned |gone |going )?blue\b/,
     ],
   ],
   [
@@ -93,6 +102,7 @@ const RULES: [DangerKind, RegExp[]][] = [
       /\b(can'?t|cannot) (lift|move) (his|her|my) (arm|leg)\b/,
       /হঠাৎ[^·\n]{0,20}অবশ/,
       /(হাত|পা) অবশ হয়ে গেছে/,
+      /\bkotha joriye\b/,
     ],
   ],
   [
@@ -119,23 +129,54 @@ const RULES: [DangerKind, RegExp[]][] = [
       /\brokto (bondho hocche na|thamche na)\b/,
     ],
   ],
-  ['seizure', [/\bseizure/, /\bconvulsion/, /\b(having|has|had|getting|got) (a )?fits?\b/, /খিঁচুনি/, /\bkhichuni\b/]],
+  ['seizure', [/\bseizure/, /\bconvulsion/, /\b(having|has|had|getting|got) (a )?fits?\b/, /খিঁচুনি/, /\bkhichuni\b/, /\bfits? (hocche|hoyeche|uthche)\b/]],
   [
     'poison',
     [/\bpoison/, /\boverdose/, /\btoo many (pills|tablets)\b/, /\bdrank (bleach|kerosene|pesticide)\b/, /বিষ খে/, /বেশি ওষুধ খে/, /কীটনাশক/,
-      /\b(took|swallowed|ate|drank) \d+ (\w+ )?(pills|tablets)\b/, /\bswallowed (\w+ )?(poison|bleach|kerosene|battery)/, /\bbish khe/, /অনেকগুলো? (ঘুমের )?(ওষুধ|ট্যাবলেট) খে/],
+      /\b(took|swallowed|ate|drank) \d+ (\w+ )?(pills|tablets)\b/, /\bswallowed (\w+ )?(poison|bleach|kerosene|battery)/, /\bbish khe/, /অনেক ?গুলো? (ঘুমের )?(ওষুধ|ট্যাবলেট) খে/],
   ],
   ['allergy', [/\bthroat (is )?(swell|closing|closing up)/, /\bswollen throat\b/, /\banaphyla/, /গলা ফুলে/, /\b(lips|tongue|face)( and (lips|tongue|face))? (is |are )?swell/, /জিভ ফুলে/, /ঠোঁট ফুলে/, /\bgola fule\b/]],
   ['snake', [/\bsnake ?bite\b/, /\bbitten by a snake\b/, /সাপে? কামড়/, /\bshap(e)? kamor\b/, /\bsnake (bit|bite|bitten)\b/, /সাপে কেটে/, /\bshap(e)? kete\b/]],
   ['burn', [/\b(severe|bad) burns?\b/, /\bburn(ed|t) badly\b/, /পুড়ে গেছে/]],
   ['pregnancy', [/\bpregnan\w*\b.*\bbleed/, /\bbleed\w*\b.*\bpregnan/, /গর্ভবতী.*রক্ত/, /রক্ত.*গর্ভবতী/, /(প্রেগন্যান্ট|গর্ভাবস্থা|অন্তঃসত্ত্বা).*রক্ত/, /\bbleeding .{0,20}after (delivery|giving birth|childbirth)\b/, /প্রসবের পর .{0,15}রক্ত/]],
   // A 9 or 10 on the pain scale sent with a point on the body.
-  ['severePain', [/(pain|ব্যথা) (9|10)\/10/]],
+  ['severePain', [/(pain|ব্যথা) (is |হলো )?(9|10) ?\/ ?10\b/]],
 ]
+
+/**
+ * Spelling differences that must not matter, applied to both the rules and the message: the one-character
+ * and two-character forms of ড় ঢ় য় (keyboards differ), the chandrabindu (often left out), invisible joiners,
+ * and the very common ব্যাথা spelling of ব্যথা.
+ */
+function fold(text: string): string {
+  return text
+    .normalize('NFC')
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')
+    .replace(/ঁ/g, '')
+    .replace(/ব্যাথা/g, 'ব্যথা')
+}
+
+const BN_DIGITS = '০১২৩৪৫৬৭৮৯'
+
+/** How people type, made regular: case, quotes, spaces, hyphens, Bangla digits, and না written joined. */
+function normalize(text: string): string {
+  return fold(text)
+    .toLowerCase()
+    .replace(/[’`]/g, "'")
+    .replace(/[০-৯]/g, (d) => String(BN_DIGITS.indexOf(d)))
+    .replace(/[\s_]+|(?<=\p{L})-(?=\p{L})/gu, ' ')
+    .replace(/(?<=[\u0980-\u09FF])না(?=\s|$|[।,.!?])/g, ' না')
+    .replace(/(?<=\b(parchi|parche|chai|hocche|thamche))na\b/g, ' na')
+}
+
+const FOLDED: [DangerKind, RegExp[]][] = RULES.map(([kind, patterns]) => [
+  kind,
+  patterns.map((p) => new RegExp(fold(p.source), p.flags)),
+])
 
 /** The kind of emergency a message may describe, or null. */
 export function detectDanger(text: string): DangerKind | null {
-  const t = text.toLowerCase().replace(/[’`]/g, "'")
-  for (const [kind, patterns] of RULES) if (patterns.some((p) => p.test(t))) return kind
+  const t = normalize(text)
+  for (const [kind, patterns] of FOLDED) if (patterns.some((p) => p.test(t))) return kind
   return null
 }

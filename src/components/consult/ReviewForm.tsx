@@ -25,7 +25,8 @@ export function ReviewForm({ summaryId, initial, lang, t }: { summaryId: string;
   async function save() {
     setBusy(true)
     setError(false)
-    const saved = await saveDoctorNote({ summaryId, body: text })
+    // A dropped connection must not leave the button spinning: it becomes the usual error message.
+    const saved = await saveDoctorNote({ summaryId, body: text }).catch(() => null)
     setBusy(false)
     if (!saved) return setError(true)
     setReview(saved)
@@ -51,7 +52,7 @@ export function ReviewForm({ summaryId, initial, lang, t }: { summaryId: string;
           <button
             type="button"
             onClick={() => setEditing(true)}
-            className="min-h-10 self-start rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft"
+            className="min-h-11 self-start rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft"
           >
             {t.edit}
           </button>

@@ -52,3 +52,37 @@ test('a patient who switches language mid-chat: their latest message decides', (
     ]),
   ).toBe('bn')
 })
+
+import { typedLang } from '@/lib/health/lang-detect'
+
+// Found by the November bug hunt: a short reply must not switch a Bangla chat to English.
+test.each(['ok', 'hmm', '102', '১০২', '😢', '102°F', 'Napa', 'ha', ''])('%p is too short to tell: keep the chat language', (text) => {
+  expect(typedLang(text)).toBeNull()
+})
+
+test.each([
+  ['জ্বর', 'bn'],
+  ['ji', 'bn'],
+  ['jor', 'bn'],
+  ['jor ashche', 'bn'],
+  ['kon oshudh khabo', 'bn'],
+  ['pet betha', 'bn'],
+  ['matha ghurche', 'bn'],
+  ['sorir kharap lagche', 'bn'],
+  ['I have a fever', 'en'],
+  ['my pet is sick today', 'en'],
+  ['It is on my forehead', 'en'],
+] as const)('%p is %p', (text, lang) => {
+  expect(typedLang(text)).toBe(lang)
+})
+
+test('a Bangla chat stays Bangla after a short "ok" or a number', () => {
+  expect(
+    chatLang([
+      { author: 'patient', body: 'আমার জ্বর' },
+      { author: 'biluna', body: 'কত দিন?' },
+      { author: 'patient', body: '3' },
+      { author: 'patient', body: 'ok' },
+    ]),
+  ).toBe('bn')
+})
