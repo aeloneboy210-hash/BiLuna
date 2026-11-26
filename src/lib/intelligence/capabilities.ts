@@ -52,7 +52,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     items: [
       c('coordinator', 'Central AI Coordinator', 'কেন্দ্রীয় এআই সমন্বয়ক', 'roadmap', 'Routing a request to the right modules', 'অনুরোধ সঠিক মডিউলে পাঠানো'),
       c('crossModule', 'Cross-Module Communication', 'মডিউল-মধ্যবর্তী যোগাযোগ', 'roadmap', 'Modules working together', 'মডিউলগুলোর একসঙ্গে কাজ'),
-      c('contextSharing', 'Context Sharing', 'প্রসঙ্গ শেয়ারিং', 'working', 'Share a summary with your doctor, logged', 'ডাক্তারের সঙ্গে সারাংশ শেয়ার, রেকর্ডসহ'),
+      c('contextSharing', 'Context Sharing', 'প্রসঙ্গ শেয়ারিং', 'working', 'Share a summary with your doctor, and stop sharing any time', 'ডাক্তারের সঙ্গে সারাংশ শেয়ার, যেকোনো সময় বন্ধ করা যায়'),
       c('orchestration', 'Task Orchestration', 'কাজের সমন্বয়', 'roadmap', 'Multi-step tasks across modules', 'একাধিক ধাপের কাজ'),
       c('unifiedResponse', 'Unified Response Engine', 'সমন্বিত উত্তর ইঞ্জিন', 'roadmap', 'One answer from several modules', 'কয়েকটি মডিউল থেকে একটি উত্তর'),
       c('permissions', 'Permission Controller', 'অনুমতি নিয়ন্ত্রক', 'working', 'Database rules: who can see what', 'ডেটাবেস নিয়ম: কে কী দেখতে পারে'),
@@ -66,7 +66,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
       c('dataProtection', 'Data Protection', 'ডেটা সুরক্ষা', 'working', 'Only you can read your chats and profile', 'শুধু আপনিই আপনার চ্যাট ও প্রোফাইল দেখেন'),
       c('consent', 'Consent Management', 'সম্মতি ব্যবস্থাপনা', 'working', 'The "use my profile" switch', '"আমার প্রোফাইল ব্যবহার" সুইচ'),
       c('memoryManagement', 'Memory Management', 'স্মৃতি ব্যবস্থাপনা', 'working', 'Review, correct or delete your profile', 'প্রোফাইল দেখা, ঠিক করা বা মুছে ফেলা'),
-      c('clinicalValidation', 'Clinical Safety Validation', 'ক্লিনিক্যাল নিরাপত্তা যাচাই', 'working', 'No diagnosis, no dose changes', 'রোগ নির্ণয় নয়, ডোজ পরিবর্তন নয়'),
+      c('clinicalValidation', 'Clinical Safety Validation', 'ক্লিনিক্যাল নিরাপত্তা যাচাই', 'working', 'Automatic wording check: no diagnosis, no dose changes. Not yet reviewed by a clinician', 'স্বয়ংক্রিয় শব্দ যাচাই: রোগ নির্ণয় নয়, ডোজ পরিবর্তন নয়। এখনো কোনো ক্লিনিশিয়ান যাচাই করেননি'),
       c('escalation', 'Emergency Escalation', 'জরুরি এসকেলেশন', 'working', 'Call 999 card', '৯৯৯-এ কল করার কার্ড'),
       c('oversight', 'Human Oversight', 'মানব তত্ত্বাবধান', 'demo', 'Doctor reviews a shared summary', 'ডাক্তার শেয়ার করা সারাংশ দেখেন'),
       c('audit', 'Audit & Monitoring', 'অডিট ও পর্যবেক্ষণ', 'working', 'The activity log below', 'নিচের কার্যক্রম লগ'),

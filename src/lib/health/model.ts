@@ -2,7 +2,7 @@ import 'server-only'
 import { google } from '@ai-sdk/google'
 import { APICallError, generateText } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
-import { bodyTag, extractBodyTag } from '@/lib/body/chat-body'
+import { bodyTag, extractBodyTag, guessOrgan, POINT_MARK } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
 import type { Attachment } from './attachment'
 import { extractOptions, optionsTag } from './options'
@@ -79,11 +79,17 @@ export async function askBiLuna(
       const opts = extractOptions(tagged.text)
       const checked = checkReply(opts.text, lang)
       if (checked.ok) {
-        let body = tagged.organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(tagged.organ)}` : checked.text
+        // If the AI left the 3D tag out, the patient's own words choose the organ, so the body still lights
+        // up on stage. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
+        const said = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
+        const organ =
+          tagged.organ ?? (said.trimStart().startsWith(POINT_MARK) || detectDanger(said) ? null : guessOrgan(said))
+        let body = organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(organ)}` : checked.text
         if (opts.options.length && checked.kind !== 'smallTalk') body += `\n${optionsTag(opts.options)}`
         // After pointing at the body, every reply for three rounds must end with a question the patient can tap.
         const round = placeRound(history)
-        if (round && !opts.options.length && checked.kind !== 'smallTalk') {
+        // No fixed follow-up question after a danger message (self-harm above all): the card and care come first.
+        if (round && !opts.options.length && checked.kind !== 'smallTalk' && !detectDanger(said)) {
           const q = placeQuestion(round, lang)
           body += `\n\n${q.q}\n${optionsTag(q.options)}`
         }

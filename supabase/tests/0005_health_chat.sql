@@ -69,26 +69,7 @@ begin
     if n <> 0 then raise exception 'patient A edited a message'; end if;
   exception when insufficient_privilege then null;
   end;
-  begin
-    delete from public.conversations where id = ca;
-    get diagnostics n = row_count;
-    if n <> 0 then raise exception 'patient A deleted a conversation'; end if;
-  exception when insufficient_privilege then null;
-  end;
-
-  -- Daily limit: 40 patient messages a day. One is already sent above.
-  for i in 2..40 loop
-    insert into public.messages (conversation_id, author, body, lang) values (ca, 'patient', 'msg ' || i, 'en');
-  end loop;
-  ok := false;
-  begin
-    insert into public.messages (conversation_id, author, body, lang) values (ca, 'patient', 'msg 41', 'en');
-  exception when others then
-    if sqlerrm like '%daily_limit_reached%' then ok := true; else raise; end if;
-  end;
-  if not ok then raise exception '41st patient message was accepted'; end if;
-  -- BiLuna can still answer the last message.
-  insert into public.messages (conversation_id, author, body, lang) values (ca, 'biluna', 'reply', 'en');
+  -- Deleting own chats (0007) and the daily limit (0008) are tested in 0007_0010_consult_and_usage.sql.
 
   reset role;
 

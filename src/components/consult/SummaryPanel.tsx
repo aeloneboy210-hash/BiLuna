@@ -8,18 +8,13 @@ import { Icon } from '@/components/ui/Icon'
 import type { PatientSummary } from '@/lib/consult/store'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
+import { formatDhaka } from '@/lib/ui/dhaka-time'
 
 type T = Dictionary['summary']
 type ErrorKey = keyof T['errors']
 
 const dateFmt = (iso: string, lang: Lang) =>
-  new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
-    timeZone: 'Asia/Dhaka',
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(iso))
+  formatDhaka(iso, lang)
 
 /**
  * Consultation Prep: BiLuna turns the chat into a summary, the patient checks it, adds a note, and chooses

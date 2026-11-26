@@ -34,6 +34,29 @@ export function extractBodyTag(text: string): { text: string; organ: OrganId | n
   return { text: clean.replace(/\n{3,}/g, '\n\n').trim(), organ }
 }
 
+/**
+ * A backup for when the AI leaves out the body tag: the organ the patient's own words point to, so the
+ * 3D body still lights up a part that "may be involved". Checked in this order, most specific first
+ * (heartburn is the stomach, not the heart; a cough is the lungs even with a sore throat).
+ */
+const ORGAN_WORDS: [OrganId, string[]][] = [
+  ['intestines', ['diarrhoea', 'diarrhea', 'loose motion', 'constipat', 'ডায়রিয়া', 'পাতলা পায়খানা', 'কোষ্ঠকাঠিন্য']],
+  ['bladder', ['urin', 'peeing', 'প্রস্রাব']],
+  ['kidneys', ['kidney', 'কিডনি']],
+  ['liver', ['jaundice', 'liver', 'জন্ডিস', 'লিভার']],
+  ['stomach', ['heartburn', 'acidity', 'gastric', 'stomach', 'vomit', 'nausea', 'অম্বল', 'গ্যাস্ট্রিক', 'গ্যাস', 'বমি', 'পেট']],
+  ['heart', ['palpitation', 'heart', 'বুক ধড়ফড়', 'হৃদ']],
+  ['lungs', ['cough', 'breath', 'wheez', 'asthma', 'phlegm', 'কাশি', 'শ্বাস', 'হাঁপানি', 'কফ']],
+  ['trachea', ['throat', 'swallow', 'গলা']],
+  ['brain', ['headache', 'migraine', 'dizz', 'মাথা ব্যথা', 'মাথাব্যথা', 'মাথা ঘোরা']],
+]
+
+export function guessOrgan(text: string): OrganId | null {
+  const t = text.toLowerCase()
+  for (const [organ, words] of ORGAN_WORDS) if (words.some((w) => t.includes(w))) return organ
+  return null
+}
+
 export const POINT_MARK = '📍'
 const POINT_LABEL: Record<Lang, string> = { en: 'Where it hurts:', bn: 'কোথায় সমস্যা:' }
 

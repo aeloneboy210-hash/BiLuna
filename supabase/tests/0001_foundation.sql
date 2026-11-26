@@ -36,8 +36,9 @@ begin
   perform set_config('request.jwt.claims', json_build_object('sub', p, 'role', 'authenticated')::text, true);
   set local role authenticated;
 
-  select count(*) into n from public.profiles;
-  if n <> 1 then raise exception 'patient sees % profiles, expected 1', n; end if;
+  -- Since 0009 a patient also sees doctors (to share a summary with), never another patient or the hospital admin.
+  select count(*) into n from public.profiles where id <> p and role <> 'doctor';
+  if n <> 0 then raise exception 'patient sees % other non-doctor profiles', n; end if;
   select count(*) into n from public.profiles where id = p;
   if n <> 1 then raise exception 'patient cannot see own profile'; end if;
 

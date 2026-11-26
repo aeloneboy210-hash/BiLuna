@@ -63,12 +63,35 @@ export async function loadHistory(conversationId: string): Promise<ChatTurn[]> {
 
 /** Deletes one of the patient's own chats (its messages and ratings go with it). Another patient's id deletes nothing. */
 export async function deleteConversation(conversationId: string): Promise<boolean> {
-  const { error } = await (await db()).from('conversations').delete().eq('id', conversationId)
+  const supabase = await db()
+  if (!(await stopSharing(supabase, conversationId))) return false
+  const { error } = await supabase.from('conversations').delete().eq('id', conversationId)
   return !error
 }
 
 /** Deletes all of the signed-in patient's chats; the database's rules limit it to their own. */
 export async function deleteAllConversations(): Promise<boolean> {
-  const { error } = await (await db()).from('conversations').delete().not('id', 'is', null)
+  const supabase = await db()
+  if (!(await stopSharing(supabase, 'all'))) return false
+  const { error } = await supabase.from('conversations').delete().not('id', 'is', null)
   return !error
+}
+
+/**
+ * Before a chat goes, any doctor it was shared with loses access. Otherwise the summary would stay shared
+ * with no screen left where the patient could stop it. The database lets a patient stop only their own shares.
+ */
+async function stopSharing(supabase: Awaited<ReturnType<typeof db>>, conversationId: string | 'all'): Promise<boolean> {
+  // "Delete all" stops every share the patient has, including summaries whose chat was deleted earlier.
+  const query = supabase.from('consult_summaries').select('id')
+  const { data, error } = await (conversationId === 'all' ? query : query.eq('conversation_id', conversationId))
+  if (error) return false
+  const ids = (data ?? []).map((r) => r.id as string)
+  if (!ids.length) return true
+  const { error: stopError } = await supabase
+    .from('summary_shares')
+    .update({ revoked_at: new Date().toISOString() })
+    .in('summary_id', ids)
+    .is('revoked_at', null)
+  return !stopError
 }

@@ -8,6 +8,7 @@ import { requirePortal } from '@/lib/auth/require-portal'
 import Link from 'next/link'
 import { sharedWithMe } from '@/lib/consult/store'
 import { getDict } from '@/lib/i18n/server'
+import { formatDhaka } from '@/lib/ui/dhaka-time'
 
 export const metadata: Metadata = { title: 'Healthcare Professional Portal' }
 
@@ -19,14 +20,7 @@ export default async function DoctorPortal() {
   const dhakaDay = (iso: string) => new Date(new Date(iso).getTime() + 6 * 3600_000).toISOString().slice(0, 10)
   const today = dhakaDay(new Date().toISOString())
   const newToday = shared.filter((s) => dhakaDay(s.sharedAt) === today).length
-  const when = (iso: string) =>
-    new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
-      timeZone: 'Asia/Dhaka',
-      day: 'numeric',
-      month: 'short',
-      hour: 'numeric',
-      minute: '2-digit',
-    }).format(new Date(iso))
+  const when = (iso: string) => formatDhaka(iso, lang)
 
   return (
     <PortalShell

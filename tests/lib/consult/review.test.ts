@@ -26,3 +26,11 @@ test("the doctor's name goes into the note heading in both languages", () => {
   for (const d of [dictionaries.en, dictionaries.bn]) expect(d.review.fromDoctor).toContain('{name}')
   expect(dictionaries.bn.review.fromDoctor.replace('{name}', 'Dr. Karim')).toBe('Dr. Karim-এর নোট')
 })
+
+import { noteIsOlder } from '@/lib/consult/review'
+
+test('a note written before the summary last changed is marked older', () => {
+  expect(noteIsOlder('2026-11-26T10:00:00Z', '2026-11-26T10:05:00Z')).toBe(true)
+  expect(noteIsOlder('2026-11-26T10:05:00Z', '2026-11-26T10:00:00Z')).toBe(false)
+  expect(noteIsOlder('2026-11-26T10:00:00Z', null)).toBe(false)
+})

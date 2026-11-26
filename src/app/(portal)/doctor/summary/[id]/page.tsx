@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { ReviewForm } from '@/components/consult/ReviewForm'
 import { SummaryView } from '@/components/consult/SummaryView'
 import { PortalShell } from '@/components/PortalShell'
@@ -9,6 +8,7 @@ import { Notice } from '@/components/ui/Notice'
 import { requirePortal } from '@/lib/auth/require-portal'
 import { sharedSummary } from '@/lib/consult/store'
 import { getDict } from '@/lib/i18n/server'
+import { formatDhaka } from '@/lib/ui/dhaka-time'
 
 export const metadata: Metadata = { title: 'Shared summary' }
 
@@ -18,14 +18,26 @@ export default async function SharedSummaryPage({ params }: { params: Promise<{ 
   const { id } = await params
   const { dict, lang } = await getDict()
   const summary = /^[0-9a-f-]{36}$/i.test(id) ? await sharedSummary(id) : null
-  if (!summary) notFound()
-  const when = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
-    timeZone: 'Asia/Dhaka',
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(summary.sharedAt))
+  // Not shared any more (or never was): a plain message instead of an error page. This is the moment in the
+  // demo where the patient stops sharing and the doctor loses access.
+  if (!summary) {
+    return (
+      <PortalShell
+        icon="stethoscope"
+        portalName={dict.portals.doctor.name}
+        title={dict.doctor.stoppedTitle}
+        subtitle={dict.doctor.stoppedText}
+      >
+        <Card className="flex flex-col gap-3 p-6">
+          <p className="text-body">{dict.doctor.rule}</p>
+          <Link href="/doctor" className="self-start text-sm font-semibold text-brand hover:underline">
+            ← {dict.doctor.back}
+          </Link>
+        </Card>
+      </PortalShell>
+    )
+  }
+  const when = formatDhaka(summary.sharedAt, lang)
 
   return (
     <PortalShell

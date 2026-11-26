@@ -5,7 +5,8 @@ import { askBiLuna, type Generate } from '@/lib/health/model'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 
 const good = `It might be a cold.\n\n${CONFIDENCE_PREFIX.en} fairly sure.`
-const history = [{ author: 'patient' as const, body: 'I have a cough' }]
+const history = [{ author: 'patient' as const, body: 'I feel unwell' }]
+const coughHistory = [{ author: 'patient' as const, body: 'I have a cough' }]
 
 function fake(...replies: (string | Error)[]) {
   const calls: Parameters<Generate>[0][] = []
@@ -194,4 +195,29 @@ test('the prescription rules cover Bangladeshi handwriting, sure/unsure marks an
   await askBiLuna(history, 'en', { generate: f.generate })
   const i = f.calls[0].instructions
   for (const s of ['handwritten', '1+0+1', 'TDS', 'খাবারের', '✅', '⚠️', '❓', 'Yes, it matches']) expect(i).toContain(s)
+})
+
+test('when the AI leaves out the 3D tag, the patient\'s words light up an organ', async () => {
+  const f = fake(good)
+  const r = await askBiLuna(coughHistory, 'en', { generate: f.generate })
+  expect(r.ok && r.text.endsWith('[[body:lungs]]')).toBe(true)
+})
+
+test('the AI\'s own tag wins over the backup guess', async () => {
+  const f = fake(`${good}\n[[body:trachea]]`)
+  const r = await askBiLuna(coughHistory, 'en', { generate: f.generate })
+  expect(r.ok && r.text.endsWith('[[body:trachea]]')).toBe(true)
+  expect(r.ok && r.text).not.toContain('[[body:lungs]]')
+})
+
+test('no backup guess on follow-up questions, after a 📍 tap, or on a danger message', async () => {
+  const ask = fake('[ASK] How long have you had it?')
+  const a = await askBiLuna(coughHistory, 'en', { generate: ask.generate })
+  expect(a.ok && a.text).not.toContain('[[body:')
+  const tapped = [{ author: 'patient' as const, body: '📍 Where it hurts: Head · Skull\nheadache' }]
+  const b = await askBiLuna(tapped, 'en', { generate: fake(good).generate })
+  expect(b.ok && b.text).not.toContain('[[body:')
+  const danger = [{ author: 'patient' as const, body: 'I have chest pain and trouble breathing' }]
+  const c = await askBiLuna(danger, 'en', { generate: fake(good).generate })
+  expect(c.ok && c.text).not.toContain('[[body:')
 })

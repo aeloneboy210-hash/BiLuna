@@ -7,17 +7,12 @@ import type { Review } from '@/lib/consult/store'
 import { REVIEW_MAX } from '@/lib/consult/review'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
+import { formatDhaka } from '@/lib/ui/dhaka-time'
 
 type T = Dictionary['review']
 
 const dateFmt = (iso: string, lang: Lang) =>
-  new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
-    timeZone: 'Asia/Dhaka',
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(iso))
+  formatDhaka(iso, lang)
 
 /** The doctor's note on a shared summary. It goes to the patient as soon as it is saved. */
 export function ReviewForm({ summaryId, initial, lang, t }: { summaryId: string; initial: Review | null; lang: Lang; t: T }) {
@@ -51,6 +46,7 @@ export function ReviewForm({ summaryId, initial, lang, t }: { summaryId: string;
             <p className="mt-2 text-xs text-muted">
               ✅ {t.sent} · {dateFmt(review.updatedAt, lang)}
             </p>
+            {review.older ? <p className="mt-1 text-xs font-semibold text-warn">⚠️ {t.older}</p> : null}
           </div>
           <button
             type="button"

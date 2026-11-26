@@ -1,11 +1,12 @@
 import 'server-only'
 import type { Lang } from '@/lib/i18n/lang'
 import { db } from '@/lib/health/chat-store'
-import { cleanReview } from './review'
+import { cleanReview, noteIsOlder } from './review'
 import { EMPTY_SUMMARY, type SummaryContent } from './summary'
 
 /** A doctor's note on a shared summary. Written by the doctor, never by BiLuna. */
-export type Review = { body: string; updatedAt: string }
+/** older: the patient changed the summary after the doctor wrote this note. */
+export type Review = { body: string; updatedAt: string; older: boolean }
 
 /** What the patient sees for a chat's summary: the content, and whether (and since when) a doctor has it. */
 export type PatientSummary = {
@@ -42,7 +43,7 @@ export async function summaryForConversation(conversationId: string): Promise<Pa
   const supabase = await db()
   const { data } = await supabase
     .from('consult_summaries')
-    .select('id, lang, content, created_at')
+    .select('id, lang, content, created_at, updated_at')
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -70,7 +71,12 @@ export async function summaryForConversation(conversationId: string): Promise<Pa
     sharedAt: (share?.shared_at as string | undefined) ?? null,
     doctorName: doctor?.name ?? null,
     review: review
-      ? { body: String(review.body), updatedAt: review.updated_at as string, doctorName: doctor?.name ?? '' }
+      ? {
+          body: String(review.body),
+          updatedAt: review.updated_at as string,
+          older: noteIsOlder(review.updated_at as string, data.updated_at as string),
+          doctorName: doctor?.name ?? '',
+        }
       : null,
   }
 }
@@ -153,7 +159,7 @@ export async function sharedWithMe(): Promise<SharedSummary[]> {
   if (!shares?.length) return []
   const { data: rows } = await supabase
     .from('consult_summaries')
-    .select('id, patient_name, lang, content')
+    .select('id, patient_name, lang, content, updated_at')
     .in(
       'id',
       shares.map((s) => s.summary_id),
@@ -162,7 +168,14 @@ export async function sharedWithMe(): Promise<SharedSummary[]> {
   // The database returns only this doctor's own notes, and only on summaries still shared.
   const { data: reviews } = await supabase.from('summary_reviews').select('summary_id, body, updated_at')
   const reviewOf = new Map(
-    (reviews ?? []).map((r) => [r.summary_id as string, { body: String(r.body), updatedAt: r.updated_at as string }]),
+    (reviews ?? []).map((r) => [
+      r.summary_id as string,
+      {
+        body: String(r.body),
+        updatedAt: r.updated_at as string,
+        older: noteIsOlder(r.updated_at as string, byId.get(r.summary_id as string)?.updated_at as string | undefined),
+      },
+    ]),
   )
   return shares.flatMap((s) => {
     const r = byId.get(s.summary_id as string)
@@ -200,13 +213,13 @@ export async function saveReview(summaryId: string, body: unknown): Promise<Revi
     .eq('summary_id', summaryId)
     .select('body, updated_at')
     .maybeSingle()
-  if (updated) return { body: String(updated.body), updatedAt: updated.updated_at as string }
+  if (updated) return { body: String(updated.body), updatedAt: updated.updated_at as string, older: false }
   const { data, error } = await supabase
     .from('summary_reviews')
     .insert({ summary_id: summaryId, body: text })
     .select('body, updated_at')
     .single()
-  return error ? null : { body: String(data.body), updatedAt: data.updated_at as string }
+  return error ? null : { body: String(data.body), updatedAt: data.updated_at as string, older: false }
 }
 
 /** For the patient's home page: every doctor's note on their summaries, newest first. */
@@ -227,7 +240,7 @@ export async function doctorNotesForMe(): Promise<DoctorNote[]> {
   if (!reviews?.length) return []
   const { data: rows } = await supabase
     .from('consult_summaries')
-    .select('id, conversation_id, content')
+    .select('id, conversation_id, content, updated_at')
     .in(
       'id',
       reviews.map((r) => r.summary_id),
@@ -242,7 +255,12 @@ export async function doctorNotesForMe(): Promise<DoctorNote[]> {
             summaryId: s.id as string,
             conversationId: (s.conversation_id as string | null) ?? null,
             concern: asContent(s.content).concern,
-            review: { body: String(r.body), updatedAt: r.updated_at as string, doctorName: doctor?.name ?? '' },
+            review: {
+              body: String(r.body),
+              updatedAt: r.updated_at as string,
+              older: noteIsOlder(r.updated_at as string, s.updated_at as string),
+              doctorName: doctor?.name ?? '',
+            },
           },
         ]
       : []

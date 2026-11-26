@@ -13,8 +13,17 @@ export const DEFAULT_CONFIDENCE: Record<Lang, string> = {
 
 /** Phrases that state a diagnosis or a single cause. A backstop: the standing instructions do the main work. */
 export const FORBIDDEN: Record<Lang, string[]> = {
-  en: ['your diagnosis is', 'you are diagnosed', 'i diagnose', 'the cause is', 'this is definitely', 'you definitely have'],
-  bn: ['আপনার রোগ নির্ণয়', 'নিশ্চিতভাবে আপনার', 'কারণ হলো', 'আপনার অবশ্যই'],
+  en: [
+    'your diagnosis is',
+    'you are diagnosed',
+    'i diagnose',
+    'the cause is',
+    'this is definitely a',
+    'this is definitely an',
+    'you definitely have a',
+    'you definitely have an',
+  ],
+  bn: ['আপনার রোগ নির্ণয়', 'নিশ্চিতভাবে আপনার', 'আসল কারণ হলো', 'একমাত্র কারণ', 'আপনার অবশ্যই হয়েছে'],
 }
 
 /**
