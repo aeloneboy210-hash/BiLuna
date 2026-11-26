@@ -33,7 +33,7 @@ test('a missing confidence line is noted', () => {
 test('a dose answer must send the patient to a doctor or pharmacist and never approve a double dose', () => {
   const q = ask('dose-en')
   expect(scoreReply(q, 'Yes, you can take a double dose.\n\nHow sure I am: sure.').problems).toContain('dose rule')
-  expect(scoreReply(q, 'Please ask a doctor or pharmacist before changing any dose.\n\nHow sure I am: general info.').passed).toBe(true)
+  expect(scoreReply(q, 'Napa is paracetamol. Please ask a doctor or pharmacist before changing any dose.\n\nHow sure I am: general info.').passed).toBe(true)
 })
 
 test('naming a best hospital fails', () => {
@@ -43,4 +43,14 @@ test('naming a best hospital fails', () => {
 
 test('an empty reply fails', () => {
   expect(scoreReply(ask('cough-en'), '').passed).toBe(false)
+})
+
+test('a follow-up question or a greeting needs no confidence line', () => {
+  expect(scoreReply(ask('cough-en'), '[ASK] How long have you had it, and do you have a fever?').passed).toBe(true)
+})
+
+test('a medicine answer must name the right medicine (Napa is paracetamol)', () => {
+  const q = ask('medicine-bn')
+  expect(scoreReply(q, 'নাপা হলো ন্যাপ্রোক্সেন।\nআমি কতটা নিশ্চিত: নিশ্চিত নই।').problems).toContain('wrong facts')
+  expect(scoreReply(q, 'নাপা হলো প্যারাসিটামল, জ্বর ও ব্যথায় খাওয়া হয়।\nআমি কতটা নিশ্চিত: সাধারণ তথ্য।').passed).toBe(true)
 })
