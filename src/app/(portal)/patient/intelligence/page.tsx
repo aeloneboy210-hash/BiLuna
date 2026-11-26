@@ -3,6 +3,7 @@ import { ProfileForm } from '@/components/intelligence/ProfileForm'
 import { Icon } from '@/components/ui/Icon'
 import { requirePortal } from '@/lib/auth/require-portal'
 import { getDict } from '@/lib/i18n/server'
+import { formatDhaka } from '@/lib/ui/dhaka-time'
 import { CAPABILITY_GROUPS, type CapabilityStatus } from '@/lib/intelligence/capabilities'
 import { summarizeToday } from '@/lib/intelligence/stats'
 import { getProfile, messagesSentToday, recentEvents, todaysEvents } from '@/lib/intelligence/store'
@@ -37,13 +38,6 @@ export default async function IntelligencePage() {
 
   const [profile, events, sent, recent] = await Promise.all([getProfile(), todaysEvents(), messagesSentToday(), recentEvents(15)])
   const s = summarizeToday(events, sent)
-  const fmt = new Intl.DateTimeFormat(lang === 'bn' ? 'bn-BD' : 'en-GB', {
-    timeZone: 'Asia/Dhaka',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
   const num = (n: number) => n.toLocaleString(lang === 'bn' ? 'bn-BD' : 'en-US')
 
   const stats: [string, string][] = [
@@ -109,7 +103,7 @@ export default async function IntelligencePage() {
                 <li key={e.id} className="flex items-baseline justify-between gap-3 py-2.5 text-sm">
                   <span className="text-ink">{t.events[e.kind]}</span>
                   <time className="shrink-0 text-xs text-muted" dateTime={e.createdAt}>
-                    {fmt.format(new Date(e.createdAt))}
+                    {formatDhaka(e.createdAt, lang)}
                   </time>
                 </li>
               ))}
