@@ -26,15 +26,20 @@ export function detectLang(text: string): Lang {
 }
 
 /**
- * The language the patient wrote the chat in, from their own words only (not BiLuna's replies, not the
- * "📍 Where it hurts" or "📎 file" lines, which are written in the site's language). Null if they wrote none.
+ * The language the patient is writing the chat in now: that of their latest message with words of their own
+ * (not BiLuna's replies, not the "📍 Where it hurts" or "📎 file" lines, which are written in the site's
+ * language). A patient who switches from Bangla to English mid-chat gets English from then on. Null if they
+ * wrote no words.
  */
 export function chatLang(history: { author: 'patient' | 'biluna'; body: string }[]): Lang | null {
-  const words = history
-    .filter((m) => m.author === 'patient')
-    .flatMap((m) => m.body.split('\n'))
-    .filter((line) => !/^\s*(📍|📎)/u.test(line))
-    .join('\n')
-    .trim()
-  return words ? detectLang(words) : null
+  for (const m of [...history].reverse()) {
+    if (m.author !== 'patient') continue
+    const words = m.body
+      .split('\n')
+      .filter((line) => !/^\s*(📍|📎)/u.test(line))
+      .join('\n')
+      .trim()
+    if (/\p{L}/u.test(words)) return detectLang(words)
+  }
+  return null
 }

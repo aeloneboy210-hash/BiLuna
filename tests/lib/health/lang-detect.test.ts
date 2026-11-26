@@ -34,4 +34,21 @@ test('the chat language is the language the patient wrote in', () => {
 test('tap and attachment lines do not decide the language; none at all gives null', () => {
   expect(chatLang([{ author: 'patient', body: '📍 Where it hurts: Chest · Pain 3/10' }, { author: 'patient', body: 'বুকে চাপ লাগে' }])).toBe('bn')
   expect(chatLang([{ author: 'patient', body: '📎 report.jpg' }])).toBeNull()
+  expect(chatLang([{ author: 'patient', body: 'মাথা ব্যথা' }, { author: 'patient', body: '📍 Where it hurts: Head' }])).toBe('bn')
+})
+
+test('a patient who switches language mid-chat: their latest message decides', () => {
+  expect(
+    chatLang([
+      { author: 'patient', body: 'আমার দুই দিন ধরে মাথা ব্যথা করছে' },
+      { author: 'biluna', body: 'কোথায় ব্যথা?' },
+      { author: 'patient', body: 'It is on my forehead, no fever' },
+    ]),
+  ).toBe('en')
+  expect(
+    chatLang([
+      { author: 'patient', body: 'I have a cough' },
+      { author: 'patient', body: 'রাতে বেশি হয়' },
+    ]),
+  ).toBe('bn')
 })

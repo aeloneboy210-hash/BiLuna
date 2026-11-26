@@ -16,7 +16,7 @@ import { detectDanger } from '@/lib/health/danger'
 import { extractOptions } from '@/lib/health/options'
 import { Icon } from '@/components/ui/Icon'
 import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
-import { detectLang } from '@/lib/health/lang-detect'
+import { chatLang as langOfChat, detectLang } from '@/lib/health/lang-detect'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
@@ -127,8 +127,9 @@ export function ChatPanel({
   other: { lang: Lang; t: Dictionary['health']; emergency: string; tSummary: Dictionary['summary']; tReview: Dictionary['review'] }
 }) {
   const router = useRouter()
-  // The chat's own language: it follows what the patient types straight away; the page follows on refresh.
-  const [typedLang, setTypedLang] = useState<Lang | null>(null)
+  // The chat's own language: the language of the patient's latest message (an old chat opens in its own
+  // language), then whatever they type, straight away; the page follows on refresh.
+  const [typedLang, setTypedLang] = useState<Lang | null>(() => langOfChat(initial))
   // When the page's language changes (after the refresh, or the language switch), the page leads again.
   const [seenPageLang, setSeenPageLang] = useState(pageLang)
   if (seenPageLang !== pageLang) {
