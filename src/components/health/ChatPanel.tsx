@@ -147,6 +147,7 @@ export function ChatPanel({
     const last = initial[initial.length - 1]
     return last?.author === 'biluna' && extractBodyTag(last.body).organ ? last.id : null
   })
+  const panelOpen = open3d === 'picker' || open3d === 'attach' || open3d === 'summary'
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
@@ -230,8 +231,16 @@ export function ChatPanel({
   }
 
   return (
-    <section className="glass flex min-h-[32rem] flex-col rounded-2xl lg:h-[calc(100vh-16rem)]" aria-label={t.title}>
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-6" aria-live="polite">
+    <section
+      // With the body picker, attach box or doctor summary open, the card grows to fit it (the page scrolls)
+      // and the messages keep their own scroll area; otherwise the card fills the screen height.
+      className={`glass flex min-h-[32rem] flex-col rounded-2xl ${panelOpen ? 'lg:min-h-[calc(100vh-16rem)]' : 'lg:h-[calc(100vh-16rem)]'}`}
+      aria-label={t.title}
+    >
+      <div
+        className={`flex flex-1 flex-col gap-4 overflow-y-auto p-4 sm:p-6 ${panelOpen ? 'lg:max-h-[45vh]' : ''}`}
+        aria-live="polite"
+      >
         <div className="flex items-end gap-2.5">
           <Image src="/brand/logo-small-v4.webp" alt="" width={160} height={151} className="h-9 w-auto shrink-0" />
           <div className="max-w-[85%] rounded-2xl rounded-bl-sm bg-soft px-4 py-3 text-[0.95rem] leading-relaxed text-ink">
