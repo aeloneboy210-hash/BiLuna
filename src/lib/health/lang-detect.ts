@@ -24,3 +24,17 @@ export function detectLang(text: string): Lang {
   const banglish = words.filter((w) => BANGLISH.has(w)).length
   return banglish >= 2 && banglish > words.length / 2 ? 'bn' : 'en'
 }
+
+/**
+ * The language the patient wrote the chat in, from their own words only (not BiLuna's replies, not the
+ * "📍 Where it hurts" or "📎 file" lines, which are written in the site's language). Null if they wrote none.
+ */
+export function chatLang(history: { author: 'patient' | 'biluna'; body: string }[]): Lang | null {
+  const words = history
+    .filter((m) => m.author === 'patient')
+    .flatMap((m) => m.body.split('\n'))
+    .filter((line) => !/^\s*(📍|📎)/u.test(line))
+    .join('\n')
+    .trim()
+  return words ? detectLang(words) : null
+}

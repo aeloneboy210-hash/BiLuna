@@ -6,6 +6,7 @@ import { saveNote, saveSummary, shareSummary, stopSharing, summaryForConversatio
 import { makeSummary } from '@/lib/consult/summary'
 import type { Attachment } from '@/lib/health/attachment'
 import type { Lang } from '@/lib/i18n/lang'
+import { chatLang } from '@/lib/health/lang-detect'
 import { addMessage, createConversation, deleteAllConversations, deleteConversation, loadHistory } from '@/lib/health/chat-store'
 import { askBiLuna } from '@/lib/health/model'
 import { profileForPrompt } from '@/lib/health/profile-prompt'
@@ -76,8 +77,9 @@ export async function prepareSummary(input: { conversationId: string; lang?: Lan
   const session = await requirePortal('patient')
   const id = input.conversationId
   if (typeof id !== 'string' || !UUID.test(id)) return { ok: false, error: 'error' }
-  const lang: Lang = input.lang === 'bn' ? 'bn' : 'en'
   const history = await loadHistory(id)
+  // Written in the language the patient used in the chat; the site's language only if they typed no words.
+  const lang: Lang = chatLang(history) ?? (input.lang === 'bn' ? 'bn' : 'en')
   if (!history.some((m) => m.author === 'patient')) return { ok: false, error: 'empty' }
   const made = await makeSummary(history, lang)
   if (!made.ok) return { ok: false, error: made.reason }

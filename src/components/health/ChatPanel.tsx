@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
+import { setLang } from '@/lib/i18n/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { AttachPanel } from '@/components/health/AttachPanel'
 import { SummaryPanel } from '@/components/consult/SummaryPanel'
@@ -159,6 +160,10 @@ export function ChatPanel({
     // The pointed line uses the language of the words typed, so BiLuna replies in that language.
     const value = point ? `${pointedLine(point, words ? detectLang(words) : lang)}${words ? `\n${words}` : ''}` : words
     setError(null)
+    // The whole chat follows the patient's language: typing Bangla switches the buttons, the emergency card
+    // and everything else to Bangla straight away (and English back to English).
+    const typed = words ? detectLang(words) : null
+    if (typed && typed !== lang) void setLang(typed).then(() => router.refresh())
     setText('')
     setPoint(null)
     setFile(null)

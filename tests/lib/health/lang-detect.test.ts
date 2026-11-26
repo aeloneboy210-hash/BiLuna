@@ -16,3 +16,22 @@ test.each([
 ])('%j is %s', (text, lang) => {
   expect(detectLang(text)).toBe(lang)
 })
+
+import { chatLang } from '@/lib/health/lang-detect'
+
+test('the chat language is the language the patient wrote in', () => {
+  expect(
+    chatLang([
+      { author: 'patient', body: 'আমার মাথা ব্যথা' },
+      { author: 'biluna', body: 'It may be a headache.' },
+      { author: 'patient', body: 'দুই দিন ধরে' },
+    ]),
+  ).toBe('bn')
+  expect(chatLang([{ author: 'patient', body: 'I have a cough' }])).toBe('en')
+  expect(chatLang([{ author: 'patient', body: 'amar buke betha korche' }])).toBe('bn')
+})
+
+test('tap and attachment lines do not decide the language; none at all gives null', () => {
+  expect(chatLang([{ author: 'patient', body: '📍 Where it hurts: Chest · Pain 3/10' }, { author: 'patient', body: 'বুকে চাপ লাগে' }])).toBe('bn')
+  expect(chatLang([{ author: 'patient', body: '📎 report.jpg' }])).toBeNull()
+})
