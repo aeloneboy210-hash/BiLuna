@@ -8,7 +8,10 @@ declare
   n int;
   ok boolean;
 begin
-  select id into pa from auth.users where email = 'patient@biluna.demo';
+  -- A fresh test patient A, so the demo patient's real (fictional) profile and history don't affect the counts.
+  insert into public.demo_accounts (email, role, display_name) values ('patient-a@biluna.demo', 'patient', 'Test patient A');
+  pa := gen_random_uuid();
+  insert into auth.users (id, email) values (pa, 'patient-a@biluna.demo');
   select id into doc from auth.users where email = 'doctor@biluna.demo';
   select id into org from auth.users where email = 'hospital@biluna.demo';
   if pa is null or doc is null or org is null then raise exception 'demo accounts missing'; end if;
