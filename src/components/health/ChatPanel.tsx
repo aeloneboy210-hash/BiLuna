@@ -103,13 +103,14 @@ export function ChatPanel({
   initial,
   feedback,
   firstQuestion,
-  t,
-  lang,
-  emergency,
+  t: pageT,
+  lang: pageLang,
+  emergency: pageEmergency,
   summary,
   doctorName,
-  tSummary,
-  tReview,
+  tSummary: pageTSummary,
+  tReview: pageTReview,
+  other,
 }: {
   conversationId: string | null
   initial: Bubble[]
@@ -122,8 +123,23 @@ export function ChatPanel({
   doctorName: string
   tSummary: Dictionary['summary']
   tReview: Dictionary['review']
+  /** The same chat words in the other language, so the chat can switch the moment the patient types. */
+  other: { lang: Lang; t: Dictionary['health']; emergency: string; tSummary: Dictionary['summary']; tReview: Dictionary['review'] }
 }) {
   const router = useRouter()
+  // The chat's own language: it follows what the patient types straight away; the page follows on refresh.
+  const [typedLang, setTypedLang] = useState<Lang | null>(null)
+  // When the page's language changes (after the refresh, or the language switch), the page leads again.
+  const [seenPageLang, setSeenPageLang] = useState(pageLang)
+  if (seenPageLang !== pageLang) {
+    setSeenPageLang(pageLang)
+    setTypedLang(null)
+  }
+  const chatLang = typedLang ?? pageLang
+  const strings =
+    chatLang === pageLang ? { t: pageT, emergency: pageEmergency, tSummary: pageTSummary, tReview: pageTReview } : other
+  const { t, emergency, tSummary, tReview } = strings
+  const lang = chatLang
   const [messages, setMessages] = useState<Bubble[]>(initial)
   const [conversationId, setConversationId] = useState(initialId)
   const [text, setText] = useState('')
@@ -163,6 +179,7 @@ export function ChatPanel({
     // The whole chat follows the patient's language: typing Bangla switches the buttons, the emergency card
     // and everything else to Bangla straight away (and English back to English).
     const typed = words ? detectLang(words) : null
+    if (typed) setTypedLang(typed)
     setText('')
     setPoint(null)
     setFile(null)
@@ -174,7 +191,7 @@ export function ChatPanel({
       let result: Awaited<ReturnType<typeof sendMessage>>
       try {
         // Set first, so the refresh after the reply brings the page back in the new language with the reply.
-        if (typed && typed !== lang) await setLang(typed).catch(() => undefined)
+        if (typed && typed !== pageLang) await setLang(typed).catch(() => undefined)
         result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
       } catch {
         result = { ok: false, error: 'error' }

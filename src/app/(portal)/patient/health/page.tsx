@@ -4,6 +4,7 @@ import { ConversationList } from '@/components/health/ConversationList'
 import { requirePortal } from '@/lib/auth/require-portal'
 import { demoDoctor, summaryForConversation } from '@/lib/consult/store'
 import { getMessages, listConversations } from '@/lib/health/chat-store'
+import { getDictionary } from '@/lib/i18n/dictionaries'
 import { getDict } from '@/lib/i18n/server'
 import { feedbackFor } from '@/lib/intelligence/store'
 
@@ -17,6 +18,9 @@ const UUID = /^[0-9a-f-]{36}$/i
 export default async function HealthPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requirePortal('patient')
   const { dict, lang } = await getDict()
+  // The chat also gets its words in the other language, so it can switch the moment the patient types.
+  const otherLang = lang === 'bn' ? 'en' : 'bn'
+  const otherDict = getDictionary(otherLang)
   const params = await searchParams
   const c = typeof params.c === 'string' && UUID.test(params.c) ? params.c : null
   const q = typeof params.q === 'string' ? params.q.slice(0, 2000) : ''
@@ -47,6 +51,13 @@ export default async function HealthPage({ searchParams }: { searchParams: Promi
           doctorName={(await demoDoctor())?.name ?? 'Dr. Karim (demo doctor)'}
           tSummary={dict.summary}
           tReview={dict.review}
+          other={{
+            lang: otherLang,
+            t: otherDict.health,
+            emergency: otherDict.common.emergency,
+            tSummary: otherDict.summary,
+            tReview: otherDict.review,
+          }}
         />
       </div>
     </div>
