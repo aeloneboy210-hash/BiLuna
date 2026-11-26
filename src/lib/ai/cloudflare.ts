@@ -56,3 +56,67 @@ export async function cloudflareChat(model: string, system: string, user: string
     return { ok: false, error: error instanceof Error ? error.name : 'error', ms: Date.now() - started }
   }
 }
+
+/** The model BiLuna uses on Cloudflare; set BILUNA_CF_MODEL in Vercel to change it without a code change. */
+export const CLOUDFLARE_MODEL = process.env.BILUNA_CF_MODEL || '@cf/google/gemma-4-26b-a4b-it'
+
+type Part = { type: 'text'; text: string } | { type: 'file'; data: string; mediaType: string; filename: string }
+type Message = { role: 'user' | 'assistant'; content: string | Part[] }
+type OpenAIPart = { type: 'text'; text: string } | { type: 'image_url'; image_url: { url: string } }
+
+/** Thrown when Cloudflare is busy or the free daily allowance is used up, so the chat says "busy". */
+export class BusyError extends Error {
+  name = 'BusyError'
+}
+
+const PDF_NOTE =
+  '[The patient attached a PDF, which cannot be read here. Do not guess its contents. Ask them kindly to send a clear photo of the page instead.]'
+
+/** Turns BiLuna's messages into Cloudflare's chat format. Photos go as images; a PDF becomes a short note. */
+export function toCloudflareMessages(instructions: string, messages: Message[]) {
+  return [
+    { role: 'system' as const, content: instructions },
+    ...messages.map((m) => ({
+      role: m.role,
+      content:
+        typeof m.content === 'string'
+          ? m.content
+          : m.content.map(
+              (p): OpenAIPart =>
+                p.type === 'text'
+                  ? p
+                  : p.mediaType === 'application/pdf'
+                    ? { type: 'text', text: PDF_NOTE }
+                    : { type: 'image_url', image_url: { url: `data:${p.mediaType};base64,${p.data}` } },
+            ),
+    })),
+  ]
+}
+
+/** One call to Gemma 4 on Cloudflare with BiLuna's instructions and the recent chat. */
+export async function cloudflareGenerate({ instructions, messages }: { instructions: string; messages: Message[] }) {
+  const account = process.env.CLOUDFLARE_ACCOUNT_ID
+  const token = process.env.CLOUDFLARE_AI_TOKEN
+  if (!account || !token) throw new Error('Cloudflare is not set up')
+  const res = await fetch(`https://api.cloudflare.com/client/v4/accounts/${account}/ai/v1/chat/completions`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: CLOUDFLARE_MODEL,
+      max_tokens: 1500,
+      temperature: 0.3,
+      ...(CLOUDFLARE_MODEL.includes('gemma-4') ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+      messages: toCloudflareMessages(instructions, messages),
+    }),
+    signal: AbortSignal.timeout(25_000),
+  })
+  if (res.status === 429) throw new BusyError('Cloudflare busy')
+  const body = (await res.json().catch(() => null)) as {
+    choices?: { message?: { content?: string | null } }[]
+    errors?: { code?: number }[]
+  } | null
+  // 4006: the free daily allowance is used up. Treated as busy so the patient sees a calm message.
+  if (body?.errors?.some((e) => e.code === 4006)) throw new BusyError('Cloudflare daily allowance used')
+  if (!res.ok) throw new Error(`Cloudflare ${res.status}`)
+  return { text: body?.choices?.[0]?.message?.content ?? '' }
+}

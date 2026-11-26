@@ -67,3 +67,14 @@ test('makeSummary reports a model failure as busy or error, never throws', async
   const r = await makeSummary(history, 'en', { generate: async () => Promise.reject(new Error('x')) })
   expect(r).toEqual({ ok: false, reason: 'error' })
 })
+
+test('a summary that adds a dose nobody wrote in the chat is refused', async () => {
+  const withDose = JSON.stringify({ ...JSON.parse(good), medicines: ['Paracetamol 500 mg twice a day'] })
+  expect(await makeSummary(history, 'en', { generate: async () => ({ text: withDose }) })).toEqual({ ok: false, reason: 'unsafe' })
+})
+
+test('Cloudflare being busy is reported as busy', async () => {
+  const { BusyError } = await import('@/lib/ai/cloudflare')
+  const r = await makeSummary(history, 'en', { generate: async () => Promise.reject(new BusyError('x')) })
+  expect(r).toEqual({ ok: false, reason: 'busy' })
+})

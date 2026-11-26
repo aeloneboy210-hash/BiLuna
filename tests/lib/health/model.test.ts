@@ -221,3 +221,28 @@ test('no backup guess on follow-up questions, after a 📍 tap, or on a danger m
   const c = await askBiLuna(danger, 'en', { generate: fake(good).generate })
   expect(c.ok && c.text).not.toContain('[[body:')
 })
+
+test('a reply that invents a dose is written again without it', async () => {
+  const f = fake(`Give him 250 mg paracetamol.\n\n${CONFIDENCE_PREFIX.en} general.`, good)
+  const r = await askBiLuna([{ author: 'patient', body: 'My son has a fever' }], 'en', { generate: f.generate })
+  expect(r).toEqual({ ok: true, text: good, kind: 'answer', retried: true })
+  expect(f.calls[1].instructions).toMatch(/dose/i)
+})
+
+test('a reply that invents a dose twice is refused', async () => {
+  const bad = `Take 1000 mg.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const f = fake(bad, bad)
+  expect(await askBiLuna([{ author: 'patient', body: 'headache' }], 'en', { generate: f.generate })).toEqual({ ok: false, reason: 'unsafe' })
+})
+
+test('a dose the patient wrote, or one from their uploaded prescription, may be repeated', async () => {
+  const echo = `Napa 500 mg is paracetamol.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const a = await askBiLuna([{ author: 'patient', body: 'What is Napa 500mg?' }], 'en', { generate: fake(echo).generate })
+  expect(a.ok).toBe(true)
+  const rx = `Line 1: Napa 500 mg, 1+0+1.\n\n${CONFIDENCE_PREFIX.en} general.`
+  const b = await askBiLuna([{ author: 'patient', body: '📎 rx.jpg' }], 'en', {
+    generate: fake(rx).generate,
+    attachment: { name: 'rx.jpg', mediaType: 'image/jpeg', data: 'AAAA' },
+  })
+  expect(b.ok).toBe(true)
+})

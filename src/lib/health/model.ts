@@ -1,6 +1,7 @@
 import 'server-only'
 import { google } from '@ai-sdk/google'
 import { APICallError, generateText } from 'ai'
+import { BusyError, cloudflareGenerate, cloudflareReady } from '@/lib/ai/cloudflare'
 import type { Lang } from '@/lib/i18n/lang'
 import { bodyTag, extractBodyTag, guessOrgan, POINT_MARK } from '@/lib/body/chat-body'
 import { buildInstructions } from './instructions'
@@ -8,6 +9,7 @@ import type { Attachment } from './attachment'
 import { extractOptions, optionsTag } from './options'
 import { placeQuestion, placeRound } from './place-questions'
 import { detectDanger } from './danger'
+import { unexplainedDoses } from './dose-guard'
 import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 
@@ -25,10 +27,18 @@ const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
 const HISTORY_LIMIT = 12
 const TIMEOUT_MS = 25_000
 
+const DOSE_RETRY_NOTE =
+  '\n\nYour previous draft gave a medicine amount or dose. Rewrite it with no amounts, no mg or ml, no number of tablets and no schedule; say that a doctor or pharmacist must decide the dose.'
+
 const RETRY_NOTE =
   '\n\nYour previous draft stated a diagnosis or a single cause. Rewrite it as two or three possibilities, and do not use the words "the cause is" or "diagnosis".'
 
+/**
+ * Gemma 4 on Cloudflare when its keys are set (Cloudflare keeps no data and does not train on it), else
+ * Google. Google's terms do not allow medical advice, so real patients must only ever reach Cloudflare.
+ */
 export const defaultGenerate: Generate = async ({ instructions, messages }) => {
+  if (cloudflareReady()) return cloudflareGenerate({ instructions, messages })
   const result = await generateText({
     model: google(process.env.BILUNA_AI_MODEL || DEFAULT_MODEL),
     instructions,
@@ -71,17 +81,25 @@ export async function askBiLuna(
   const instructions = buildInstructions(lang, deps.profile ?? null)
 
   try {
-    for (const extra of ['', RETRY_NOTE]) {
+    // A failed first draft is written again once, with a note saying what was wrong.
+    let extra = ''
+    for (let attempt = 0; attempt < 2; attempt++) {
       const { text } = await generate({ instructions: instructions + extra, messages })
       // The 3D body tag comes off before the safety check and goes back at the very end, answers only.
       const tagged = extractBodyTag(text)
       // Tap-to-answer options also come off before the check, and go back on answers and follow-up questions.
       const opts = extractOptions(tagged.text)
       const checked = checkReply(opts.text, lang)
+      // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription,
+      // may be repeated; any other amount means the draft is written again.
+      const said = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
+      if (checked.ok && !file && unexplainedDoses(checked.text, said).length) {
+        extra = DOSE_RETRY_NOTE
+        continue
+      }
       if (checked.ok) {
         // If the AI left the 3D tag out, the patient's own words choose the organ, so the body still lights
-        // up on stage. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
-        const said = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
+        // up. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
         const organ =
           tagged.organ ?? (said.trimStart().startsWith(POINT_MARK) || detectDanger(said) ? null : guessOrgan(said))
         let body = organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(organ)}` : checked.text
@@ -103,12 +121,14 @@ export async function askBiLuna(
             .join('\n')
             .trim()
         }
-        return { ok: true, text: body, kind: checked.kind, retried: extra !== '' }
+        return { ok: true, text: body, kind: checked.kind, retried: attempt > 0 }
       }
       if (checked.reason === 'empty') return { ok: false, reason: 'error' }
+      extra = RETRY_NOTE
     }
     return { ok: false, reason: 'unsafe' }
   } catch (error) {
+    if (error instanceof BusyError) return { ok: false, reason: 'busy' }
     if (APICallError.isInstance(error) && error.statusCode === 429) return { ok: false, reason: 'busy' }
     // Log only what kind of failure it was, never the message text.
     const name = error instanceof Error ? error.name : 'UnknownError'

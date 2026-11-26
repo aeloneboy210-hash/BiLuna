@@ -1,6 +1,8 @@
 import 'server-only'
 import { APICallError } from 'ai'
 import type { Lang } from '@/lib/i18n/lang'
+import { BusyError } from '@/lib/ai/cloudflare'
+import { unexplainedDoses } from '@/lib/health/dose-guard'
 import { defaultGenerate, type ChatTurn, type Generate } from '@/lib/health/model'
 import { FORBIDDEN } from '@/lib/health/safety-filter'
 
@@ -99,8 +101,11 @@ export async function makeSummary(
       instructions: summaryInstructions(lang),
       messages: [{ role: 'user', content: `The chat:\n\n${transcript}` }],
     })
+    // The summary may only repeat amounts that are already in the chat; it never adds a dose.
+    if (unexplainedDoses(text, transcript).length) return { ok: false, reason: 'unsafe' }
     return parseSummary(text, lang)
   } catch (e) {
+    if (e instanceof BusyError) return { ok: false, reason: 'busy' }
     if (APICallError.isInstance(e) && e.statusCode === 429) return { ok: false, reason: 'busy' }
     return { ok: false, reason: 'error' }
   }
