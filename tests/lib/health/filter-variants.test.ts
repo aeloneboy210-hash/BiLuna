@@ -43,3 +43,29 @@ test.each(['[ASK] Where does it hurt, and since when?', '[SMALL_TALK] Hello! How
     expect(r.ok && r.kind).not.toBe('answer')
   },
 )
+
+// Second review of the bug-hunt fixes.
+test.each(['আসল কারণ হলো ডেঙ্গু, ডাক্তার দেখান।', 'The cause is dengue; a doctor can confirm.'])(
+  'mentioning a doctor does not excuse a diagnosis: %p',
+  (text) => expect(checkReply(`${text}\n\n${CONFIDENCE_PREFIX.en} x`, 'en')).toEqual({ ok: false, reason: 'diagnosis' }),
+)
+
+test.each([
+  'Since you have diabetes, keep checking your sugar.',
+  'Because you have asthma, keep your inhaler close.',
+  'In case you have asthma, tell the doctor.',
+  'If you think you have dengue, get a blood test.',
+  'I cannot say you have dengue.',
+  'আপনার ডায়াবেটিস আছে বলে চিনি কম খাওয়া ভালো।',
+  'It may be dengue or a viral fever.',
+])('restating a known condition or a possibility is not blocked: %p', (text) => {
+  expect(checkReply(`${text}\n\n${CONFIDENCE_PREFIX.en} x`, 'en').ok).toBe(true)
+})
+
+test.each(['[ASK] আমি এখানে আছি। কবে থেকে জ্বর?', '[SMALL_TALK] হ্যালো! আমি এখানে আছি, কী সাহায্য করতে পারি?', '[SMALL_TALK] Hi! Take care.', '[ASK] Tell me the rest. How long?'])(
+  'greetings and questions keep their kind: %p',
+  (text) => {
+    const r = checkReply(text, 'bn')
+    expect(r.ok && r.kind).not.toBe('answer')
+  },
+)

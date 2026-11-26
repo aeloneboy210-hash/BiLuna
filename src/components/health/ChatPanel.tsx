@@ -209,8 +209,9 @@ export function ChatPanel({
         // Set first, so the refresh after the reply brings the page back in the new language with the reply.
         // Compared with what was last saved, not the page: on a slow phone the page can still be the old one.
         if (typed && typed !== savedLang.current) {
-          savedLang.current = typed
-          await setLang(typed).catch(() => undefined)
+          await setLang(typed)
+            .then(() => (savedLang.current = typed))
+            .catch(() => undefined)
         }
         result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
       } catch {
@@ -550,7 +551,7 @@ export function ChatPanel({
           </button>
         </div>
         <p className="text-xs text-muted">
-          {t.fictional} <span className="hidden sm:inline">· {t.enterHint}</span>
+          {t.fictional} <span className="hidden pointer-fine:inline">· {t.enterHint}</span>
         </p>
         <p className="text-sm text-danger">{emergency}</p>
       </form>

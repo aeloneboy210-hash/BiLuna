@@ -319,3 +319,17 @@ test('a dose BiLuna once wrote outside a medicine line does not become allowed l
   const r = await askBiLuna(history, 'en', { generate: fake(again, again).generate })
   expect(r).toEqual({ ok: false, reason: 'unsafe' })
 })
+
+test.each([
+  '1. ✅ Napa 500 mg 1+0+1',
+  '১) নাপা ৫০০ মি.গ্রা. ১+০+১',
+  '- **Napa 500 mg** — 1+0+1',
+  '1. Napa Extend 665 mg: 1+0+1',
+  '| Napa | 500 mg | 1+0+1 |',
+  '✔️ Seclo 20 mg 1+0+0',
+])('a prescription read in the format %p is allowed', async (line) => {
+  const file = { name: 'rx.jpg', mediaType: 'image/jpeg', data: 'AAAA' }
+  const read = `A prescription.\n${line}\n\n${CONFIDENCE_PREFIX.en} general.`
+  const r = await askBiLuna([{ author: 'patient', body: '📎 rx.jpg' }], 'en', { attachment: file, generate: fake(read).generate })
+  expect(r.ok).toBe(true)
+})

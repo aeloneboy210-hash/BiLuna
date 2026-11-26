@@ -66,11 +66,12 @@ export const defaultGenerate: Generate = async ({ instructions, messages }) => {
  * a reply that states a diagnosis is regenerated once, then refused.
  */
 /**
- * A line where BiLuna reads one medicine off an uploaded prescription: it starts with ✅, ⚠️ or ❓ (as the
- * instructions ask), with "Line 3" / "লাইন ৩", or is a numbered item naming a dosage form (Tab, Cap, Syp…).
+ * A line where BiLuna reads one medicine off an uploaded prescription: a ✅ ⚠️ ❓ ✔ line (as the
+ * instructions ask), "Line 3" / "লাইন ৩", a list item, a numbered item or a table row. A dose in an ordinary
+ * sentence ("You can take iron 200 mg daily") is never one of these, so it is still caught.
  */
 const MEDICINE_LINE =
-  /^\s*(?:[-*•]\s*)?(?:\*\*)?(?:✅|⚠️|⚠|❓|(?:line|লাইন)\s*[\d০-৯]|[\d০-৯]+[.)]\s.*\b(?:tab|tablet|cap|capsule|syp|syrup|susp|inj|drop)s?\b|[\d০-৯]+[.)]\s.*(?:ট্যাব|ক্যাপ|সিরাপ|ড্রপ))/iu
+  /^\s*(?:[-*•]|[\d০-৯]+[.)])?\s*(?:\*\*)?(?:✅|⚠️?|❓|✔️?|☑️?)|^\s*(?:line|লাইন)\s*[\d০-৯]|^\s*(?:[-*•]|[\d০-৯]+[.)])\s+\S|^\s*\|/iu
 const medicineLines = (text: string) => text.split('\n').filter((l) => MEDICINE_LINE.test(l))
 const otherLines = (text: string) => text.split('\n').filter((l) => !MEDICINE_LINE.test(l))
 

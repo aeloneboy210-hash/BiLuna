@@ -43,7 +43,7 @@ const PATTERNS: [RegExp, (m: RegExpExecArray) => string][] = [
     new RegExp(String.raw`${NUM}\s*(?:(?:mg|milligrams?)\b(?!\s*\/\s*d?l\b)|মি\.?\s?গ্রা(?:ম)?|মিলিগ্রাম)`, 'gi'),
     (m) => `${amount(m[1])}mg`,
   ],
-  [new RegExp(String.raw`${NUM}\s*(?:(?:g|gm|gms|grams?)\b(?!\s*\/)|গ্রাম)`, 'gi'), (m) => `${amount(m[1])}g`],
+  [new RegExp(String.raw`${NUM}\s*(?:(?:g|gm|gms|grams?)\b(?!\s*\/)(?!\s+(?:of|fiber|fibre|protein|sugar|fat|carbs?|salt|network|data)\b)|গ্রাম)`, 'gi'), (m) => `${amount(m[1])}g`],
   [new RegExp(String.raw`${NUM}\s*(?:(?:ml|cc)\b(?!\s*\/)|মিলি(?!গ্রাম)(?:লিটার)?|এমএল)`, 'gi'), (m) => `${amount(m[1])}ml`],
   [new RegExp(String.raw`${NUM}\s*(?:iu\b(?!\s*\/\s*d?l\b)(?!\s*\/\s*l\b)|আইইউ)`, 'gi'), (m) => `${amount(m[1])}iu`],
   [
@@ -51,7 +51,12 @@ const PATTERNS: [RegExp, (m: RegExpExecArray) => string][] = [
     (m) => `${amount(m[1])}tablet`,
   ],
   [
-    new RegExp(String.raw`(?<![\d/.\-+])(\d)\s*[-+]\s*(\d)\s*[-+]\s*(\d)(?![\d/\-+]|\.\d)`, 'g'),
+    new RegExp(String.raw`(?<![\d/.\-+])(\d)\s*\+\s*(\d)\s*\+\s*(\d)(?![\d/\-+]|\.\d)`, 'g'),
+    (m) => `${m[1]}+${m[2]}+${m[3]}`,
+  ],
+  // The dash form ("1-0-1") only with 0, 1 or 2 per time of day, so "4-7-8 breathing" or "3-2-1" is not one.
+  [
+    new RegExp(String.raw`(?<![\d/.\-+])([0-2])\s*-\s*([0-2])\s*-\s*([0-2])(?![\d/\-+]|\.\d)`, 'g'),
     (m) => `${m[1]}+${m[2]}+${m[3]}`,
   ],
   [new RegExp(String.raw`${NUM}\s*(?:teaspoons?\b|tablespoons?\b|tsp\b|tbsp\b|চামচ)`, 'gi'), (m) => `${amount(m[1])}spoon`],

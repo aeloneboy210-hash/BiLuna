@@ -42,3 +42,7 @@ test('the first bytes must match the type: a renamed file is refused', () => {
     error: 'fileType',
   })
 })
+
+test('broken base64 is refused, not a crash', () => {
+  expect(checkAttachment({ name: 'a.pdf', mediaType: 'application/pdf', data: 'JVBER' })).toEqual({ ok: false, error: 'fileType' })
+})

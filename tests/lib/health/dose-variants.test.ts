@@ -50,3 +50,8 @@ test('a schedule at the end of a sentence is still a schedule', () => {
   expect(dosesIn('Napa 500 mg, 1+0+1.')).toEqual(['500mg', '1+0+1'])
   expect(dosesIn('খাবেন ১-০-১।')).toEqual(['1+0+1'])
 })
+
+test.each(['30 g fiber a day', 'about 2 g of protein', 'my 4g network is slow', 'try 4-7-8 breathing', 'score 3-2-1', 'Week 1 - 2 - 3'])(
+  'everyday advice is not a dose: %p',
+  (text) => expect(dosesIn(text)).toEqual([]),
+)

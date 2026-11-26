@@ -81,20 +81,27 @@ const DISEASES_EN =
 const DISEASES_BN =
   'ডেঙ্গু|টাইফয়েড|ম্যালেরিয়া|কোভিড|করোনা|যক্ষ্মা|নিউমোনিয়া|ক্যান্সার|ডায়াবেটিস|হাঁপানি|অ্যাজমা|মাইগ্রেন|জন্ডিস|হেপাটাইটিস|কলেরা|অ্যাপেন্ডিসাইটিস|গ্যাস্ট্রিক|আলসার|চিকুনগুনিয়া|স্ট্রোক|হার্ট অ্যাটাক'
 
-/** Sentences that name the illness as a fact. Questions ("Do you have asthma?") and "if you have…" do not count. */
+/**
+ * Sentences that name the illness as a fact. Only where "you have …" opens the sentence or a clause, so
+ * "Since you have diabetes…", "If you think you have dengue…" and questions do not count; a Bangla
+ * "আপনার ডেঙ্গু হয়েছে" only when it ends the sentence, so "আপনার ডায়াবেটিস আছে বলে…" does not.
+ */
 const DIAGNOSIS: RegExp[] = [
-  new RegExp(String.raw`(?<!\b(?:if|whether|when|unless|do|does|did|may|might|could)\s)\byou (?:have|'ve got|have got|are suffering from|suffer from)\s+(?:an? )?(?:${DISEASES_EN})\b`),
-  new RegExp(String.raw`\b(?:this|it) (?:is|'s) (?:most likely|definitely|certainly|clearly|surely) (?:an? )?(?:${DISEASES_EN})\b`),
-  /\byou are suffering from\b/,
-  new RegExp(String.raw`আপনার (?:${DISEASES_BN})(?: রোগ)? (?:হয়েছে|আছে)`.normalize('NFC')),
+  new RegExp(String.raw`(?:^|[,;:]\s*)you (?:have|'ve got|have got|are suffering from|suffer from)\s+(?:an? )?(?:${DISEASES_EN})\b`),
+  new RegExp(String.raw`(?:^|[,;:]\s*)(?:this|it) (?:is|'s) (?:most likely|definitely|certainly|clearly|surely) (?:an? )?(?:${DISEASES_EN})\b`),
+  /(?:^|[,;:]\s*)you are suffering from\b/,
+  new RegExp(String.raw`(?:^|[,;:]\s*)আপনার (?:${DISEASES_BN})(?: রোগ)? (?:হয়েছে|আছে)\s*[।.!]?$`.normalize('NFC')),
   new RegExp(String.raw`^(?:এটা|এটি|এটাই|এটিই) (?:${DISEASES_BN})(?: রোগ)?\s*(?:হয়েছে)?\s*[।.!]?$`.normalize('NFC')),
 ]
 
 /** After a forbidden phrase, words that turn it into a careful sentence: "the cause is not clear", "…কারণ নয়". */
 const CAREFUL_AFTER = /^(?:n['’]?t\b|\s+(?:not|unclear|unknown|uncertain|hard|difficult)\b|\s*(?:নয়|না)(?:\s|[,।.]|$))/
-/** In the same sentence, words that make it careful: only a doctor can say, it cannot be said for sure. */
+/**
+ * In the same sentence, real hedges that make it careful: only a doctor can say, it cannot be said without
+ * tests. Merely mentioning a doctor ("…, see a doctor") does not.
+ */
 const CAREFUL_SENTENCE =
-  /\bonly a doctor\b|\ba doctor (?:can|must|will|needs to)\b|\bwithout (?:a |any )?(?:tests?|exam)|ডাক্তার|বলা যায় না|বলা সম্ভব নয়|জানা যায় না/
+  /\bonly a doctor\b|\bwithout (?:a |any )?(?:tests?|exam)|ডাক্তারই|বলা যায় না|বলা সম্ভব নয়|জানা যায় না/
 
 function statesDiagnosis(text: string): boolean {
   const sentences = text
@@ -121,8 +128,11 @@ function statesDiagnosis(text: string): boolean {
 }
 
 /** Advice or a guess at the illness: such a reply is an answer, whatever mark it starts with. */
-const ADVICE =
-  /\b(?:take|rest|drink|eat|avoid|apply|likely|probably|possibly|may be|might be|could be|sounds like|seems like)\b|খান|খাবেন|নিন|বিশ্রাম|পান করুন|সম্ভবত|হতে পারে|মনে হচ্ছে/i
+const BN_ADVICE = ['খান', 'খাবেন', 'নিন', 'বিশ্রাম', 'পান করুন', 'সম্ভবত', 'হতে পারে', 'মনে হচ্ছে']
+const ADVICE = new RegExp(
+  String.raw`\btake (?:a |an |some |your |this |it |two |one |\d)|\bget (?:some )?rest\b|\brest (?:well|at home|for)\b|\bdrink (?:plenty|lots|more|water|fluids)|\bavoid\b|\bapply\b|\blikely\b|\bprobably\b|\bpossibly\b|\b(?:may|might|could) be\b|\bsounds like\b|\bseems like\b|(?<![ঀ-৿])(?:${BN_ADVICE.join('|')})(?![ঀ-৿])`,
+  'i',
+)
 
 /** The parts of a reply that are not questions. */
 function statements(text: string): string {

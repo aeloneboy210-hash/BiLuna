@@ -24,7 +24,12 @@ export function checkAttachment(a: Attachment): { ok: true } | { ok: false; erro
 /** The opening bytes of each allowed type, as base64 text. */
 function startsLike(mediaType: string, base64: string): boolean {
   // atob works on the server and in the browser (this file is shared); 24 base64 letters are 18 bytes.
-  const head = atob(base64.slice(0, 24))
+  let head: string
+  try {
+    head = atob(base64.slice(0, 24))
+  } catch {
+    return false
+  }
   const at = (i: number, ...b: number[]) => b.every((x, k) => head.charCodeAt(i + k) === x)
   if (mediaType === 'image/jpeg') return at(0, 0xff, 0xd8, 0xff)
   if (mediaType === 'image/png') return at(0, 0x89, 0x50, 0x4e, 0x47)
