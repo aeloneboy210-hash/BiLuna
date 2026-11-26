@@ -42,15 +42,16 @@ const SUMMARY_FORBIDDEN = ['the diagnosis is', 'diagnosis:', 'diagnosed with', '
 
 export function summaryInstructions(lang: Lang): string {
   const language = lang === 'bn' ? 'Bangla' : 'English'
+  const example = lang === 'bn' ? 'ভাইরাল গলা সংক্রমণ হতে পারে' : 'May be a viral throat infection'
   return `You prepare a short summary of a patient's chat with BiLuna, for the patient to show their doctor.
-Write every value in ${language}, in short plain words. Use only what the patient said and what BiLuna already said in the chat: never invent a symptom, a time, a medicine or a dose.
+Write every value in ${language} only, in short plain words, even if the patient also wrote in another language. Never add a translation in brackets. Use only what the patient said and what BiLuna already said in the chat: never invent a symptom, a time, a medicine or a dose.
 Reply with JSON only, with exactly these keys:
 {"concern": "the main problem in one sentence",
  "where": "where on the body, or empty",
  "pain": "pain level such as 6/10, or empty",
  "since": "since when, or empty",
  "symptoms": ["other symptoms the patient mentioned"],
- "possibilities": ["what BiLuna said it may be, each a short sentence such as 'May be a viral throat infection' (Bangla: 'ভাইরাল গলা সংক্রমণ হতে পারে')"],
+ "possibilities": ["what BiLuna said it may be, each a short sentence such as '${example}'"],
  "medicines": ["medicines the patient takes or that were on an uploaded prescription, exactly as written"],
  "questions": ["two to four useful questions to ask the doctor"],
  "redFlags": ["warning signs BiLuna said need urgent care"]}

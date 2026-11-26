@@ -51,6 +51,12 @@ test('the instructions ask for only what was said, possibilities with "may", in 
   for (const s of ['JSON', 'possibilities', 'may', 'Bangla', 'never invent']) expect(i).toContain(s)
 })
 
+test('an English summary is not shown a Bangla example (the model copied it into a mixed-language chat)', () => {
+  expect(summaryInstructions('en')).not.toMatch(/[ঀ-৿]/)
+  expect(summaryInstructions('en')).toContain('Never add a translation')
+  expect(summaryInstructions('bn')).toContain('ভাইরাল গলা সংক্রমণ হতে পারে')
+})
+
 test('makeSummary sends the chat and returns the parsed summary', async () => {
   let sent = ''
   const r = await makeSummary(history, 'en', {
