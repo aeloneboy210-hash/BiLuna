@@ -163,7 +163,6 @@ export function ChatPanel({
     // The whole chat follows the patient's language: typing Bangla switches the buttons, the emergency card
     // and everything else to Bangla straight away (and English back to English).
     const typed = words ? detectLang(words) : null
-    if (typed && typed !== lang) void setLang(typed).then(() => router.refresh())
     setText('')
     setPoint(null)
     setFile(null)
@@ -174,6 +173,8 @@ export function ChatPanel({
     void (async () => {
       let result: Awaited<ReturnType<typeof sendMessage>>
       try {
+        // Set first, so the refresh after the reply brings the page back in the new language with the reply.
+        if (typed && typed !== lang) await setLang(typed).catch(() => undefined)
         result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
       } catch {
         result = { ok: false, error: 'error' }
