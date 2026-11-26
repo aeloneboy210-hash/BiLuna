@@ -59,10 +59,29 @@ export function checkReply(text: string, lang: Lang): CheckResult {
     (marked === 'clarify' && trimmed.length <= CLARIFY_MAX && /[?？]/.test(trimmed))
   if (shortEnough) return { ok: true, text: trimmed, kind: marked }
 
+  trimmed = joinConfidenceHeading(trimmed)
   const lines = trimmed.split('\n').filter((l) => l.trim())
   const last = lines[lines.length - 1].trim().replace(/^[*_#>\s]+/, '')
   if (last.startsWith(CONFIDENCE_PREFIX.en) || last.startsWith(CONFIDENCE_PREFIX.bn)) {
     return { ok: true, text: trimmed, kind: 'answer' }
   }
   return { ok: true, text: `${trimmed}\n\n${DEFAULT_CONFIDENCE[lang]}`, kind: 'answer' }
+}
+
+/**
+ * The model sometimes writes "How sure I am:" as a heading with its text on the next line. Joins them into
+ * one line, so the check sees the confidence line and does not add a second one.
+ */
+function joinConfidenceHeading(text: string): string {
+  const raw = text.split('\n')
+  const prefixes = Object.values(CONFIDENCE_PREFIX)
+  for (let i = 0; i < raw.length; i++) {
+    const clean = raw[i].trim().replace(/^[*_#>\s]+/, '').replace(/[*_\s]+$/, '')
+    const prefix = prefixes.find((p) => clean === p)
+    if (!prefix) continue
+    const j = raw.findIndex((l, k) => k > i && l.trim())
+    if (j < 0) continue
+    raw.splice(i, j - i + 1, `${prefix} ${raw[j].trim().replace(/^[*_\s]+/, '')}`)
+  }
+  return raw.join('\n')
 }

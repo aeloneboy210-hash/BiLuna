@@ -131,3 +131,11 @@ describe('the short-reply marks cannot hide health advice', () => {
     expect(s).toMatch(/how you work/i)
   })
 })
+
+test('a confidence heading with the text on the next line is joined, not doubled', () => {
+  const r = checkReply('It may be a cold.\n\nHow sure I am:\nI am not sure yet; a clinician must check.', 'en')
+  expect(r.ok && r.text).toBe('It may be a cold.\n\nHow sure I am: I am not sure yet; a clinician must check.')
+  const b = checkReply('ঠান্ডা লাগতে পারে।\n**আমি কতটা নিশ্চিত:**\nনিশ্চিত নই; একজন চিকিৎসককে দেখতে হবে।', 'bn')
+  expect(b.ok && b.text).toBe('ঠান্ডা লাগতে পারে।\nআমি কতটা নিশ্চিত: নিশ্চিত নই; একজন চিকিৎসককে দেখতে হবে।')
+  expect(b.ok && b.text.split('আমি কতটা নিশ্চিত').length).toBe(2)
+})
