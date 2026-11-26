@@ -130,7 +130,7 @@ export function ChatPanel({
   // The chat's own language: the language of the patient's latest message (an old chat opens in its own
   // language), then whatever they type, straight away; the page follows on refresh.
   const [typedLang, setTypedLang] = useState<Lang | null>(() => langOfChat(initial))
-  // When the page's language changes (after the refresh, or the language switch), the page leads again.
+  // When the page's language changes (after the refresh that follows typing), the page leads again.
   const [seenPageLang, setSeenPageLang] = useState(pageLang)
   if (seenPageLang !== pageLang) {
     setSeenPageLang(pageLang)

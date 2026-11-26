@@ -2,20 +2,16 @@ import Link from 'next/link'
 import { signOut } from '@/lib/auth/sign-out'
 import type { Session } from '@/lib/auth/session'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
-import type { Lang } from '@/lib/i18n/lang'
 import { PORTALS } from '@/lib/portals'
-import { LanguageSwitch } from './LanguageSwitch'
 import { Logo } from './Logo'
 
 const navLink = 'flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-brand hover:bg-soft'
 
 export function SiteHeader({
   dict,
-  lang,
   session,
 }: {
   dict: Dictionary
-  lang: Lang
   session: Session | null
 }) {
   return (
@@ -43,7 +39,6 @@ export function SiteHeader({
               {dict.nav.signIn}
             </Link>
           )}
-          <LanguageSwitch current={lang} label={dict.nav.language} />
         </nav>
       </div>
     </header>
