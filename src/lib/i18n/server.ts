@@ -3,8 +3,8 @@ import { getDictionary, type Dictionary } from './dictionaries'
 import { LANG_COOKIE, parseLang, type Lang } from './lang'
 
 /**
- * BiLuna opens in English. The language changes when the visitor picks one under Settings, or when a
- * patient types to BiLuna in Bangla (the chat saves it the same way).
+ * BiLuna opens in English; the site's language changes only when the visitor picks one under Settings.
+ * BiLuna's chat replies follow the language the patient writes in, without changing the site.
  */
 export async function getLang(): Promise<Lang> {
   return parseLang((await cookies()).get(LANG_COOKIE)?.value)

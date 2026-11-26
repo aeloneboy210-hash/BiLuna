@@ -4,7 +4,6 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Fragment, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { rateReply, sendMessage } from '@/app/(portal)/patient/health/actions'
-import { setLang } from '@/lib/i18n/actions'
 import { BodyCard, BodyPicker, PointChip } from '@/components/health/ChatBody'
 import { AttachPanel } from '@/components/health/AttachPanel'
 import { SummaryPanel } from '@/components/consult/SummaryPanel'
@@ -106,14 +105,13 @@ export function ChatPanel({
   initial,
   feedback,
   firstQuestion,
-  t: pageT,
-  lang: pageLang,
-  emergency: pageEmergency,
+  t,
+  lang,
+  emergency,
   summary,
   doctorName,
-  tSummary: pageTSummary,
-  tReview: pageTReview,
-  other,
+  tSummary,
+  tReview,
 }: {
   conversationId: string | null
   initial: Bubble[]
@@ -126,27 +124,14 @@ export function ChatPanel({
   doctorName: string
   tSummary: Dictionary['summary']
   tReview: Dictionary['review']
-  /** The same chat words in the other language, so the chat can switch the moment the patient types. */
-  other: { lang: Lang; t: Dictionary['health']; emergency: string; tSummary: Dictionary['summary']; tReview: Dictionary['review'] }
 }) {
   const router = useRouter()
-  // The chat's own language: the language of the patient's latest message (an old chat opens in its own
-  // language), then whatever they type, straight away; the page follows on refresh.
+  // The language BiLuna replies in: the language of the patient's latest message (an old chat goes on in
+  // its own language), then whatever they type. Only the replies follow it; the page, its buttons and the
+  // emergency card stay in the language chosen under Settings.
   const [typedLang, setTypedLang] = useState<Lang | null>(() => langOfChat(initial))
-  // When the page's language changes (after the refresh that follows typing), the page leads again.
-  const [seenPageLang, setSeenPageLang] = useState(pageLang)
-  if (seenPageLang !== pageLang) {
-    setSeenPageLang(pageLang)
-    setTypedLang(null)
-  }
-  const chatLang = typedLang ?? pageLang
+  const replyLang = typedLang ?? lang
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  // The language last saved for the site (the page's, until the patient types another).
-  const savedLang = useRef(pageLang)
-  const strings =
-    chatLang === pageLang ? { t: pageT, emergency: pageEmergency, tSummary: pageTSummary, tReview: pageTReview } : other
-  const { t, emergency, tSummary, tReview } = strings
-  const lang = chatLang
   const [messages, setMessages] = useState<Bubble[]>(initial)
   const [conversationId, setConversationId] = useState(initialId)
   const [text, setText] = useState('')
@@ -188,10 +173,9 @@ export function ChatPanel({
     const words = raw.trim()
     if ((!words && !point && !attached) || pending) return
     // The pointed line uses the language of the words typed, so BiLuna replies in that language.
-    const value = point ? `${pointedLine(point, langOfText(words) ?? lang)}${words ? `\n${words}` : ''}` : words
+    const value = point ? `${pointedLine(point, langOfText(words) ?? replyLang)}${words ? `\n${words}` : ''}` : words
     setError(null)
-    // The whole chat follows the patient's language: typing Bangla switches the buttons, the emergency card
-    // and everything else to Bangla straight away (and English back to English).
+    // BiLuna answers in the language the patient writes in; a short "ok" or "3" keeps the current one.
     const typed = langOfText(words)
     if (typed) setTypedLang(typed)
     setText('')
@@ -206,14 +190,7 @@ export function ChatPanel({
     void (async () => {
       let result: Awaited<ReturnType<typeof sendMessage>>
       try {
-        // Set first, so the refresh after the reply brings the page back in the new language with the reply.
-        // Compared with what was last saved, not the page: on a slow phone the page can still be the old one.
-        if (typed && typed !== savedLang.current) {
-          await setLang(typed)
-            .then(() => (savedLang.current = typed))
-            .catch(() => undefined)
-        }
-        result = await sendMessage({ conversationId, text: value, attachment: attached, lang })
+        result = await sendMessage({ conversationId, text: value, attachment: attached, lang: typed ?? replyLang })
       } catch {
         result = { ok: false, error: 'error' }
       }
