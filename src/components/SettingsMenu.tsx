@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { setLang } from '@/lib/i18n/actions'
 import type { Lang } from '@/lib/i18n/lang'
@@ -9,11 +12,30 @@ const OPTIONS: { lang: Lang; label: string }[] = [
 
 /**
  * The Settings button: opens a small menu where the whole site's language can be changed. BiLuna opens in
- * English; the choice is kept in a cookie. Works without JavaScript (a native disclosure and plain forms).
+ * English; the choice is kept in a cookie. A native disclosure with plain forms, so it works before the
+ * page's scripts load; once they have, it closes on a choice, a tap outside it, or Escape.
  */
 export function SettingsMenu({ current, t }: { current: Lang; t: { settings: string; language: string } }) {
+  const menu = useRef<HTMLDetailsElement>(null)
+  useEffect(() => {
+    const close = (e: Event) => {
+      const el = menu.current
+      if (!el?.open) return
+      if (e instanceof KeyboardEvent ? e.key === 'Escape' : !el.contains(e.target as Node)) el.open = false
+    }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', close)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', close)
+    }
+  }, [])
+  // A new language closes the menu.
+  useEffect(() => {
+    if (menu.current) menu.current.open = false
+  }, [current])
   return (
-    <details className="group relative">
+    <details ref={menu} className="group relative">
       <summary
         className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-2 rounded-full px-3 text-sm font-semibold text-brand hover:bg-soft [&::-webkit-details-marker]:hidden"
         aria-label={t.settings}
