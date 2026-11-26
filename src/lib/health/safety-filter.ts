@@ -58,6 +58,12 @@ export function checkReply(text: string, lang: Lang): CheckResult {
     (marked === 'smallTalk' && trimmed.length <= SMALL_TALK_MAX) ||
     (marked === 'clarify' && trimmed.length <= CLARIFY_MAX && /[?？]/.test(trimmed))
   if (shortEnough) return { ok: true, text: trimmed, kind: marked }
+  // Some models ask their follow-up questions without the [ASK] mark. A short reply that ends with a
+  // question and has no confidence line is a follow-up, so no "How sure I am" is added under a question.
+  const hasConfidence = trimmed.includes(CONFIDENCE_PREFIX.en) || trimmed.includes(CONFIDENCE_PREFIX.bn)
+  if (marked === 'answer' && !hasConfidence && onlyAsks(trimmed)) {
+    return { ok: true, text: trimmed, kind: 'clarify' }
+  }
 
   trimmed = joinConfidenceHeading(trimmed)
   const lines = trimmed.split('\n').filter((l) => l.trim())
@@ -84,4 +90,15 @@ function joinConfidenceHeading(text: string): string {
     raw.splice(i, j - i + 1, `${prefix} ${raw[j].trim().replace(/^[*_\s]+/, '')}`)
   }
   return raw.join('\n')
+}
+
+/**
+ * True when a reply only asks questions: it ends with one, is under 400 characters, and everything that is
+ * not a question adds up to one short kind sentence (80 characters), so advice cannot hide in front.
+ */
+function onlyAsks(text: string): boolean {
+  if (text.length > 400 || !/[?？]$/.test(text)) return false
+  const sentences = text.match(/[^.!?।？]+[.!?।？]*/g) ?? []
+  const statements = sentences.filter((x) => !/[?？]\s*$/.test(x)).join('').trim()
+  return statements.length <= 80
 }

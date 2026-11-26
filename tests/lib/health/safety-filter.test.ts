@@ -139,3 +139,15 @@ test('a confidence heading with the text on the next line is joined, not doubled
   expect(b.ok && b.text).toBe('ঠান্ডা লাগতে পারে।\nআমি কতটা নিশ্চিত: নিশ্চিত নই; একজন চিকিৎসককে দেখতে হবে।')
   expect(b.ok && b.text.split('আমি কতটা নিশ্চিত').length).toBe(2)
 })
+
+test('a short reply that only asks questions counts as a follow-up even without the [ASK] mark', () => {
+  const q = 'I am sorry to hear you have been coughing for five days. To understand better, are you also experiencing a fever, chest pain, or any shortness of breath? Also, on a scale of 1 to 10, how strong is the discomfort in your chest when you cough?'
+  expect(checkReply(q, 'en')).toEqual({ ok: true, text: q, kind: 'clarify' })
+})
+
+test('a long answer that happens to end with a question still gets the confidence line', () => {
+  const long = `${'It may be a cold. Rest and drink water. '.repeat(12)}Do you have a fever?`
+  const r = checkReply(long, 'en')
+  expect(r.ok && r.kind).toBe('answer')
+  expect(r.ok && r.text).toContain(CONFIDENCE_PREFIX.en)
+})
