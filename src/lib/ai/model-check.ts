@@ -54,7 +54,6 @@ export const CANDIDATES = [
   '@cf/openai/gpt-oss-20b',
   '@cf/google/gemma-4-26b-a4b-it',
   '@cf/qwen/qwen3.8-27b',
-  '@cf/nvidia/nemotron-3-120b-a12b',
   '@cf/mistralai/mistral-small-3.1-24b-instruct',
 ] as const
 

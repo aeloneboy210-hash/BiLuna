@@ -25,6 +25,8 @@ export async function cloudflareChat(model: string, system: string, user: string
         model,
         // Thinking models use part of this before they answer, so it must be generous.
         max_tokens: 4000,
+        // Gemma 4 thinks before it answers, which made replies take 10-45 s; ask it not to.
+        ...(model.includes('gemma-4') ? { chat_template_kwargs: { enable_thinking: false } } : {}),
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
