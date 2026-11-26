@@ -110,6 +110,7 @@ export function ChatPanel({
   emergency,
   summary,
   doctorName,
+  isDemo = false,
   tSummary,
   tReview,
 }: {
@@ -121,7 +122,10 @@ export function ChatPanel({
   lang: Lang
   emergency: string
   summary: PatientSummary | null
-  doctorName: string
+  /** The doctor a summary can be shared with, or null when there is none for this account. */
+  doctorName: string | null
+  /** The shared demo account: remind people to use made-up details only. */
+  isDemo?: boolean
   tSummary: Dictionary['summary']
   tReview: Dictionary['review']
 }) {
@@ -528,7 +532,7 @@ export function ChatPanel({
           </button>
         </div>
         <p className="text-xs text-muted">
-          {t.fictional} <span className="hidden pointer-fine:inline">· {t.enterHint}</span>
+          {isDemo ? t.fictional : t.notDoctor} <span className="hidden pointer-fine:inline">· {t.enterHint}</span>
         </p>
         <p className="text-sm text-danger">{emergency}</p>
       </form>

@@ -1,6 +1,10 @@
 import { PORTALS, ROLES, type Role } from '@/lib/portals'
 
 const SIGN_IN = '/sign-in'
+/** Only for visitors who are not signed in: a signed-in person is sent to their portal. */
+const SIGNED_OUT_ONLY = [SIGN_IN, '/sign-up', '/forgot-password']
+/** Any signed-in account, whatever its role: consent, the account page, a new password after a reset. */
+const SIGNED_IN_ONLY = ['/welcome', '/account', '/reset-password']
 
 function normalise(pathname: string): string {
   const lower = pathname.toLowerCase()
@@ -24,13 +28,28 @@ export function resolveRedirect(pathname: string, role: Role | null): string | n
     return owner === role ? null : PORTALS[role].home
   }
 
-  if (path === SIGN_IN && role) return PORTALS[role].home
+  if (SIGNED_IN_ONLY.some((p) => isWithin(path, p))) return role ? null : SIGN_IN
+
+  if (SIGNED_OUT_ONLY.includes(path) && role) return PORTALS[role].home
 
   return null
 }
 
-/** True for the paths where the account's role decides what happens: the three portals and sign-in. */
+/**
+ * Where to go after a sign-in link: only a path on this site. Anything else (another site, "//x",
+ * "/\\x", a script) becomes the home page, so a link in an email can never send someone elsewhere.
+ */
+export function safeNext(next: string | null | undefined): string {
+  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return '/'
+  return next
+}
+
+/** True for the paths where the account's role decides what happens: the portals, sign-in and account pages. */
 export function needsRole(pathname: string): boolean {
   const path = normalise(pathname)
-  return path === SIGN_IN || ROLES.some((role) => isWithin(path, PORTALS[role].home))
+  return (
+    SIGNED_OUT_ONLY.includes(path) ||
+    SIGNED_IN_ONLY.some((p) => isWithin(path, p)) ||
+    ROLES.some((role) => isWithin(path, PORTALS[role].home))
+  )
 }

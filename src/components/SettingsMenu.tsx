@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { setLang } from '@/lib/i18n/actions'
@@ -15,7 +16,16 @@ const OPTIONS: { lang: Lang; label: string }[] = [
  * English; the choice is kept in a cookie. A native disclosure with plain forms, so it works before the
  * page's scripts load; once they have, it closes on a choice, a tap outside it, or Escape.
  */
-export function SettingsMenu({ current, t }: { current: Lang; t: { settings: string; language: string } }) {
+export function SettingsMenu({
+  current,
+  t,
+  account,
+}: {
+  current: Lang
+  t: { settings: string; language: string }
+  /** Shown when signed in: a link to the account page. */
+  account?: string
+}) {
   const menu = useRef<HTMLDetailsElement>(null)
   useEffect(() => {
     const close = (e: Event) => {
@@ -66,6 +76,15 @@ export function SettingsMenu({ current, t }: { current: Lang; t: { settings: str
             )
           })}
         </div>
+        {account ? (
+          <Link
+            href="/account"
+            onClick={() => menu.current?.removeAttribute('open')}
+            className="flex min-h-11 items-center gap-2 rounded-xl border-t border-line px-3 pt-1 text-sm font-semibold text-ink hover:bg-soft"
+          >
+            👤 {account}
+          </Link>
+        ) : null}
       </div>
     </details>
   )

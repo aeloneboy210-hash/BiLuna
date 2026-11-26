@@ -57,3 +57,42 @@ test.each(['/patient', '/doctor/x', '/org', '/sign-in', '/Patient/'])('%s needs 
 test.each(['/', '/roadmap', '/setup', '/patients', '/organization'])('%s does not need the role', (p) => {
   expect(needsRole(p)).toBe(false)
 })
+
+// Step 2: real accounts.
+test.each(['/sign-up', '/forgot-password', '/privacy', '/terms', '/auth/callback', '/auth/confirm'])(
+  'signed out may open %s',
+  (p) => expect(r(p, null)).toBeNull(),
+)
+
+test.each(['/welcome', '/account', '/reset-password', '/account/download'])('signed out is sent to sign-in from %s', (p) => {
+  expect(r(p, null)).toBe('/sign-in')
+})
+
+test.each(['/welcome', '/account', '/reset-password'])('any signed-in role may open %s', (p) => {
+  expect(r(p, 'patient')).toBeNull()
+  expect(r(p, 'doctor')).toBeNull()
+})
+
+test.each(['/sign-up', '/forgot-password'])('signed in is sent home from %s', (p) => {
+  expect(r(p, 'patient')).toBe('/patient')
+})
+
+test.each(['/welcome', '/account', '/sign-up', '/forgot-password', '/reset-password'])('%s needs the role looked up', (p) => {
+  expect(needsRole(p)).toBe(true)
+})
+
+import { safeNext } from '@/lib/access/route-guard'
+
+test.each([
+  ['/welcome', '/welcome'],
+  ['/reset-password', '/reset-password'],
+  ['/patient/health?c=1', '/patient/health?c=1'],
+  ['https://evil.example', '/'],
+  ['//evil.example', '/'],
+  ['/\\evil.example', '/'],
+  ['', '/'],
+  [null, '/'],
+  ['javascript:alert(1)', '/'],
+] as const)('a return address %p becomes %p (never another site)', (next, out) => {
+  expect(safeNext(next)).toBe(out)
+})

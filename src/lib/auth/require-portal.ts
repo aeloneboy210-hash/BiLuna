@@ -12,5 +12,14 @@ export async function requirePortal(portal: Role): Promise<Session> {
   const target = resolveRedirect(PORTALS[portal].home, session?.role ?? null)
   if (target) redirect(target)
   // resolveRedirect returned null, so the session exists and its role owns this portal.
+  // A new account must agree to the terms and privacy policy before using BiLuna.
+  if (!session?.consented) redirect('/welcome')
   return session as Session
+}
+
+/** Any signed-in account, whatever its role (the welcome and account pages). */
+export async function requireSignedIn(): Promise<Session> {
+  const session = await getSession()
+  if (!session) redirect('/sign-in')
+  return session
 }

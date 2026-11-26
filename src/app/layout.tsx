@@ -9,6 +9,7 @@ import './globals.css'
 import { Suspense } from 'react'
 import { DemoBanner } from '@/components/DemoBanner'
 import { NavLoader } from '@/components/NavLoader'
+import { getSession } from '@/lib/auth/session'
 import { getDict } from '@/lib/i18n/server'
 
 export const metadata: Metadata = {
@@ -19,9 +20,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#ffffff' }
 
-/** Shared by every page: language, fonts, background and the demo banner. Each area adds its own frame. */
+/**
+ * Shared by every page: language, fonts, background and the top banner. The shared demo accounts see
+ * "Demo — fictional data"; everyone else the reminder that BiLuna is an AI, not a doctor.
+ */
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
-  const { lang, dict } = await getDict()
+  const [{ lang, dict }, session] = await Promise.all([getDict(), getSession()])
 
   return (
     <html lang={lang} className="h-full antialiased">
@@ -32,7 +36,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         >
           {dict.nav.skip}
         </a>
-        <DemoBanner text={dict.banner} />
+        <DemoBanner text={session?.isDemo ? dict.banner : dict.bannerReal} />
         {children}
         <Suspense fallback={null}>
           <NavLoader label={dict.nav.loading} />

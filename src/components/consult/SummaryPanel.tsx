@@ -32,7 +32,8 @@ export function SummaryPanel({
 }: {
   conversationId: string
   initial: PatientSummary | null
-  doctorName: string
+  /** The doctor a summary can be shared with, or null when there is none for this account. */
+  doctorName: string | null
   lang: Lang
   onClose: () => void
   onChange: (s: PatientSummary) => void
@@ -158,6 +159,8 @@ export function SummaryPanel({
                   {t.stop}
                 </button>
               </>
+            ) : !doctorName ? (
+              <p className="text-sm text-body">{t.noDoctor}</p>
             ) : (
               <>
                 <p className="text-sm text-body">{t.notShared}</p>

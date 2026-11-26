@@ -34,6 +34,10 @@ export type SharedSummary = {
 const asContent = (v: unknown): SummaryContent => ({ ...EMPTY_SUMMARY, ...(v && typeof v === 'object' ? (v as object) : {}) })
 
 /** The demo has one doctor account; the patient shares with that doctor. */
+/**
+ * The doctor this patient can share with: the database shows a patient only doctors on their own side
+ * (the demo doctor to demo accounts, verified doctors to real accounts). Null when there is none yet.
+ */
 export async function demoDoctor(): Promise<{ id: string; name: string } | null> {
   const { data } = await (await db()).from('profiles').select('id, display_name').eq('role', 'doctor').limit(1).maybeSingle()
   return data ? { id: data.id as string, name: String(data.display_name) } : null

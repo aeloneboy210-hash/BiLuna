@@ -15,7 +15,7 @@ export const maxDuration = 60
 const UUID = /^[0-9a-f-]{36}$/i
 
 export default async function HealthPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  await requirePortal('patient')
+  const session = await requirePortal('patient')
   const { dict, lang } = await getDict()
   const params = await searchParams
   const c = typeof params.c === 'string' && UUID.test(params.c) ? params.c : null
@@ -44,7 +44,8 @@ export default async function HealthPage({ searchParams }: { searchParams: Promi
           lang={lang}
           emergency={dict.common.emergency}
           summary={owned ? await summaryForConversation(owned) : null}
-          doctorName={(await demoDoctor())?.name ?? 'Dr. Karim (demo doctor)'}
+          doctorName={(await demoDoctor())?.name ?? null}
+          isDemo={session.isDemo}
           tSummary={dict.summary}
           tReview={dict.review}
         />

@@ -43,7 +43,7 @@ export function SiteHeader({
               {dict.nav.signIn}
             </Link>
           )}
-          <SettingsMenu current={lang} t={dict.nav} />
+          <SettingsMenu current={lang} t={dict.nav} account={session ? dict.account.menu : undefined} />
         </nav>
       </div>
     </header>

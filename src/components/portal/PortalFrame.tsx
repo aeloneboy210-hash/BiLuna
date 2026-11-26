@@ -85,7 +85,7 @@ export function PortalFrame({
           </label>
 
           <div className="ml-auto flex items-center gap-3">
-            <SettingsMenu current={lang} t={dict.nav} />
+            <SettingsMenu current={lang} t={dict.nav} account={session ? dict.account.menu : undefined} />
             <span
               title={dict.shell.notifications}
               className="glass hidden h-11 w-11 items-center justify-center rounded-full text-cyan sm:flex"
@@ -120,7 +120,15 @@ export function PortalFrame({
           {children}
         </main>
 
-        <p className="pb-2 text-xs text-muted">{dict.welcome.prototype}</p>
+        <p className="flex flex-wrap gap-x-4 pb-2 text-xs text-muted">
+          <span>{dict.welcome.prototype}</span>
+          <Link href="/privacy" className="font-semibold hover:text-ink">
+            {dict.legal.privacy}
+          </Link>
+          <Link href="/terms" className="font-semibold hover:text-ink">
+            {dict.legal.terms}
+          </Link>
+        </p>
       </div>
     </div>
   )
