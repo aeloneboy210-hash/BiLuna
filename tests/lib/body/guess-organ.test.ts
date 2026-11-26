@@ -23,3 +23,10 @@ test.each([
 test.each(['Hello', 'Thank you!', 'My left knee hurts', 'I feel tired', ''])('no organ for "%s"', (text) => {
   expect(guessOrgan(text)).toBeNull()
 })
+
+test('words that only contain an organ word do not count', () => {
+  expect(guessOrgan('I get a headache during the day')).toBe('brain')
+  expect(guessOrgan('কফি খাওয়ার পর মাথা ব্যথা')).toBe('brain')
+  expect(guessOrgan('Burning when I urinate')).toBe('bladder')
+  expect(guessOrgan('Painful urination')).toBe('bladder')
+})

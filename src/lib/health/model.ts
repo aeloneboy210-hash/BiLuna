@@ -93,7 +93,10 @@ export async function askBiLuna(
       // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription,
       // may be repeated; any other amount means the draft is written again.
       const said = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
-      if (checked.ok && !file && unexplainedDoses(checked.text, said).length) {
+      // Doses are checked in the answer and in its tap-to-answer options, against the whole chat so far
+      // (a prescription BiLuna read earlier may be talked about again).
+      const shown = `${checked.ok ? checked.text : ''}\n${opts.options.join('\n')}`
+      if (checked.ok && !file && unexplainedDoses(shown, history.map((m) => m.body).join('\n')).length) {
         extra = DOSE_RETRY_NOTE
         continue
       }

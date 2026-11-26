@@ -31,3 +31,10 @@ test('a new dose BiLuna made up is caught', () => {
   expect(unexplainedDoses('You can take 1000 mg.', 'I take Napa 500mg')).toEqual(['1000mg'])
   expect(unexplainedDoses('Give him 250 mg.', 'My son has fever')).toEqual(['250mg'])
 })
+
+test('lab values and reference ranges are not doses', () => {
+  expect(dosesIn('A normal fasting sugar is below 100 mg/dL.')).toEqual([])
+  expect(dosesIn('ALT 40 IU/L is normal')).toEqual([])
+  expect(dosesIn('Creatinine 1.1 mg/dl')).toEqual([])
+  expect(dosesIn('Ibuprofen 10 mg/kg')).toEqual(['10mg'])
+})

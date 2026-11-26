@@ -10,9 +10,9 @@ const toLatin = (s: string) => s.replace(/[০-৯]/g, (d) => String(BN_DIGITS.i
 const NUM = String.raw`(\d+(?:\.\d+)?)`
 const PATTERNS: [RegExp, (m: RegExpExecArray) => string][] = [
   [new RegExp(String.raw`${NUM}\s*(?:mcg|µg|মাইক্রোগ্রাম)`, 'gi'), (m) => `${m[1]}mcg`],
-  [new RegExp(String.raw`${NUM}\s*(?:mg\b|মি\.?\s?গ্রা(?:ম)?|মিলিগ্রাম)`, 'gi'), (m) => `${m[1]}mg`],
+  [new RegExp(String.raw`${NUM}\s*(?:mg\b(?!\s*\/\s*d?l\b)|মি\.?\s?গ্রা(?:ম)?|মিলিগ্রাম)`, 'gi'), (m) => `${m[1]}mg`],
   [new RegExp(String.raw`${NUM}\s*(?:ml\b|মিলি(?:লিটার)?|এমএল)`, 'gi'), (m) => `${m[1]}ml`],
-  [new RegExp(String.raw`${NUM}\s*(?:iu\b|আইইউ)`, 'gi'), (m) => `${m[1]}iu`],
+  [new RegExp(String.raw`${NUM}\s*(?:iu\b(?!\s*\/\s*d?l\b)|আইইউ)`, 'gi'), (m) => `${m[1]}iu`],
   [
     new RegExp(String.raw`(\d+)\s*(?:টি|টা)?\s*(?:tablets?\b|tabs?\b|capsules?\b|caps?\b|pills?\b|ট্যাবলেট|ক্যাপসুল|বড়ি)`, 'gi'),
     (m) => `${m[1]}tablet`,
@@ -32,7 +32,7 @@ export function dosesIn(text: string): string[] {
   return found.sort((a, b) => a.at - b.at).map((f) => f.dose)
 }
 
-/** Doses in BiLuna's reply that the patient did not write themselves. */
+/** Doses in BiLuna's reply that are not already in the given text (the chat so far). */
 export function unexplainedDoses(reply: string, patientText: string): string[] {
   const own = new Set(dosesIn(patientText))
   return dosesIn(reply).filter((d) => !own.has(d))

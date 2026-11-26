@@ -246,3 +246,21 @@ test('a dose the patient wrote, or one from their uploaded prescription, may be 
   })
   expect(b.ok).toBe(true)
 })
+
+test('a follow-up about an uploaded prescription may repeat the dose BiLuna already read from it', async () => {
+  const history = [
+    { author: 'patient' as const, body: '📎 rx.jpg' },
+    { author: 'biluna' as const, body: `Line 1: Napa 500 mg, 1+0+1.\n\n${CONFIDENCE_PREFIX.en} general.` },
+    { author: 'patient' as const, body: 'What does line 1 mean?' },
+  ]
+  const r = await askBiLuna(history, 'en', {
+    generate: fake(`Line 1 is Napa 500 mg, 1+0+1: one in the morning and one at night.\n\n${CONFIDENCE_PREFIX.en} general.`).generate,
+  })
+  expect(r.ok).toBe(true)
+})
+
+test('a dose hidden in tap-to-answer options is caught too', async () => {
+  const sneaky = `It may be a tension headache.\n\n${CONFIDENCE_PREFIX.en} general.\n[[options: Take 500 mg | Take 1000 mg]]`
+  const r = await askBiLuna([{ author: 'patient', body: 'headache' }], 'en', { generate: fake(sneaky, sneaky).generate })
+  expect(r).toEqual({ ok: false, reason: 'unsafe' })
+})

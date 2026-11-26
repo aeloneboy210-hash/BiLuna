@@ -39,21 +39,21 @@ export function extractBodyTag(text: string): { text: string; organ: OrganId | n
  * 3D body still lights up a part that "may be involved". Checked in this order, most specific first
  * (heartburn is the stomach, not the heart; a cough is the lungs even with a sore throat).
  */
-const ORGAN_WORDS: [OrganId, string[]][] = [
-  ['intestines', ['diarrhoea', 'diarrhea', 'loose motion', 'constipat', 'ডায়রিয়া', 'পাতলা পায়খানা', 'কোষ্ঠকাঠিন্য']],
-  ['bladder', ['urin', 'peeing', 'প্রস্রাব']],
-  ['kidneys', ['kidney', 'কিডনি']],
-  ['liver', ['jaundice', 'liver', 'জন্ডিস', 'লিভার']],
-  ['stomach', ['heartburn', 'acidity', 'gastric', 'stomach', 'vomit', 'nausea', 'অম্বল', 'গ্যাস্ট্রিক', 'গ্যাস', 'বমি', 'পেট']],
-  ['heart', ['palpitation', 'heart', 'বুক ধড়ফড়', 'হৃদ']],
-  ['lungs', ['cough', 'breath', 'wheez', 'asthma', 'phlegm', 'কাশি', 'শ্বাস', 'হাঁপানি', 'কফ']],
-  ['trachea', ['throat', 'swallow', 'গলা']],
-  ['brain', ['headache', 'migraine', 'dizz', 'মাথা ব্যথা', 'মাথাব্যথা', 'মাথা ঘোরা']],
+// English words must start a word ("during" is not "urine"); কফ (phlegm) is not কফি (coffee).
+const ORGAN_WORDS: [OrganId, RegExp][] = [
+  ['intestines', /\b(diarrh(o)?ea|loose motion|constipat)|ডায়রিয়া|পাতলা পায়খানা|কোষ্ঠকাঠিন্য/i],
+  ['bladder', /\b(urin|peeing)|প্রস্রাব/i],
+  ['kidneys', /\bkidney|কিডনি/i],
+  ['liver', /\b(jaundice|liver)|জন্ডিস|লিভার/i],
+  ['stomach', /\b(heartburn|acidity|gastric|stomach|vomit|nausea)|অম্বল|গ্যাস্ট্রিক|গ্যাস|বমি|পেট/i],
+  ['heart', /\b(palpitation|heart)|বুক ধড়ফড়|হৃদ/i],
+  ['lungs', /\b(cough|breath|wheez|asthma|phlegm)|কাশি|শ্বাস|হাঁপানি|কফ(?!ি)/i],
+  ['trachea', /\b(throat|swallow)|গলা/i],
+  ['brain', /\b(headache|migraine|dizz)|মাথা ব্যথা|মাথাব্যথা|মাথা ঘোরা/i],
 ]
 
 export function guessOrgan(text: string): OrganId | null {
-  const t = text.toLowerCase()
-  for (const [organ, words] of ORGAN_WORDS) if (words.some((w) => t.includes(w))) return organ
+  for (const [organ, words] of ORGAN_WORDS) if (words.test(text)) return organ
   return null
 }
 
