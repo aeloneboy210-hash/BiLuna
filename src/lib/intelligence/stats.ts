@@ -1,6 +1,6 @@
 import type { Lang } from '@/lib/i18n/lang'
 
-export const DAILY_MESSAGE_LIMIT = 40
+export const DAILY_MESSAGE_LIMIT = 150
 
 export type TodayStats = {
   /** BiLuna replies shown today. */

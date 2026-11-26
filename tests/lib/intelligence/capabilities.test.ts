@@ -52,9 +52,9 @@ test('summarizeToday counts events and what is left of the daily limit', () => {
     ],
     12,
   )
-  expect(s).toEqual({ answered: 3, checked: 4, caught: 2, followUps: 1, profileUses: 1, bangla: 2, english: 1, left: 28 })
+  expect(s).toEqual({ answered: 3, checked: 4, caught: 2, followUps: 1, profileUses: 1, bangla: 2, english: 1, left: 138 })
 })
 
 test('the limit never goes below zero', () => {
-  expect(summarizeToday([], 55).left).toBe(0)
+  expect(summarizeToday([], 155).left).toBe(0)
 })

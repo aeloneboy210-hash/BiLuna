@@ -71,18 +71,18 @@ begin
   end;
   if not ok then raise exception 'patient could call the usage function directly'; end if;
 
-  -- 0008: limit at 40 a day, and deleting chats does not reset it.
+  -- 0008: limit at 150 a day, and deleting chats does not reset it.
   insert into public.conversations (title) values ('A chat') returning id into ca;
-  for i in (before + 1)..40 loop
+  for i in (before + 1)..150 loop
     insert into public.messages (conversation_id, author, body, lang) values (ca, 'patient', 'msg ' || i, 'en');
   end loop;
   ok := false;
   begin
-    insert into public.messages (conversation_id, author, body, lang) values (ca, 'patient', 'msg 41', 'en');
+    insert into public.messages (conversation_id, author, body, lang) values (ca, 'patient', 'msg 151', 'en');
   exception when others then
     if sqlerrm like '%daily_limit_reached%' then ok := true; else raise; end if;
   end;
-  if not ok then raise exception '41st patient message was accepted'; end if;
+  if not ok then raise exception '151st patient message was accepted'; end if;
   delete from public.conversations where id = ca;
   insert into public.conversations (title) values ('after delete') returning id into ca;
   ok := false;
@@ -246,7 +246,7 @@ begin
 
   -- The tally: exactly 40 for A today, 1 for B.
   select sent into n from public.daily_usage where patient_id = pa and day = (now() at time zone 'Asia/Dhaka')::date;
-  if n <> 40 then raise exception 'A tally is % not 40', n; end if;
+  if n <> 150 then raise exception 'A tally is % not 150', n; end if;
   select sent into n from public.daily_usage where patient_id = pb;
   if n <> 1 then raise exception 'B tally is % not 1', n; end if;
 
