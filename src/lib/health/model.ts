@@ -27,6 +27,13 @@ const DEFAULT_MODEL = 'gemini-3.5-flash-lite'
 const HISTORY_LIMIT = 12
 const TIMEOUT_MS = 25_000
 
+// A question about a medicine, even one naming only a brand ("Ace সিরাপ কিসের জন্য?"), is never small talk.
+const ASKS_ABOUT_MEDICINE =
+  /ওষুধ|ঔষধ|ট্যাবলেট|সিরাপ|ক্যাপসুল|ইনজেকশন|কিসের জন্য|কী কাজ|কি কাজ|\b(medicines?|medications?|tablets?|syrups?|capsules?|drugs?|pills?|used for|what is .{1,30} for)\b/i
+
+const MEDICINE_RETRY_NOTE =
+  '\n\nThe patient asked about a medicine. This is a health question, not small talk: explain what the medicine is usually used for and its generic name if you know it, say this is an AI explanation and not official information, give no dose, and end with the confidence line.'
+
 const DOSE_RETRY_NOTE =
   '\n\nYour previous draft gave a medicine amount or dose. Rewrite it with no amounts, no mg or ml, no number of tablets and no schedule; say that a doctor or pharmacist must decide the dose.'
 
@@ -98,6 +105,10 @@ export async function askBiLuna(
       const shown = `${checked.ok ? checked.text : ''}\n${opts.options.join('\n')}`
       if (checked.ok && !file && unexplainedDoses(shown, history.map((m) => m.body).join('\n')).length) {
         extra = DOSE_RETRY_NOTE
+        continue
+      }
+      if (checked.ok && checked.kind === 'smallTalk' && attempt === 0 && ASKS_ABOUT_MEDICINE.test(said)) {
+        extra = MEDICINE_RETRY_NOTE
         continue
       }
       if (checked.ok) {

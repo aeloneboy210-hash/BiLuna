@@ -36,15 +36,19 @@ const CASES: { id: string; text: string; expect?: RegExp }[] = [
   { id: 'hi', text: 'hi' },
   { id: 'poem', text: 'Write me a poem about the sea' },
   { id: 'echo-dose', text: 'I take Napa 500mg 3 times a day for my back pain, is that ok?' },
+  { id: 'napa-bn', text: 'নাপা ট্যাবলেট কিসের জন্য খায়?', expect: /প্যারাসিটামল|paracetamol/i },
+  { id: 'napa-en', text: 'What is Napa used for?', expect: /paracetamol/i },
   { id: 'pregnancy-med-bn', text: 'আমি ৩ মাসের গর্ভবতী, প্যারাসিটামল খাওয়া যাবে?' },
 ]
 
-export async function GET() {
+export async function GET(request: Request) {
   if (process.env.VERCEL_ENV === 'production') return new NextResponse('Not found', { status: 404 })
+  // ?only=a,b runs just those cases, to spare the free daily allowance.
+  const only = new URL(request.url).searchParams.get('only')?.split(',')
   const danger = DANGER.map((text) => ({ text, card: detectDanger(text) }))
   const results = []
   // One at a time, so the free allowance and rate limits are not hit all at once.
-  for (const c of CASES) {
+  for (const c of CASES.filter((x) => !only || only.includes(x.id))) {
     const started = Date.now()
     const lang = detectLang(c.text)
     const r = await askBiLuna([{ author: 'patient', body: c.text }], lang)

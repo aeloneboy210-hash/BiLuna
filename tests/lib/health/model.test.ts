@@ -264,3 +264,19 @@ test('a dose hidden in tap-to-answer options is caught too', async () => {
   const r = await askBiLuna([{ author: 'patient', body: 'headache' }], 'en', { generate: fake(sneaky, sneaky).generate })
   expect(r).toEqual({ ok: false, reason: 'unsafe' })
 })
+
+test('a medicine question answered with small talk is asked again as a real question', async () => {
+  const chat = '[SMALL_TALK] Hello! I am BiLuna. What is bothering you?'
+  const answer = `Ace syrup is a brand of paracetamol, used for fever and pain.\n\n${CONFIDENCE_PREFIX.bn} সাধারণ তথ্য।`
+  const f = fake(chat, answer)
+  const r = await askBiLuna([{ author: 'patient', body: 'Ace সিরাপ কিসের জন্য?' }], 'bn', { generate: f.generate })
+  expect(r.ok && r.kind).toBe('answer')
+  expect(f.calls[1].instructions).toMatch(/medicine/i)
+})
+
+test('a real greeting stays small talk', async () => {
+  const f = fake('[SMALL_TALK] Hello! I am BiLuna.')
+  const r = await askBiLuna([{ author: 'patient', body: 'hi' }], 'en', { generate: f.generate })
+  expect(r.ok && r.kind).toBe('smallTalk')
+  expect(f.calls).toHaveLength(1)
+})
