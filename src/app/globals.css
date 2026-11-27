@@ -41,6 +41,7 @@
   --animate-float: float 7s ease-in-out infinite;
   --animate-glow: glow 4s ease-in-out infinite;
   --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-beacon: beacon 1.8s ease-out infinite;
 
   @keyframes float {
     0%,
@@ -59,6 +60,17 @@
     }
     50% {
       opacity: 1;
+    }
+  }
+
+  /* A soft ring spreading out from an icon, like a beacon: used for the emergency point. */
+  @keyframes beacon {
+    0% {
+      box-shadow: 0 0 0 0 rgb(200 30 30 / 0.45);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 14px rgb(200 30 30 / 0);
     }
   }
 
