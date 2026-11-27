@@ -13,12 +13,12 @@ export const CONTENT: Record<CardId, CardContent> = {
     keywords: ['fever', 'temperature', 'feverish', 'shivering', 'জ্বর', 'গা গরম', 'শরীর গরম', 'কাঁপুনি', 'jor', 'jhor', 'jwor'],
     facts: `- A fever (38°C or more) is usually the body fighting an infection, such as a cold or flu, and often gets better on its own.
 - At home: rest, drink plenty of water so the urine is light yellow, wear light clothes, and wipe the body with a cool damp cloth.
-- A pharmacist can suggest a fever medicine such as paracetamol; the amount must follow the packet or the pharmacist.
+- A pharmacist can suggest a fever medicine such as paracetamol; the amount must follow the packet or the pharmacist. Until a doctor has ruled out dengue, avoid aspirin and ibuprofen-type painkillers, which can cause bleeding in dengue.
 - In Bangladesh, a fever lasting more than 2 to 3 days, or with body aches, rash or pain behind the eyes, should be checked by a doctor and tested, because dengue and typhoid are common.
 - Get help urgently for fever with a stiff neck, a rash that does not fade when pressed, confusion or extreme sleepiness, trouble breathing, a seizure, or a fever that keeps rising.`,
   },
   dengue: {
-    keywords: ['dengue', 'platelet', 'pain behind the eyes', 'ডেঙ্গু', 'ডেঙ্গি', 'প্লাটিলেট', 'প্লেটলেট', 'চোখের পেছনে ব্যথা', 'dengu'],
+    keywords: ['dengue', 'platelet', 'behind the eyes', 'behind my eyes', 'eye pain', 'pain in my eyes', 'ডেঙ্গু', 'ডেঙ্গি', 'প্লাটিলেট', 'প্লেটলেট', 'চোখের পেছনে ব্যথা', 'dengu'],
     facts: `- Dengue is a virus spread by mosquito bites. It causes a high fever with headache, pain behind the eyes, muscle and joint pain, nausea, vomiting or a rash.
 - There is no specific medicine for dengue. Early care at a doctor and a blood test greatly lower the risk of serious illness.
 - At home: rest and drink plenty of fluids (water, ORS, soup, fruit juice).
@@ -53,7 +53,7 @@ export const CONTENT: Record<CardId, CardContent> = {
 - Protection: breastfeeding, good food, vaccines, clean air indoors (smoke-free cooking), and handwashing.`,
   },
   gastric: {
-    keywords: ['gastric', 'acidity', 'acid reflux', 'heartburn', 'indigestion', 'bloat', 'burning chest', 'sour burp', 'গ্যাস্ট্রিক', 'গ্যাস', 'অ্যাসিডিটি', 'এসিডিটি', 'বুক জ্বালা', 'বুকজ্বালা', 'টক ঢেকুর', 'পেট ফাঁপা', 'বদহজম', 'অম্বল', 'gas', 'buk jala'],
+    keywords: ['gastric', 'acidity', 'acid reflux', 'heartburn', 'indigestion', 'bloat', 'burning chest', 'burning feeling', 'burning sensation', 'chest burn', 'after eating', 'sour burp', 'গ্যাস্ট্রিক', 'গ্যাস', 'অ্যাসিডিটি', 'এসিডিটি', 'বুক জ্বালা', 'বুকজ্বালা', 'টক ঢেকুর', 'পেট ফাঁপা', 'বদহজম', 'অম্বল', 'gas', 'buk jala'],
     facts: `- Acidity or heartburn is a burning feeling in the chest or upper belly, often after eating, sometimes with bloating, burping or a sour taste. It is common and usually mild.
 - At home: eat smaller meals, do not lie down soon after eating, eat the evening meal earlier, cut down on oily or spicy food, tea, coffee and fizzy drinks, and stop smoking. Stress can make it worse.
 - Do not take painkillers such as ibuprofen or aspirin unless a doctor prescribed them: they can make it worse.
@@ -146,7 +146,7 @@ export const CONTENT: Record<CardId, CardContent> = {
 - Get help urgently for shortness of breath at rest, chest pain, fainting, or heavy bleeding.`,
   },
   uti: {
-    keywords: ['urine infection', 'urinary', 'uti', 'burning urine', 'burning when peeing', 'pain when peeing', 'pee often', 'প্রস্রাবে জ্বালা', 'প্রস্রাব জ্বালা', 'প্রস্রাবের সময় জ্বালা', 'প্রস্রাবে ব্যথা', 'ঘন ঘন প্রস্রাব', 'বারবার প্রস্রাব', 'প্রস্রাবে ইনফেকশন', 'ইউরিন ইনফেকশন', 'প্রস্রাবের ইনফেকশন', 'proshrab jala', 'urine jala'],
+    keywords: ['urine infection', 'urinary', 'uti', 'burning urine', 'burning when peeing', 'pain when peeing', 'pee often', 'pee', 'peeing', 'when i urinate', 'urinating', 'প্রস্রাবে জ্বালা', 'প্রস্রাব জ্বালা', 'প্রস্রাবের সময় জ্বালা', 'প্রস্রাবে ব্যথা', 'ঘন ঘন প্রস্রাব', 'বারবার প্রস্রাব', 'প্রস্রাবে ইনফেকশন', 'ইউরিন ইনফেকশন', 'প্রস্রাবের ইনফেকশন', 'proshrab jala', 'urine jala'],
     facts: `- A urine infection (UTI) is a germ infection of the bladder or urine tubes. Signs: burning or pain when passing urine, needing to go often or suddenly, lower belly pain, cloudy or bad-smelling urine, sometimes blood in the urine.
 - At home: drink enough water so the urine is pale, do not hold urine in, and wipe front to back.
 - A doctor decides if antibiotics are needed; do not buy antibiotics without a prescription.

@@ -48,6 +48,9 @@ describe('findCards', () => {
     )
     expect(ids('My stomach burns after meals, bad acidity')).toContain('gastric')
     expect(ids('burning when peeing and I pee often')).toContain('uti')
+    expect(ids('It burns when I pee and I need to go all the time')).toContain('uti')
+    expect(ids('I get a burning feeling in my chest after eating')).toContain('gastric')
+    expect(ids('fever for 3 days with pain behind my eyes')).toEqual(expect.arrayContaining(['dengue', 'fever']))
   })
 
   it('finds cards from Bangla and Banglish messages', () => {
