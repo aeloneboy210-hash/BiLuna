@@ -40,8 +40,17 @@ export function resolveRedirect(pathname: string, role: Role | null): string | n
  * "/\\x", a script) becomes the home page, so a link in an email can never send someone elsewhere.
  */
 export function safeNext(next: string | null | undefined): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return '/'
-  return next
+  // Control characters (tab, new line) are dropped by browsers and URL parsers, which can turn "/\t/x"
+  // into "//x"; refuse them and backslashes outright, then let the URL parser have the final word.
+  if (!next || !next.startsWith('/') || /[\u0000-\u001F\u007F\\]/.test(next)) return '/'
+  const base = 'https://biluna.invalid'
+  let url: URL
+  try {
+    url = new URL(next, base)
+  } catch {
+    return '/'
+  }
+  return url.origin === base ? `${url.pathname}${url.search}${url.hash}` : '/'
 }
 
 /** True for the paths where the account's role decides what happens: the portals, sign-in and account pages. */

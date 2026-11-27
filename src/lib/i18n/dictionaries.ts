@@ -171,6 +171,10 @@ const en = {
     savePassword: 'Save password',
     saving: 'Saving…',
     demoWarning: 'A shared demo with made-up data, for trying BiLuna. Never type real health information here.',
+    continueTitle: 'Finish signing in',
+    continueText: 'Tap the button to confirm your email and sign in to BiLuna. Only continue if you asked for this email yourself.',
+    continue: 'Continue',
+    continuing: 'Signing in…',
   },
   common: {
     sampleData: 'Sample data',
@@ -704,6 +708,10 @@ const bn: Dictionary = {
     savePassword: 'পাসওয়ার্ড সংরক্ষণ করুন',
     saving: 'সংরক্ষণ হচ্ছে…',
     demoWarning: 'কাল্পনিক তথ্যের শেয়ার করা ডেমো, বিলুনা দেখার জন্য। এখানে কখনো আসল স্বাস্থ্য তথ্য লিখবেন না।',
+    continueTitle: 'সাইন ইন শেষ করুন',
+    continueText: 'ইমেইল নিশ্চিত করে বিলুনায় সাইন ইন করতে বোতামটি চাপুন। ইমেইলটি আপনি নিজে চেয়ে থাকলে তবেই চালিয়ে যান।',
+    continue: 'চালিয়ে যান',
+    continuing: 'সাইন ইন হচ্ছে…',
   },
   common: {
     sampleData: 'নমুনা তথ্য',

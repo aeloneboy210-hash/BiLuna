@@ -96,3 +96,11 @@ test.each([
 ] as const)('a return address %p becomes %p (never another site)', (next, out) => {
   expect(safeNext(next)).toBe(out)
 })
+
+test.each(['/\t/evil.com', '/\n/evil.com', '/\r\n/evil.com', '/%09/evil.com', '/ /evil.com'])(
+  'a return address with hidden characters (%p) never leaves the site',
+  (next) => {
+    const out = safeNext(next)
+    expect(new URL(out, 'https://biluna.vercel.app').origin).toBe('https://biluna.vercel.app')
+  },
+)

@@ -37,3 +37,11 @@ test.each([undefined, '', 'fr', 'EN', 'BN', '<script>', 'bn '])('parseLang(%p) i
 })
 test('parseLang keeps bn', () => expect(parseLang('bn')).toBe('bn'))
 
+
+import { readFileSync } from 'node:fs'
+import { CONSENT_VERSION } from '@/lib/legal/content'
+
+test('the consent version in the app matches the one the database checks', () => {
+  const sql = readFileSync('supabase/migrations/0015_protect_demo_and_consent_version.sql', 'utf8')
+  expect(sql).toContain(`('consent_version', '${CONSENT_VERSION}')`)
+})

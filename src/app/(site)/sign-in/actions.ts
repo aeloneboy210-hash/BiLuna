@@ -2,6 +2,8 @@
 
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import type { EmailOtpType } from '@supabase/supabase-js'
+import { safeNext } from '@/lib/access/route-guard'
 import { cleanEmail, cleanName, isDemoEmail, passwordOk } from '@/lib/auth/account-rules'
 import { siteOrigin } from '@/lib/auth/origin'
 import { tryDemo } from '@/lib/auth/try-demo'
@@ -79,9 +81,12 @@ export async function signUp(_prev: SignUpState, formData: FormData): Promise<Si
     password,
     options: { data: { full_name: name }, emailRedirectTo: `${origin}/auth/confirm?next=/welcome` },
   })
+  // The per-email "wait a minute" limit only happens for an email that already has an account; treating it
+  // as sent keeps the answer the same for everyone, so no one can test whether an email uses BiLuna.
+  if (error?.code === 'over_email_send_rate_limit' || error?.code === 'user_already_exists') return { error: null, sentTo: email }
   if (tooMany(error)) return { error: dict.auth.tooMany, sentTo: null }
   if (error?.code === 'weak_password') return { error: dict.auth.badPassword, sentTo: null }
-  if (error && error.code !== 'user_already_exists') return { error: dict.auth.failed, sentTo: null }
+  if (error) return { error: dict.auth.failed, sentTo: null }
   return { error: null, sentTo: email }
 }
 
@@ -112,7 +117,9 @@ export async function requestPasswordReset(_prev: ResetState, formData: FormData
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/auth/confirm?next=/reset-password`,
   })
-  if (tooMany(error)) return { error: dict.auth.tooMany, sentTo: null }
+  // Same answer for every email (see signUp): only the site-wide limit is reported.
+  if (error?.code === 'over_request_rate_limit' || (error?.status === 429 && error?.code !== 'over_email_send_rate_limit'))
+    return { error: dict.auth.tooMany, sentTo: null }
   return { error: null, sentTo: email }
 }
 
@@ -134,6 +141,30 @@ export async function setNewPassword(_prev: NewPasswordState, formData: FormData
   if (error?.code === 'weak_password' || error?.code === 'same_password') return { error: dict.auth.badPassword }
   if (error) return { error: dict.auth.failed }
   return goHome(supabase, user.id)
+}
+
+const LINK_TYPES: EmailOtpType[] = ['signup', 'email', 'recovery', 'email_change']
+
+/**
+ * The "Continue" button on the page an email link opens. Only this tap signs the person in, so a link
+ * sent by someone else cannot sign a visitor into a stranger's account without them noticing, and email
+ * scanners that open links do not use them up.
+ */
+export async function confirmEmailLink(formData: FormData): Promise<void> {
+  const tokenHash = String(formData.get('token_hash') ?? '')
+  const code = String(formData.get('code') ?? '')
+  const type = String(formData.get('type') ?? '') as EmailOtpType
+  const next = safeNext(String(formData.get('next') ?? '') || (type === 'recovery' ? '/reset-password' : '/welcome'))
+  const supabase = await createClient()
+  if (supabase && tokenHash && LINK_TYPES.includes(type)) {
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash })
+    if (!error) redirect(next)
+  }
+  if (supabase && code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error) redirect(next)
+  }
+  redirect('/sign-in?auth=link')
 }
 
 /** One tap, no password typed: opens the shared demo account for the chosen portal. */
