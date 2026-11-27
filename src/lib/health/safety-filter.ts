@@ -34,7 +34,8 @@ export const SMALL_TALK_MARK = '[SMALL_TALK]'
 /** The model starts a reply that only asks follow-up questions with this mark. Same rules as small talk. */
 export const CLARIFY_MARK = '[ASK]'
 /** Longest reply that may skip the confidence line. A greeting fits; a paragraph of advice does not. */
-const SMALL_TALK_MAX = 300
+// A warm introduction in Bangla can run to 500 characters; advice is still caught (ADVICE) whatever the length.
+const SMALL_TALK_MAX = 700
 const CLARIFY_MAX = 220
 
 export type ReplyKind = 'answer' | 'smallTalk' | 'clarify'
