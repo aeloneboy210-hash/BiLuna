@@ -34,12 +34,12 @@ export function splitConfidence(line: string): { lang: Lang; text: string } | nu
 
 export const METER_WORDS: Record<Lang, { title: string; levels: Record<SureLevel, string>; doctor: string }> = {
   en: {
-    title: 'Honesty meter',
+    title: 'Confidence Compass',
     levels: { 1: 'Early idea', 2: 'Getting clearer', 3: 'Fairly sure' },
     doctor: 'The last step is always a doctor’s',
   },
   bn: {
-    title: 'সততার মিটার',
+    title: 'আস্থার কম্পাস',
     levels: { 1: 'প্রাথমিক ধারণা', 2: 'আরও পরিষ্কার হচ্ছে', 3: 'মোটামুটি নিশ্চিত' },
     doctor: 'শেষ ধাপটা সবসময় ডাক্তারের',
   },
