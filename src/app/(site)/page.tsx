@@ -6,11 +6,10 @@ import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
 import { IconTile } from '@/components/ui/IconTile'
 import { getDict } from '@/lib/i18n/server'
-import { MODULES } from '@/lib/modules'
 import { ROLES } from '@/lib/portals'
 import type { IconName } from '@/lib/ui/icons'
 import { INTRO_GATE_SCRIPT } from '@/lib/ui/intro'
-import { MODULE_ICONS, ROLE_ICONS } from '@/lib/ui/module-icons'
+import { ROLE_ICONS } from '@/lib/ui/module-icons'
 
 const FEATURES: {
   key: 'care' | 'insights' | 'science' | 'everyone'
@@ -131,27 +130,10 @@ export default async function WelcomePage() {
         </ul>
       </section>
 
-      <section className="flex flex-col gap-4 lg:max-w-4xl">
-        <p className="text-base leading-relaxed text-body sm:text-lg sm:leading-relaxed">{dict.description}</p>
-        <p className="flex items-center gap-2 text-sm text-muted">
-          <Icon name="shield" className="h-4 w-4 text-cyan" />
-          {w.note}
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-5">
-        <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.modulesTitle}</h2>
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {MODULES.map((m) => (
-            <li key={m.id}>
-              <Card interactive className="flex h-full flex-col items-center gap-3 p-5 text-center">
-                <IconTile name={MODULE_ICONS[m.id]} size="lg" />
-                <span className="font-display text-sm font-semibold sm:text-base">{m.name}</span>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <p className="flex items-center justify-center gap-2 text-sm text-muted">
+        <Icon name="shield" className="h-4 w-4 text-cyan" />
+        {w.note}
+      </p>
     </div>
   )
 }
