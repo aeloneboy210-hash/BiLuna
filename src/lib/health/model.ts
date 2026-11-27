@@ -13,6 +13,8 @@ import { unexplainedDoses } from './dose-guard'
 import { strayWords } from './stray-words'
 import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
+import { extractSources, sourcesTag } from '@/lib/knowledge/catalog'
+import { findCards, knowledgeBlock } from '@/lib/knowledge/find'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
 type ModelPart = { type: 'text'; text: string } | { type: 'file'; data: string; mediaType: string; filename: string }
@@ -83,7 +85,8 @@ export async function askBiLuna(
   const generate = deps.generate ?? defaultGenerate
   const messages: ModelMessage[] = history.slice(-HISTORY_LIMIT).map((m) => ({
     role: m.author === 'patient' ? 'user' : 'assistant',
-    content: m.body,
+    // The sources line under an earlier answer is for the screen, not for the AI to copy.
+    content: m.author === 'biluna' ? extractSources(m.body).text : m.body,
   }))
   // An uploaded report or prescription goes with the newest patient message, this one time only.
   const file = deps.attachment
@@ -99,7 +102,9 @@ export async function askBiLuna(
       }
     }
   }
-  const instructions = buildInstructions(lang, deps.profile ?? null)
+  // Guideline cards for what the patient is talking about (WHO, UNICEF, NHS, CDC), read before answering.
+  const cards = findCards(history.filter((m) => m.author === 'patient').map((m) => m.body))
+  const instructions = buildInstructions(lang, deps.profile ?? null, knowledgeBlock(cards))
 
   try {
     // A failed first draft is written again once, with a note saying what was wrong.
@@ -107,7 +112,8 @@ export async function askBiLuna(
     for (let attempt = 0; attempt < 2; attempt++) {
       const { text } = await generate({ instructions: instructions + extra, messages })
       // The 3D body tag comes off before the safety check and goes back at the very end, answers only.
-      const tagged = extractBodyTag(text)
+      // A sources line the AI wrote itself is dropped: only the cards BiLuna really gave it are listed.
+      const tagged = extractBodyTag(extractSources(text).text)
       // Tap-to-answer options also come off before the check, and go back on answers and follow-up questions.
       const opts = extractOptions(tagged.text)
       const checked = checkReply(opts.text, lang)
@@ -139,7 +145,10 @@ export async function askBiLuna(
         // up. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
         const organ =
           tagged.organ ?? (said.trimStart().startsWith(POINT_MARK) || detectDanger(said) ? null : guessOrgan(said))
-        let body = organ && checked.kind === 'answer' ? `${checked.text}\n${bodyTag(organ)}` : checked.text
+        // A full answer lists the guideline cards it was given, so the patient can open the sources.
+        const main =
+          cards.length && checked.kind === 'answer' ? `${checked.text}\n${sourcesTag(cards.map((c) => c.id))}` : checked.text
+        let body = organ && checked.kind === 'answer' ? `${main}\n${bodyTag(organ)}` : main
         if (opts.options.length && checked.kind !== 'smallTalk') body += `\n${optionsTag(opts.options)}`
         // After pointing at the body, every reply for three rounds must end with a question the patient can tap.
         const round = placeRound(history)

@@ -7,7 +7,7 @@ import { CLARIFY_MARK, CONFIDENCE_PREFIX, SMALL_TALK_MARK } from './safety-filte
  * BiLuna Intelligence blueprint (personality, emotional intelligence, consent-based memory).
  * `profile` is only passed when the patient has switched on "Let BiLuna use my profile in chats".
  */
-export function buildInstructions(lang: Lang, profile: string | null = null): string {
+export function buildInstructions(lang: Lang, profile: string | null = null, knowledge = ''): string {
   const language = lang === 'bn' ? 'Bangla (Bengali script)' : 'English'
   const prefix = CONFIDENCE_PREFIX[lang]
 
@@ -39,7 +39,7 @@ Language
 
 Health profile
 ${profileBlock}
-
+${knowledge ? `\n${knowledge}\n` : ''}
 Follow-up questions
 - If a health message is too vague to answer safely (for example "I feel sick" with no detail), comfort them in one short sentence, then ask the single most useful question first (where, since when, or how bad), with tap-to-answer options.
 - Start that reply with exactly "${CLARIFY_MARK}", keep it under 40 words, and add no confidence line.

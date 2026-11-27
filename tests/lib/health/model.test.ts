@@ -225,7 +225,7 @@ test('no backup guess on follow-up questions, after a 📍 tap, or on a danger m
 test('a reply that invents a dose is written again without it', async () => {
   const f = fake(`Give him 250 mg paracetamol.\n\n${CONFIDENCE_PREFIX.en} general.`, good)
   const r = await askBiLuna([{ author: 'patient', body: 'My son has a fever' }], 'en', { generate: f.generate })
-  expect(r).toEqual({ ok: true, text: good, kind: 'answer', retried: true })
+  expect(r).toEqual({ ok: true, text: `${good}\n[[sources: fever, childDanger]]`, kind: 'answer', retried: true })
   expect(f.calls[1].instructions).toMatch(/dose/i)
 })
 
@@ -332,4 +332,38 @@ test.each([
   const read = `A prescription.\n${line}\n\n${CONFIDENCE_PREFIX.en} general.`
   const r = await askBiLuna([{ author: 'patient', body: '📎 rx.jpg' }], 'en', { attachment: file, generate: fake(read).generate })
   expect(r.ok).toBe(true)
+})
+
+test('an answer lists the guideline cards it was given, and the AI reads them first', async () => {
+  const f = fake(good)
+  const r = await askBiLuna([{ author: 'patient', body: 'I think I have dengue' }], 'en', { generate: f.generate })
+  expect(r.ok && r.text).toBe(`${good}\n[[sources: dengue]]`)
+  expect(f.calls[0].instructions).toContain('<card title="Dengue"')
+})
+
+test('no cards for a greeting, and no sources under small talk', async () => {
+  const f = fake('[SMALL_TALK] Hi! How are you feeling today?')
+  const r = await askBiLuna([{ author: 'patient', body: 'hi' }], 'en', { generate: f.generate })
+  expect(r.ok && r.text).not.toContain('[[sources')
+  expect(f.calls[0].instructions).not.toContain('Guideline cards')
+})
+
+test('a sources line written by the AI itself is removed', async () => {
+  const f = fake(`${good}\n[[sources: typhoid]]`)
+  const r = await askBiLuna(history, 'en', { generate: f.generate })
+  expect(r.ok && r.text).toBe(good)
+})
+
+test('earlier sources lines are not shown to the AI', async () => {
+  const f = fake(good)
+  await askBiLuna(
+    [
+      { author: 'patient', body: 'I think I have dengue' },
+      { author: 'biluna', body: `${good}\n[[sources: dengue]]` },
+      { author: 'patient', body: 'thanks, anything else?' },
+    ],
+    'en',
+    { generate: f.generate },
+  )
+  expect(JSON.stringify(f.calls[0].messages)).not.toContain('[[sources')
 })

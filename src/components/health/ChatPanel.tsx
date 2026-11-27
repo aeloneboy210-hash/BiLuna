@@ -19,6 +19,8 @@ import { chatLang as langOfChat, typedLang as langOfText } from '@/lib/health/la
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
 import { SureMeter } from './SureMeter'
 import { splitConfidence } from '@/lib/health/sure-meter'
+import { SourceList } from './SourceList'
+import { extractSources } from '@/lib/knowledge/catalog'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
@@ -307,7 +309,8 @@ export function ChatPanel({
               </Fragment>
             )
           }
-          const tagged = extractBodyTag(m.body)
+          const cited = extractSources(m.body)
+          const tagged = extractBodyTag(cited.text)
           const opts = extractOptions(tagged.text)
           const reply = { text: opts.text, organ: tagged.organ }
           const isLatest = m.id === messages[messages.length - 1]?.id && !pending
@@ -321,6 +324,7 @@ export function ChatPanel({
                 >
                   <span className="sr-only">{t.biluna}: </span>
                   <ReplyText body={reply.text} />
+                  {cited.ids.length ? <SourceList ids={cited.ids} lang={lang} title={t.sources} note={t.sourcesNote} /> : null}
                   {opts.options.length && isLatest ? (
                     <div className="mt-1 flex flex-wrap gap-2" role="group" aria-label={t.tapAnswer}>
                       {opts.options.map((o) => (

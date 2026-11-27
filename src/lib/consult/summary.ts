@@ -5,6 +5,7 @@ import { BusyError } from '@/lib/ai/cloudflare'
 import { unexplainedDoses } from '@/lib/health/dose-guard'
 import { defaultGenerate, type ChatTurn, type Generate } from '@/lib/health/model'
 import { FORBIDDEN } from '@/lib/health/safety-filter'
+import { extractSources } from '@/lib/knowledge/catalog'
 
 /** The sections of a Consultation Prep summary. `note` is the patient's own words for the doctor. */
 export type SummaryContent = {
@@ -96,7 +97,9 @@ export async function makeSummary(
   deps: { generate?: Generate } = {},
 ): Promise<{ ok: true; content: SummaryContent } | { ok: false; reason: 'busy' | 'error' | 'unsafe' }> {
   const generate = deps.generate ?? defaultGenerate
-  const transcript = history.map((m) => `${m.author === 'patient' ? 'Patient' : 'BiLuna'}: ${m.body}`).join('\n\n')
+  const transcript = history
+    .map((m) => `${m.author === 'patient' ? 'Patient' : 'BiLuna'}: ${extractSources(m.body).text}`)
+    .join('\n\n')
   try {
     const { text } = await generate({
       instructions: summaryInstructions(lang),
