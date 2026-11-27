@@ -42,6 +42,8 @@
   --animate-glow: glow 4s ease-in-out infinite;
   --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   --animate-beacon: beacon 1.8s ease-out infinite;
+  --animate-pop-depth: pop-depth 0.85s cubic-bezier(0.18, 1.35, 0.4, 1) both;
+  --animate-pop-word: pop-word 0.7s cubic-bezier(0.2, 1.6, 0.4, 1) both;
 
   @keyframes float {
     0%,
@@ -60,6 +62,38 @@
     }
     50% {
       opacity: 1;
+    }
+  }
+
+  /* Comes out of the background: far back, small and blurred, then lands in place with a small overshoot. */
+  @keyframes pop-depth {
+    0% {
+      opacity: 0;
+      filter: blur(10px);
+      transform: perspective(700px) translateZ(-420px) translateY(30px) scale(0.6);
+    }
+    60% {
+      opacity: 1;
+      filter: blur(0);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
+    }
+  }
+
+  /* One word of a heading popping forward. */
+  @keyframes pop-word {
+    0% {
+      opacity: 0;
+      filter: blur(6px);
+      transform: perspective(500px) translateZ(-300px) scale(0.3);
+    }
+    100% {
+      opacity: 1;
+      filter: blur(0);
+      transform: none;
     }
   }
 

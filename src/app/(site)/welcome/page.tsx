@@ -20,12 +20,26 @@ export default async function WelcomePage() {
   const icons = ['🤖', '🚑', '🔒', '✨']
   return (
     <Card className="mx-auto flex w-full max-w-xl flex-col gap-5 p-6 sm:p-8">
-      <div className="flex animate-rise flex-col gap-1.5">
-        <span aria-hidden="true" className="text-4xl">
+      <div className="flex flex-col gap-1.5">
+        <span aria-hidden="true" className="inline-block w-fit animate-pop-word text-5xl">
           👋
         </span>
-        <h1 className="text-3xl font-bold">{t.title}</h1>
-        <p className="text-body">{t.intro}</p>
+        {/* The heading pops out of the background word by word; screen readers read it as one line. */}
+        <h1 className="text-3xl font-bold" aria-label={t.title}>
+          {t.title.split(' ').map((word, i) => (
+            <span
+              key={i}
+              aria-hidden="true"
+              className="mr-[0.25em] inline-block animate-pop-word"
+              style={{ animationDelay: `${120 + i * 110}ms` }}
+            >
+              {word}
+            </span>
+          ))}
+        </h1>
+        <p className="animate-rise text-body" style={{ animationDelay: '500ms' }}>
+          {t.intro}
+        </p>
       </div>
       <ul className="flex flex-col gap-3">
         {t.points.map((point, i) => {
@@ -34,8 +48,8 @@ export default async function WelcomePage() {
             <li
               key={i}
               // The points arrive one after another; phones set to reduce motion show them at once.
-              style={{ animationDelay: `${150 + i * 140}ms` }}
-              className={`flex animate-rise items-start gap-3 rounded-2xl px-4 py-3 text-[0.95rem] leading-relaxed text-ink transition-transform hover:-translate-y-0.5 ${
+              style={{ animationDelay: `${650 + i * 220}ms` }}
+              className={`flex animate-pop-depth items-start gap-3 rounded-2xl px-4 py-3 text-[0.95rem] leading-relaxed text-ink transition-transform hover:-translate-y-0.5 ${
                 urgent ? 'border border-danger/40 bg-danger/10 font-semibold' : 'bg-soft'
               }`}
             >
@@ -52,7 +66,7 @@ export default async function WelcomePage() {
           )
         })}
       </ul>
-      <div className="flex animate-rise flex-col gap-5" style={{ animationDelay: `${150 + t.points.length * 140}ms` }}>
+      <div className="flex animate-rise flex-col gap-5" style={{ animationDelay: `${650 + t.points.length * 220}ms` }}>
         <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
           <Link href="/terms" target="_blank" className="font-semibold text-brand underline underline-offset-4">
             {t.readTerms}
