@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { GoogleButton } from '@/components/auth/GoogleButton'
-import { TryDemoButtons } from '@/components/TryDemo'
 import { Card } from '@/components/ui/Card'
 import { getDict } from '@/lib/i18n/server'
 import { SignInForm } from './SignInForm'
@@ -62,11 +61,6 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             </Link>
           </p>
         </div>
-      </Card>
-      <Card className="flex flex-col gap-3 p-6">
-        <h2 className="font-semibold text-ink">{dict.signIn.tryTitle}</h2>
-        <p className="text-sm text-body">{dict.auth.demoWarning}</p>
-        <TryDemoButtons dict={dict} />
       </Card>
     </div>
   )

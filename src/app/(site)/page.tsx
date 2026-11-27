@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import { IntroSplash } from '@/components/IntroSplash'
-import { startDemo } from '@/app/(site)/sign-in/actions'
-import { TryDemoButton } from '@/components/TryDemo'
+import Link from 'next/link'
 import { ButtonLink } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { Icon } from '@/components/ui/Icon'
@@ -52,7 +51,9 @@ export default async function WelcomePage() {
             </h1>
             <p className="text-lg text-aqua">{dict.brand.tagline}</p>
             <div className="mt-2 flex flex-wrap justify-center gap-3 lg:justify-start">
-              <TryDemoButton role="patient" dict={dict} className="px-8 text-lg" />
+              <ButtonLink href="/sign-in" className="px-8 text-lg">
+                {w.cta}
+              </ButtonLink>
               <ButtonLink href="/roadmap" variant="secondary">
                 {w.secondaryCta}
               </ButtonLink>
@@ -80,32 +81,53 @@ export default async function WelcomePage() {
       <section className="flex flex-col gap-5">
         <h2 className="text-sm font-semibold tracking-[0.18em] text-aqua uppercase">{w.portalsTitle}</h2>
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          {ROLES.map((role) => (
-            <li key={role}>
-              <form action={startDemo} data-page-loader="" className="h-full">
-                <input type="hidden" name="role" value={role} />
-                <button type="submit" className="glass glow-edge group flex h-full w-full items-center gap-4 rounded-2xl p-5 text-left">
-                  <span
-                    aria-hidden="true"
-                    className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
-                  >
-                    <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
-                  </span>
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="font-display text-lg font-semibold">{dict.portals[role].name}</span>
-                    <span className="text-sm text-body">{dict.portals[role].blurb}</span>
-                    <span className="mt-1 text-sm font-semibold text-brand">{dict.signIn.try[role]}</span>
-                  </span>
+          {ROLES.map((role) => {
+            const ready = role === 'patient'
+            const inside = (
+              <>
+                <span
+                  aria-hidden="true"
+                  className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-on-brand ${ready ? 'bg-brand' : 'bg-field'}`}
+                >
+                  <Icon name={ROLE_ICONS[role]} className="h-8 w-8" />
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="font-display text-lg font-semibold">{dict.portals[role].name}</span>
+                  <span className="text-sm text-body">{dict.portals[role].blurb}</span>
+                  {ready ? <span className="mt-1 text-sm font-semibold text-brand">{w.portalStart}</span> : null}
+                </span>
+                {ready ? (
                   <span
                     aria-hidden="true"
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20 text-cyan transition-transform group-hover:translate-x-1"
                   >
                     <Icon name="arrowRight" className="h-5 w-5" />
                   </span>
-                </button>
-              </form>
-            </li>
-          ))}
+                ) : null}
+              </>
+            )
+            return (
+              <li key={role} className="relative">
+                {ready ? (
+                  <Link
+                    href="/sign-in"
+                    className="glass glow-edge group flex h-full w-full items-center gap-4 rounded-2xl p-5 text-left"
+                  >
+                    {inside}
+                  </Link>
+                ) : (
+                  <div className="glass flex h-full w-full items-center gap-4 rounded-2xl p-5 pt-9 text-left opacity-75" aria-disabled="true">
+                    {inside}
+                  </div>
+                )}
+                {ready ? null : (
+                  <span className="absolute top-3 right-3 rounded-full border border-warn/30 bg-[#fff4dc] px-2.5 py-1 text-xs font-bold text-warn">
+                    🚧 {w.developing}
+                  </span>
+                )}
+              </li>
+            )
+          })}
         </ul>
       </section>
 

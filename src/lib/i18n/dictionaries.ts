@@ -45,6 +45,8 @@ const en = {
     cta: 'Get started',
     note: 'BiLuna does not replace doctors or emergency services.',
     portalsTitle: 'Three portals',
+    portalStart: 'Sign in to start',
+    developing: 'Still developing',
     modulesTitle: 'Eight modules',
     prototype:
       'BiLuna is a prototype built for an AI congress. It is not a launched or clinically validated healthcare service.',
@@ -582,6 +584,8 @@ const bn: Dictionary = {
     cta: 'শুরু করুন',
     note: 'বিলুনা ডাক্তার বা জরুরি সেবার বিকল্প নয়।',
     portalsTitle: 'তিনটি পোর্টাল',
+    portalStart: 'সাইন ইন করে শুরু করুন',
+    developing: 'এখনও তৈরি হচ্ছে',
     modulesTitle: 'আটটি মডিউল',
     prototype:
       'বিলুনা একটি এআই কংগ্রেসের জন্য তৈরি প্রোটোটাইপ। এটি চালু হওয়া বা ক্লিনিক্যালি যাচাই করা স্বাস্থ্যসেবা নয়।',
