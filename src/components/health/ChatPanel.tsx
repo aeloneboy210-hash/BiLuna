@@ -356,9 +356,11 @@ export function ChatPanel({
         {(() => {
           const last = messages[messages.length - 1]
           if (pending || messages.length < 2 || last?.author !== 'biluna' || last.id.startsWith('local-')) return null
-          // No "are you happy" check right after an emergency or self-harm message.
+          // No "are you happy" check right after an emergency or self-harm message, and none under a greeting
+          // or a follow-up question: only a real answer (it ends with the confidence line) is asked about.
           const asked = [...messages].reverse().find((m) => m.author === 'patient')
           if (asked && detectDanger(asked.body)) return null
+          if (!last.body.includes(CONFIDENCE_PREFIX.en) && !last.body.includes(CONFIDENCE_PREFIX.bn)) return null
           if (cared === last.id) {
             return <p className="self-start rounded-2xl rounded-tl-sm bg-soft px-4 py-3 text-sm text-ink">💙 {t.care.thanks}</p>
           }
