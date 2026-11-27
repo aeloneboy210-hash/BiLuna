@@ -349,3 +349,28 @@ html[lang="bn"] :is(h1, h2, h3) {
 @media (prefers-reduced-motion: reduce) {
   .body-scan, .body-scan-label { display: none; }
 }
+
+/* The honesty meter under BiLuna's answers: the card slides up, its bars rise one by one. */
+.sure-meter {
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.sure-meter-bar {
+  transform-origin: bottom;
+  animation: meter-fill 0.5s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+.sure-meter-icon {
+  display: inline-block;
+  animation: meter-wobble 2.4s ease-in-out 0.4s 1 both;
+}
+@keyframes meter-fill {
+  from { transform: scaleY(0); }
+}
+@keyframes meter-wobble {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-25deg); }
+  50% { transform: rotate(20deg); }
+  75% { transform: rotate(-8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sure-meter, .sure-meter-bar, .sure-meter-icon { animation: none; }
+}

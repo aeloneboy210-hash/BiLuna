@@ -17,6 +17,8 @@ import { Icon } from '@/components/ui/Icon'
 import { extractBodyTag, pointedLine, splitPointed, type BodyPoint } from '@/lib/body/chat-body'
 import { chatLang as langOfChat, typedLang as langOfText } from '@/lib/health/lang-detect'
 import { CONFIDENCE_PREFIX } from '@/lib/health/safety-filter'
+import { SureMeter } from './SureMeter'
+import { splitConfidence } from '@/lib/health/sure-meter'
 import type { SendError } from '@/lib/health/send'
 import type { Dictionary } from '@/lib/i18n/dictionaries'
 import type { Lang } from '@/lib/i18n/lang'
@@ -77,8 +79,6 @@ function FeedbackButtons({ messageId, initial, t }: { messageId: string; initial
   )
 }
 
-const PREFIXES = Object.values(CONFIDENCE_PREFIX)
-
 /** BiLuna's reply as plain paragraphs, with the "How sure I am" line set apart. Markdown stars are dropped. */
 function ReplyText({ body }: { body: string }) {
   const lines = body.replace(/\*\*/g, '').split('\n')
@@ -87,11 +87,9 @@ function ReplyText({ body }: { body: string }) {
       {lines.map((raw, i) => {
         const line = raw.replace(/^\s*[*-]\s+/, '• ').trim()
         if (!line) return null
-        const isConfidence = PREFIXES.some((p) => line.startsWith(p))
-        return isConfidence ? (
-          <p key={i} className="mt-1 rounded-xl border border-tint bg-soft px-3 py-2 text-sm font-semibold text-ink">
-            {line}
-          </p>
+        const confidence = splitConfidence(line)
+        return confidence ? (
+          <SureMeter key={i} lang={confidence.lang} text={confidence.text} />
         ) : (
           <p key={i}>{line}</p>
         )
