@@ -150,7 +150,7 @@ export const TERMS: Record<Lang, LegalPage> = {
       {
         heading: 'No guarantee',
         body: [
-          'BiLuna is a prototype built by a student team. It is given as it is, without any promise that it is always right, always available, or fit for a particular use.',
+          'BiLuna is a new service in early development. It is given as it is, without any promise that it is always right, always available, or fit for a particular use.',
         ],
       },
       {
@@ -191,7 +191,7 @@ export const TERMS: Record<Lang, LegalPage> = {
       {
         heading: 'কোনো নিশ্চয়তা নেই',
         body: [
-          'বিলুনা একটি শিক্ষার্থী দলের তৈরি প্রোটোটাইপ। এটি যেমন আছে তেমনই দেওয়া হচ্ছে; সবসময় সঠিক, সবসময় চালু বা কোনো নির্দিষ্ট কাজের উপযুক্ত হবে, এমন কোনো প্রতিশ্রুতি নেই।',
+          'বিলুনা একটি নতুন সেবা, এখনও শুরুর পর্যায়ে তৈরি হচ্ছে। এটি যেমন আছে তেমনই দেওয়া হচ্ছে; সবসময় সঠিক, সবসময় চালু বা কোনো নির্দিষ্ট কাজের উপযুক্ত হবে, এমন কোনো প্রতিশ্রুতি নেই।',
         ],
       },
       {

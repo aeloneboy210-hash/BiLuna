@@ -15,7 +15,7 @@ import { getDict } from '@/lib/i18n/server'
 export const metadata: Metadata = {
   title: { default: 'BiLuna — Your Personal Healthcare AI Companion', template: '%s · BiLuna' },
   description:
-    'BiLuna is a Bangladesh-first healthcare AI companion prototype. Demo with fictional data. Not medical advice.',
+    'BiLuna is a free healthcare AI companion for Bangladesh, in Bangla and English. Tell it how you feel and get clear, safe next steps. Not a replacement for a doctor.',
 }
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#ffffff' }

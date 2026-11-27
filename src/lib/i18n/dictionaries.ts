@@ -48,8 +48,7 @@ const en = {
     portalStart: 'Sign in to start',
     developing: 'Still developing',
     modulesTitle: 'Eight modules',
-    prototype:
-      'BiLuna is a prototype built for an AI congress. It is not a launched or clinically validated healthcare service.',
+    prototype: '© 2026 BiLuna · Your Personal Healthcare AI Companion · Made in Bangladesh 🇧🇩',
   },
   portals: {
     patient: {
@@ -587,8 +586,7 @@ const bn: Dictionary = {
     portalStart: 'সাইন ইন করে শুরু করুন',
     developing: 'এখনও তৈরি হচ্ছে',
     modulesTitle: 'আটটি মডিউল',
-    prototype:
-      'বিলুনা একটি এআই কংগ্রেসের জন্য তৈরি প্রোটোটাইপ। এটি চালু হওয়া বা ক্লিনিক্যালি যাচাই করা স্বাস্থ্যসেবা নয়।',
+    prototype: '© ২০২৬ বিলুনা · আপনার ব্যক্তিগত স্বাস্থ্যসেবা এআই সঙ্গী · বাংলাদেশে তৈরি 🇧🇩',
   },
   portals: {
     patient: {
