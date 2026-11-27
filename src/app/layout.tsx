@@ -36,7 +36,7 @@ export default async function RootLayout({ children }: LayoutProps<'/'>) {
         >
           {dict.nav.skip}
         </a>
-        <DemoBanner text={session?.isDemo ? dict.banner : dict.bannerReal} />
+        {session?.isDemo ? <DemoBanner text={dict.banner} /> : null}
         {children}
         <Suspense fallback={null}>
           <NavLoader label={dict.nav.loading} />
