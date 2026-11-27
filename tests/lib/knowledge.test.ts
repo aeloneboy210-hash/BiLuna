@@ -58,6 +58,11 @@ describe('findCards', () => {
     expect(ids('আমি গর্ভবতী, রক্ত যাচ্ছে')).toContain('pregnancy')
     expect(ids('বুক জ্বালা করে আর টক ঢেকুর')).toContain('gastric')
     expect(ids('amar jor hoyeche')).toContain('fever')
+    expect(ids('আমার কি ডায়াবেটিস হয়েছে?')).toContain('diabetes')
+  })
+
+  it('lets a longer phrase use up its words', () => {
+    expect(ids('জন্ডিস হয়েছে, পেটে বাচ্চা আছে')).toEqual(['pregnancy', 'jaundice'])
   })
 
   it('finds nothing in greetings or unrelated words', () => {

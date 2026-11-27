@@ -21,7 +21,7 @@ export const CAPABILITY_GROUPS: CapabilityGroup[] = [
     name: { en: 'Core AI', bn: 'মূল এআই' },
     items: [
       c('reasoning', 'AI Reasoning Engine', 'এআই যুক্তি ইঞ্জিন', 'working', 'Answers in the Health chat', 'হেলথ চ্যাটের উত্তর'),
-      c('medicalKnowledge', 'Medical Knowledge Engine', 'চিকিৎসা জ্ঞান ইঞ্জিন', 'working', 'Not yet reviewed by a doctor', 'এখনো ডাক্তার দ্বারা যাচাই হয়নি'),
+      c('medicalKnowledge', 'Medical Knowledge Engine', 'চিকিৎসা জ্ঞান ইঞ্জিন', 'working', '20 guideline cards from WHO, UNICEF, NHS and CDC; not yet checked by a doctor', 'WHO, UNICEF, NHS ও CDC থেকে ২০টি নির্দেশিকা কার্ড; এখনও ডাক্তার যাচাই করেননি'),
       c('voice', 'Voice Intelligence', 'ভয়েস ইন্টেলিজেন্স', 'demo', 'Speak and listen in the chat', 'চ্যাটে বলা ও শোনা'),
       c('image', 'Image Intelligence', 'ছবি ইন্টেলিজেন্স', 'working', 'Report and prescription upload', 'রিপোর্ট ও প্রেসক্রিপশন আপলোড'),
       c('multilingual', 'Multilingual Intelligence', 'বহুভাষিক ইন্টেলিজেন্স', 'working', 'Bangla and English replies', 'বাংলা ও ইংরেজি উত্তর'),

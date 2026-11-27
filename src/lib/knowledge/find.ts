@@ -17,23 +17,37 @@ const fold = (text: string) =>
     .replace(/ঁ/g, '')
     .toLowerCase()
 
-/**
- * One matcher per card. Bangla keywords match anywhere. Latin keywords must start a word; short ones (under five
- * letters, such as "flu" or "ors") must be the whole word, so "fluids" or "worse" never bring a card up.
- */
-const MATCHERS: { id: CardId; bangla: string[]; latin: RegExp | null }[] = CATALOG.map((card) => {
-  const words = CONTENT[card.id].keywords.map(fold)
-  const latin = words.filter((w) => !BANGLA.test(w))
+/** Latin keywords must start a word; short ones (under five letters, such as "flu" or "ors") must be the whole word. */
+const LATIN: { id: CardId; re: RegExp }[] = CATALOG.flatMap((card) => {
+  const latin = CONTENT[card.id].keywords.map(fold).filter((w) => !BANGLA.test(w))
   const pattern = latin.map((w) => (w.length < 5 ? `${escape(w)}\\b` : escape(w))).join('|')
-  return {
-    id: card.id,
-    bangla: words.filter((w) => BANGLA.test(w)),
-    latin: pattern ? new RegExp(`(?<![\\p{L}\\p{N}])(?:${pattern})`, 'u') : null,
-  }
+  return pattern ? [{ id: card.id, re: new RegExp(`(?<![\\p{L}\\p{N}])(?:${pattern})`, 'u') }] : []
 })
 
-const hits = (m: (typeof MATCHERS)[number], text: string) =>
-  m.bangla.filter((w) => text.includes(w)).length + (m.latin?.test(text) ? 1 : 0)
+/**
+ * Bangla keywords match anywhere, longest first, and a matched phrase is used up: "পেটে বাচ্চা" (pregnant) brings up
+ * the pregnancy card and does not also count as "বাচ্চা" (child) for the sick-child card.
+ */
+const BANGLA_WORDS: { id: CardId; word: string }[] = CATALOG.flatMap((card) =>
+  CONTENT[card.id].keywords
+    .map(fold)
+    .filter((w) => BANGLA.test(w))
+    .map((word) => ({ id: card.id, word })),
+).sort((a, b) => b.word.length - a.word.length)
+
+function score(text: string): Map<CardId, number> {
+  const out = new Map<CardId, number>()
+  const add = (id: CardId) => out.set(id, (out.get(id) ?? 0) + 1)
+  let rest = text
+  for (const { id, word } of BANGLA_WORDS) {
+    if (rest.includes(word)) {
+      add(id)
+      rest = rest.split(word).join(' ')
+    }
+  }
+  for (const { id, re } of LATIN) if (re.test(text)) add(id)
+  return out
+}
 
 /**
  * Picks the guideline cards for the patient's latest message. Earlier patient messages count too, at half weight,
@@ -41,16 +55,13 @@ const hits = (m: (typeof MATCHERS)[number], text: string) =>
  */
 export function findCards(patientMessages: string[]): FoundCard[] {
   const recent = patientMessages.slice(-(EARLIER_MESSAGES + 1)).map(fold)
-  const latest = recent.at(-1) ?? ''
-  const earlier = recent.slice(0, -1).join('\n')
-  return MATCHERS.map((m, order) => ({ m, order, score: 2 * hits(m, latest) + hits(m, earlier) }))
-    .filter((x) => x.score > 0)
-    .sort((a, b) => b.score - a.score || a.order - b.order)
+  const latest = score(recent.at(-1) ?? '')
+  const earlier = score(recent.slice(0, -1).join('\n'))
+  return CATALOG.map((meta, order) => ({ meta, order, total: 2 * (latest.get(meta.id) ?? 0) + (earlier.get(meta.id) ?? 0) }))
+    .filter((x) => x.total > 0)
+    .sort((a, b) => b.total - a.total || a.order - b.order)
     .slice(0, MAX_CARDS)
-    .map(({ m }) => {
-      const meta = CATALOG.find((c) => c.id === m.id)!
-      return { ...meta, facts: CONTENT[m.id].facts }
-    })
+    .map(({ meta }) => ({ ...meta, facts: CONTENT[meta.id].facts }))
 }
 
 /** The part of the AI's instructions that hands it the cards. Empty when no card fits. */
