@@ -131,7 +131,7 @@ function statesDiagnosis(text: string): boolean {
 /** Advice or a guess at the illness: such a reply is an answer, whatever mark it starts with. */
 const BN_ADVICE = ['খান', 'খাবেন', 'নিন', 'বিশ্রাম', 'পান করুন', 'সম্ভবত', 'হতে পারে', 'মনে হচ্ছে']
 const ADVICE = new RegExp(
-  String.raw`\btake (?:a |an |some |your |this |it |two |one |\d)|\bget (?:some )?rest\b|\brest (?:well|at home|for)\b|\bdrink (?:plenty|lots|more|water|fluids)|\bavoid\b|\bapply\b|\blikely\b|\bprobably\b|\bpossibly\b|\b(?:may|might|could) be\b|\bsounds like\b|\bseems like\b|(?<![ঀ-৿])(?:${BN_ADVICE.join('|')})(?![ঀ-৿])`,
+  String.raw`\btake (?:a |an |some |your |this |it |two |one |\d)|\bget (?:some )?rest\b|\brest (?:well|at home|for)\b|\bdrink (?:plenty|lots|more|water|fluids)|\bavoid(?:ing)?\b|\bprevent(?:ing|ion)?\b|\bmanag(?:e|ing) (?:your|the|it)\b|\bapply\b|\blikely\b|\bprobably\b|\bpossibly\b|\b(?:may|might|could) be\b|\bsounds like\b|\bseems like\b|(?<![ঀ-৿])(?:${BN_ADVICE.join('|')})(?![ঀ-৿])`,
   'i',
 )
 

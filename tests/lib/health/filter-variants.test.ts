@@ -69,3 +69,10 @@ test.each(['[ASK] আমি এখানে আছি। কবে থেকে 
     expect(r.ok && r.kind).not.toBe('answer')
   },
 )
+
+test('a warm self-introduction stays small talk (no confidence line)', () => {
+  const intro =
+    "[SMALL_TALK] I'm BiLuna, and I'm here to look after your health with you. If your child has a fever at night, I can help you understand what to watch for and when to go to a doctor. I can also read a prescription or a lab report you photograph and explain it in simple words. I never guess a diagnosis or a medicine dose, and I always tell you how sure I am. How are you feeling today?"
+  const r = checkReply(intro, 'en')
+  expect(r.ok && r.kind).toBe('smallTalk')
+})
