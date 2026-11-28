@@ -11,12 +11,13 @@ import { placeQuestion, placeRound } from './place-questions'
 import { detectDanger } from './danger'
 import { unexplainedDoses } from './dose-guard'
 import { strayWords } from './stray-words'
-import { CONFIDENCE_PREFIX } from './safety-filter'
+import { CONFIDENCE_PREFIX, SMALL_TALK_MARK } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 import { extractSources, sourcesTag } from '@/lib/knowledge/catalog'
 import { dropRepeats, dropStockOpeners } from './comfort'
 import { findCards, knowledgeBlock } from '@/lib/knowledge/find'
 import { asksForLanguage } from './lang-detect'
+import { isRude } from './rude'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
 type ModelPart = { type: 'text'; text: string } | { type: 'file'; data: string; mediaType: string; filename: string }
@@ -38,6 +39,8 @@ const ASKS_ABOUT_MEDICINE =
 
 const MEDICINE_RETRY_NOTE =
   '\n\nThe patient asked about a medicine. This is a health question, not small talk: explain what the medicine is usually used for and its generic name if you know it, say this is an AI explanation and not official information, give no dose, and end with the confidence line.'
+
+const hasConfidence = (text: string) => Object.values(CONFIDENCE_PREFIX).some((p) => text.includes(p))
 
 const REPEAT_RETRY_NOTE =
   '\n\nYour previous draft repeated one of your earlier replies in this chat word for word. Say it differently, in fresh words; a repeated sentence sounds like a machine.'
@@ -122,6 +125,7 @@ export async function askBiLuna(
   // "amk banglai bolo": the patient wants the same help in another language, not a fresh start (tester feedback).
   const latestPatient = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
   const switched = later && asksForLanguage(latestPatient) === lang
+  const rude = isRude(latestPatient) && !detectDanger(latestPatient)
   const switchNote = switched
     ? `\n\nThe patient just asked you to speak ${lang === 'bn' ? 'Bangla' : 'English'}. Do not greet them and do not start over. Give your previous reply again, all of it, in ${lang === 'bn' ? 'Bangla' : 'English'}: the same content, the same question and the same tap-to-answer options, translated. Then stop.`
     : ''
@@ -136,7 +140,9 @@ export async function askBiLuna(
       const tagged = extractBodyTag(extractSources(text).text)
       // Tap-to-answer options also come off before the check, and go back on answers and follow-up questions.
       const opts = extractOptions(tagged.text)
-      const checked = checkReply(opts.text, lang)
+      // A reply to swearing is small talk even when the AI forgets to say so: no confidence line under it.
+      const marked = rude && !/^\s*\[(?:SMALL_TALK|ASK)\]/.test(opts.text) && !hasConfidence(opts.text) ? `${SMALL_TALK_MARK} ${opts.text}` : opts.text
+      const checked = checkReply(marked, lang)
       // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription
       // (the ✅ ⚠️ ❓ lines BiLuna writes for each medicine it reads), may be repeated; any other amount, in
       // the answer or in its tap-to-answer options, means the draft is written again. This holds with a file

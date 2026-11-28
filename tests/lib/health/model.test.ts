@@ -441,3 +441,10 @@ test('if the second try repeats too, it is sent rather than failing', async () =
   )
   expect(r.ok && r.text).toBe(same)
 })
+
+test('a reply to swearing gets no confidence line, even when the AI forgets the small-talk mark', async () => {
+  const f = fake("You seem upset right now. If something is bothering you, I'm listening.")
+  const r = await askBiLuna([{ author: 'patient', body: 'fuck you' }], 'en', { generate: f.generate })
+  expect(r.ok && r.text).toBe("You seem upset right now. If something is bothering you, I'm listening.")
+  expect(r.ok && r.kind).toBe('smallTalk')
+})
