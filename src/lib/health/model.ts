@@ -14,7 +14,7 @@ import { strayWords } from './stray-words'
 import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 import { extractSources, sourcesTag } from '@/lib/knowledge/catalog'
-import { dropStockOpeners } from './comfort'
+import { dropRepeats, dropStockOpeners } from './comfort'
 import { findCards, knowledgeBlock } from '@/lib/knowledge/find'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
@@ -148,7 +148,8 @@ export async function askBiLuna(
         // up. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
         const organ =
           tagged.organ ?? (said.trimStart().startsWith(POINT_MARK) || detectDanger(said) ? null : guessOrgan(said))
-        const reply = later && checked.kind !== 'smallTalk' ? dropStockOpeners(checked.text) : checked.text
+        const opened = later && checked.kind !== 'smallTalk' ? dropStockOpeners(checked.text) : checked.text
+        const reply = dropRepeats(opened, Object.values(CONFIDENCE_PREFIX))
         // A full answer lists the guideline cards it was given, so the patient can open the sources.
         const main = cards.length && checked.kind === 'answer' ? `${reply}\n${sourcesTag(cards.map((c) => c.id))}` : reply
         let body = organ && checked.kind === 'answer' ? `${main}\n${bodyTag(organ)}` : main

@@ -30,3 +30,13 @@ test('never empties a reply that is only a stock line', () => {
 test('stops after two sentences', () => {
   expect(dropStockOpeners('I understand. I am here with you. I am sorry to hear that. Rest.')).toBe('I am sorry to hear that. Rest.')
 })
+
+import { dropRepeats } from '@/lib/health/comfort'
+
+test('drops a sources line the AI wrote and a second confidence line', () => {
+  const P = ['How sure I am:', 'আমি কতটা নিশ্চিত:']
+  expect(
+    dropRepeats('ORS দিন।\n\nআমি কতটা নিশ্চিত: নিশ্চিত নই।\n\nSource: WHO — Diarrhoea\n\nআমি কতটা নিশ্চিত: এটি শুধু সাধারণ তথ্য।', P),
+  ).toBe('ORS দিন।\n\nআমি কতটা নিশ্চিত: নিশ্চিত নই।')
+  expect(dropRepeats('Rest.\n\nHow sure I am: fairly sure.', P)).toBe('Rest.\n\nHow sure I am: fairly sure.')
+})

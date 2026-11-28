@@ -32,3 +32,25 @@ export function dropStockOpeners(text: string): string {
   }
   return rest
 }
+
+/**
+ * The screen already shows the sources and one confidence line. If the AI writes its own "Source: WHO …" line,
+ * or a second confidence line, those are taken out (the first confidence line, the specific one, stays).
+ */
+export function dropRepeats(text: string, confidencePrefixes: string[]): string {
+  let seenConfidence = false
+  return text
+    .split('\n')
+    .filter((line) => {
+      const t = line.trim()
+      if (/^(?:sources?|references?|তথ্যসূত্র|উৎস|সূত্র)\s*[:：]/iu.test(t)) return false
+      if (confidencePrefixes.some((p) => t.startsWith(p))) {
+        if (seenConfidence) return false
+        seenConfidence = true
+      }
+      return true
+    })
+    .join('\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
