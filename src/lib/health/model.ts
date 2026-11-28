@@ -41,6 +41,12 @@ const MEDICINE_RETRY_NOTE =
   '\n\nThe patient asked about a medicine. This is a health question, not small talk: explain what the medicine is usually used for and its generic name if you know it, say this is an AI explanation and not official information, give no dose, and end with the confidence line.'
 
 const hasConfidence = (text: string) => Object.values(CONFIDENCE_PREFIX).some((p) => text.includes(p))
+const dropConfidence = (text: string) =>
+  text
+    .split('\n')
+    .filter((l) => !Object.values(CONFIDENCE_PREFIX).some((p) => l.trim().startsWith(p)))
+    .join('\n')
+    .trim()
 
 const REPEAT_RETRY_NOTE =
   '\n\nYour previous draft repeated one of your earlier replies in this chat word for word. Say it differently, in fresh words; a repeated sentence sounds like a machine.'
@@ -142,7 +148,13 @@ export async function askBiLuna(
       const opts = extractOptions(tagged.text)
       // A reply to swearing is small talk even when the AI forgets to say so: no confidence line under it.
       const marked = rude && !/^\s*\[(?:SMALL_TALK|ASK)\]/.test(opts.text) && !hasConfidence(opts.text) ? `${SMALL_TALK_MARK} ${opts.text}` : opts.text
-      const checked = checkReply(marked, lang)
+      const first = checkReply(marked, lang)
+      // A short calm reply to swearing ("মনে হচ্ছে মনটা ভালো নেই…") can trip the advice check and get a confidence
+      // line it does not need. With no health topic in the chat and no long answer, it stays small talk.
+      const checked =
+        rude && !cards.length && first.ok && first.kind === 'answer' && dropConfidence(first.text).length < 250
+          ? { ...first, text: dropConfidence(first.text), kind: 'smallTalk' as const }
+          : first
       // BiLuna never gives a dose. One the patient wrote, or one read from their own uploaded prescription
       // (the ✅ ⚠️ ❓ lines BiLuna writes for each medicine it reads), may be repeated; any other amount, in
       // the answer or in its tap-to-answer options, means the draft is written again. This holds with a file

@@ -448,3 +448,16 @@ test('a reply to swearing gets no confidence line, even when the AI forgets the 
   expect(r.ok && r.text).toBe("You seem upset right now. If something is bothering you, I'm listening.")
   expect(r.ok && r.kind).toBe('smallTalk')
 })
+
+test('a short calm Bangla reply to swearing stays small talk even with a "seems" word in it', async () => {
+  const f = fake('মনে হচ্ছে মনটা ভালো নেই। কোনো কষ্ট থাকলে বলতে পারেন, আমি শুনছি।')
+  const r = await askBiLuna([{ author: 'patient', body: 'তুই একটা ফালতু বেয়াদব' }], 'bn', { generate: f.generate })
+  expect(r.ok && r.kind).toBe('smallTalk')
+  expect(r.ok && r.text).not.toContain('আমি কতটা নিশ্চিত')
+})
+
+test('a real health answer to a rude message keeps its confidence line', async () => {
+  const f = fake(good)
+  const r = await askBiLuna([{ author: 'patient', body: 'this fucking cough will not stop' }], 'en', { generate: f.generate })
+  expect(r.ok && r.kind).toBe('answer')
+})
