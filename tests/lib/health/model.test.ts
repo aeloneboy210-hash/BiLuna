@@ -367,3 +367,25 @@ test('earlier sources lines are not shown to the AI', async () => {
   )
   expect(JSON.stringify(f.calls[0].messages)).not.toContain('[[sources')
 })
+
+test('after the first reply, a stock comfort opener is dropped and the AI is told to skip it', async () => {
+  const f = fake(`শুনে খুব খারাপ লাগছে। আমি আপনার পাশে আছি।\n\n${good}`)
+  const r = await askBiLuna(
+    [
+      { author: 'patient', body: 'I have a cough' },
+      { author: 'biluna', body: 'How long have you had it?' },
+      { author: 'patient', body: 'two days' },
+    ],
+    'en',
+    { generate: f.generate },
+  )
+  expect(r.ok && r.text.startsWith('It might be a cold.')).toBe(true)
+  expect(f.calls[0].instructions).toContain('No comforting opener')
+})
+
+test('the first reply may keep its one opening line', async () => {
+  const f = fake(`That sounds uncomfortable.\n\n${good}`)
+  const r = await askBiLuna([{ author: 'patient', body: 'I feel sick' }], 'en', { generate: f.generate })
+  expect(r.ok && r.text.startsWith('That sounds uncomfortable.')).toBe(true)
+  expect(f.calls[0].instructions).not.toContain('No comforting opener')
+})

@@ -14,6 +14,7 @@ import { strayWords } from './stray-words'
 import { CONFIDENCE_PREFIX } from './safety-filter'
 import { checkReply, type ReplyKind } from './safety-filter'
 import { extractSources, sourcesTag } from '@/lib/knowledge/catalog'
+import { dropStockOpeners } from './comfort'
 import { findCards, knowledgeBlock } from '@/lib/knowledge/find'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
@@ -104,7 +105,9 @@ export async function askBiLuna(
   }
   // Guideline cards for what the patient is talking about (WHO, UNICEF, NHS, CDC), read before answering.
   const cards = findCards(history.filter((m) => m.author === 'patient').map((m) => m.body))
-  const instructions = buildInstructions(lang, deps.profile ?? null, knowledgeBlock(cards))
+  // After BiLuna's first reply, answers go straight to the point: no comforting opener (tester feedback).
+  const later = history.some((m) => m.author === 'biluna')
+  const instructions = buildInstructions(lang, deps.profile ?? null, knowledgeBlock(cards), later)
 
   try {
     // A failed first draft is written again once, with a note saying what was wrong.
@@ -145,9 +148,9 @@ export async function askBiLuna(
         // up. Not after a 📍 tap (the AI picks an organ in that place or none) or a danger message.
         const organ =
           tagged.organ ?? (said.trimStart().startsWith(POINT_MARK) || detectDanger(said) ? null : guessOrgan(said))
+        const reply = later && checked.kind !== 'smallTalk' ? dropStockOpeners(checked.text) : checked.text
         // A full answer lists the guideline cards it was given, so the patient can open the sources.
-        const main =
-          cards.length && checked.kind === 'answer' ? `${checked.text}\n${sourcesTag(cards.map((c) => c.id))}` : checked.text
+        const main = cards.length && checked.kind === 'answer' ? `${reply}\n${sourcesTag(cards.map((c) => c.id))}` : reply
         let body = organ && checked.kind === 'answer' ? `${main}\n${bodyTag(organ)}` : main
         if (opts.options.length && checked.kind !== 'smallTalk') body += `\n${optionsTag(opts.options)}`
         // After pointing at the body, every reply for three rounds must end with a question the patient can tap.

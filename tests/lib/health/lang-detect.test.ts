@@ -72,6 +72,26 @@ test.each([
   ['I have a fever', 'en'],
   ['my pet is sick today', 'en'],
   ['It is on my forehead', 'en'],
+  // November testers: these Banglish messages were getting English answers.
+  ['matha ghurche ar bomi bomi lagche', 'bn'],
+  ['amar ammur pressure beshi', 'bn'],
+  ['gola betha r sordi', 'bn'],
+  ['ki korbo bolo', 'bn'],
+  ['jor kombe kivabe', 'bn'],
+  ['amar baby r jor', 'bn'],
+  ['khub mathabetha kortese', 'bn'],
+  ['dengue hoise naki bujhbo kivabe', 'bn'],
+  ['napa khaite parbo?', 'bn'],
+  ['chest e pain hocche', 'bn'],
+  ['buke chap lagtese', 'bn'],
+  ['ami khub tired feel kortesi', 'bn'],
+  ['Ei jinis gula je bole eita off kore dile valo hoito', 'bn'],
+  ['I have fever since 2 days', 'en'],
+  ['my head hurts', 'en'],
+  ['is it dengue?', 'en'],
+  ['I have a headache and feel tired', 'en'],
+  ['my matha betha since 2 days', 'en'],
+  ['Can I take this medicine with food?', 'en'],
 ] as const)('%p is %p', (text, lang) => {
   expect(typedLang(text)).toBe(lang)
 })
