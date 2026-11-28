@@ -53,6 +53,18 @@ const CASES: { id: string; text: string; expect?: RegExp; before?: Turn[]; notEx
   // November testers: Banglish must get Bangla, and later replies must not open with stock comfort lines.
   { id: 'banglish-fever', text: 'amar jor hoise 3 din dhore, ki korbo bolo' },
   { id: 'banglish-chest', text: 'buke chap lagtese ar gas hoy' },
+  // November tester swore twice and got the same sentence twice: stay calm, and never repeat word for word.
+  { id: 'rude', text: 'fuck you' },
+  { id: 'rude-bn', text: 'তুই একটা ফালতু বেয়াদব' },
+  {
+    id: 'rude-again',
+    before: [
+      { author: 'patient', body: 'fuck you' },
+      { author: 'biluna', body: 'I am here to help you with your health whenever you feel ready. Is there something on your mind?' },
+    ],
+    text: 'no fuck you bitch',
+    notExpect: /I am here to help you with your health whenever you feel ready\. Is there something on your mind\?/,
+  },
   {
     id: 'switch-to-bangla',
     before: [

@@ -409,3 +409,35 @@ test('an ordinary message gets no language-switch note', async () => {
   await askBiLuna(history, 'en', { generate: f.generate })
   expect(f.calls[0].instructions).not.toMatch(/previous reply again/)
 })
+
+test('a reply that repeats an earlier one word for word is written again in fresh words', async () => {
+  const same = 'I am here to help you with your health whenever you feel ready. Is there something on your mind?'
+  const fresh = "You seem upset right now. If something is bothering you, I'm listening."
+  const f = fake(`[SMALL_TALK] ${same}`, `[SMALL_TALK] ${fresh}`)
+  const r = await askBiLuna(
+    [
+      { author: 'patient', body: 'fuck you' },
+      { author: 'biluna', body: same },
+      { author: 'patient', body: 'no fuck you' },
+    ],
+    'en',
+    { generate: f.generate },
+  )
+  expect(r.ok && r.text).toBe(fresh)
+  expect(f.calls[1].instructions).toMatch(/word for word/)
+})
+
+test('if the second try repeats too, it is sent rather than failing', async () => {
+  const same = 'Is there something on your mind?'
+  const f = fake(`[SMALL_TALK] ${same}`, `[SMALL_TALK] ${same}`)
+  const r = await askBiLuna(
+    [
+      { author: 'patient', body: 'hmm' },
+      { author: 'biluna', body: same },
+      { author: 'patient', body: 'hmm' },
+    ],
+    'en',
+    { generate: f.generate },
+  )
+  expect(r.ok && r.text).toBe(same)
+})

@@ -39,6 +39,16 @@ const ASKS_ABOUT_MEDICINE =
 const MEDICINE_RETRY_NOTE =
   '\n\nThe patient asked about a medicine. This is a health question, not small talk: explain what the medicine is usually used for and its generic name if you know it, say this is an AI explanation and not official information, give no dose, and end with the confidence line.'
 
+const REPEAT_RETRY_NOTE =
+  '\n\nYour previous draft repeated one of your earlier replies in this chat word for word. Say it differently, in fresh words; a repeated sentence sounds like a machine.'
+
+/** Same reply text, ignoring tags, spaces, punctuation and case: "I am here…?" twice reads as a broken machine. */
+const plain = (body: string) =>
+  extractOptions(extractBodyTag(extractSources(body).text).text)
+    .text.toLowerCase()
+    .replace(/[\p{P}\p{S}\s]+/gu, ' ')
+    .trim()
+
 const LANGUAGE_RETRY_NOTE =
   '\n\nYour previous draft had a word from another language inside the Bangla. Write the whole reply in only Bangla (Bengali script); medicine names may stay in English inside brackets.'
 
@@ -149,6 +159,14 @@ export async function askBiLuna(
       if (checked.ok && checked.kind === 'smallTalk' && attempt === 0 && ASKS_ABOUT_MEDICINE.test(said)) {
         extra = MEDICINE_RETRY_NOTE
         continue
+      }
+      if (checked.ok && attempt === 0) {
+        const now = plain(checked.text)
+        const earlier = history.filter((m) => m.author === 'biluna').slice(-5)
+        if (now && earlier.some((m) => plain(m.body) === now)) {
+          extra = REPEAT_RETRY_NOTE
+          continue
+        }
       }
       if (checked.ok) {
         // If the AI left the 3D tag out, the patient's own words choose the organ, so the body still lights
