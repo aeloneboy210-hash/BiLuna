@@ -6,7 +6,7 @@ import type { Dictionary } from '@/lib/i18n/dictionaries'
 
 type T = Dictionary['health']['attach']
 
-/** Opens above the message box: choose a photo or PDF, or try one of the two fictional samples. */
+/** Opens above the message box: choose a photo or PDF. The shared demo account also gets fictional samples to try. */
 export function AttachPanel({
   onFile,
   onSample,
@@ -15,7 +15,8 @@ export function AttachPanel({
   t,
 }: {
   onFile: (file: File) => void
-  onSample: (path: string, name: string) => void
+  /** Only for the shared demo account; real accounts see no samples. */
+  onSample?: (path: string, name: string) => void
   onClose: () => void
   busy: boolean
   t: T
@@ -52,33 +53,37 @@ export function AttachPanel({
         <Icon name="clip" className="h-5 w-5" />
         {t.choose}
       </button>
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onSample('/samples/sample-lab-report.jpg', 'Sample lab report.jpg')}
-          className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
-        >
-          🧪 {t.sampleReport}
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onSample('/samples/sample-handwritten-prescription.jpg', 'Sample handwritten prescription.jpg')}
-          className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
-        >
-          ✍️ {t.sampleHandwritten}
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => onSample('/samples/sample-prescription.jpg', 'Sample prescription.jpg')}
-          className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
-        >
-          💊 {t.samplePrescription}
-        </button>
-      </div>
-      <p className="text-xs text-muted">{t.sampleNote}</p>
+      {onSample ? (
+        <>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onSample('/samples/sample-lab-report.jpg', 'Sample lab report.jpg')}
+              className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
+            >
+              🧪 {t.sampleReport}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onSample('/samples/sample-handwritten-prescription.jpg', 'Sample handwritten prescription.jpg')}
+              className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
+            >
+              ✍️ {t.sampleHandwritten}
+            </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => onSample('/samples/sample-prescription.jpg', 'Sample prescription.jpg')}
+              className="min-h-10 rounded-full border border-brand px-4 text-sm font-semibold text-brand hover:bg-soft disabled:opacity-60"
+            >
+              💊 {t.samplePrescription}
+            </button>
+          </div>
+          <p className="text-xs text-muted">{t.sampleNote}</p>
+        </>
+      ) : null}
     </div>
   )
 }

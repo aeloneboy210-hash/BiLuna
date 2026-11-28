@@ -454,7 +454,7 @@ export function ChatPanel({
           <AttachPanel
             busy={preparing || pending}
             onFile={(f) => attach(f, f.name, false)}
-            onSample={async (path, name) => {
+            onSample={!isDemo ? undefined : async (path, name) => {
               try {
                 const res = await fetch(path)
                 await attach(await res.blob(), name, true)
