@@ -16,6 +16,7 @@ import { checkReply, type ReplyKind } from './safety-filter'
 import { extractSources, sourcesTag } from '@/lib/knowledge/catalog'
 import { dropRepeats, dropStockOpeners } from './comfort'
 import { findCards, knowledgeBlock } from '@/lib/knowledge/find'
+import { asksForLanguage } from './lang-detect'
 
 export type ChatTurn = { author: 'patient' | 'biluna'; body: string }
 type ModelPart = { type: 'text'; text: string } | { type: 'file'; data: string; mediaType: string; filename: string }
@@ -108,12 +109,18 @@ export async function askBiLuna(
   // After BiLuna's first reply, answers go straight to the point: no comforting opener (tester feedback).
   const later = history.some((m) => m.author === 'biluna')
   const instructions = buildInstructions(lang, deps.profile ?? null, knowledgeBlock(cards), later)
+  // "amk banglai bolo": the patient wants the same help in another language, not a fresh start (tester feedback).
+  const latestPatient = [...history].reverse().find((m) => m.author === 'patient')?.body ?? ''
+  const switched = later && asksForLanguage(latestPatient) === lang
+  const switchNote = switched
+    ? `\n\nThe patient just asked you to speak ${lang === 'bn' ? 'Bangla' : 'English'}. Do not greet them and do not start over. Give your previous reply again, all of it, in ${lang === 'bn' ? 'Bangla' : 'English'}: the same content, the same question and the same tap-to-answer options, translated. Then stop.`
+    : ''
 
   try {
     // A failed first draft is written again once, with a note saying what was wrong.
     let extra = ''
     for (let attempt = 0; attempt < 2; attempt++) {
-      const { text } = await generate({ instructions: instructions + extra, messages })
+      const { text } = await generate({ instructions: instructions + switchNote + extra, messages })
       // The 3D body tag comes off before the safety check and goes back at the very end, answers only.
       // A sources line the AI wrote itself is dropped: only the cards BiLuna really gave it are listed.
       const tagged = extractBodyTag(extractSources(text).text)

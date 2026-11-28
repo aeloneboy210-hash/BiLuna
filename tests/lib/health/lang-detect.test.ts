@@ -106,3 +106,34 @@ test('a Bangla chat stays Bangla after a short "ok" or a number', () => {
     ]),
   ).toBe('bn')
 })
+
+import { asksForLanguage } from '@/lib/health/lang-detect'
+
+// November tester: "amk banglai bolo" got a fresh greeting instead of the same answer in Bangla.
+test.each([
+  ['amk banglai bolo', 'bn'],
+  ['amake banglay bolo', 'bn'],
+  ['বাংলায় বলো', 'bn'],
+  ['বাংলায় বলুন প্লিজ', 'bn'],
+  ['can you speak bangla', 'bn'],
+  ['Bangla please', 'bn'],
+  ['Bangla?', 'bn'],
+  ['please reply in English', 'en'],
+  ['English e bolo', 'en'],
+  ['ইংরেজিতে বলো', 'en'],
+] as const)('%p asks for %p', (text, lang) => {
+  expect(asksForLanguage(text)).toBe(lang)
+})
+
+test.each([
+  'I have a headache',
+  'amar matha betha',
+  'I cannot read the English words in my Bangla report, what do they mean for my kidneys?',
+  'Bangla na English, kono ta bujhi na',
+])('%p is not a language request', (text) => {
+  expect(asksForLanguage(text)).toBeNull()
+})
+
+test('a request for Bangla counts as Bangla even though it is typed in English letters', () => {
+  expect(typedLang('amk banglai bolo')).toBe('bn')
+})

@@ -1,6 +1,6 @@
 import type { Lang } from '@/lib/i18n/lang'
 import { attachmentLine, checkAttachment, type Attachment } from './attachment'
-import { typedLang } from './lang-detect'
+import { typedLang, asksForLanguage } from './lang-detect'
 import type { AskResult, ChatTurn } from './model'
 
 export const MAX_MESSAGE_LENGTH = 2000
@@ -57,7 +57,8 @@ export async function handleSend(
   }
 
   // The language of what they typed; a short "ok" or "3" keeps the chat's language.
-  const lang = typedLang(words) ?? input.lang ?? 'en'
+  // "amk banglai bolo" / "speak English" switches the reply language even when the words are in the other one.
+  const lang = asksForLanguage(words) ?? typedLang(words) ?? input.lang ?? 'en'
   const conversationId = input.conversationId ?? (await deps.createConversation(text.slice(0, 60)))
 
   const saved = await deps.addMessage(conversationId, 'patient', text, lang)

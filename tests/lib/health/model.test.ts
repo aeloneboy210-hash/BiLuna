@@ -389,3 +389,23 @@ test('the first reply may keep its one opening line', async () => {
   expect(r.ok && r.text.startsWith('That sounds uncomfortable.')).toBe(true)
   expect(f.calls[0].instructions).not.toContain('No comforting opener')
 })
+
+test('"amk banglai bolo" asks the AI to give its last reply again in Bangla, not to start over', async () => {
+  const f = fake('বাহুর মাঝখানে ব্যথা।\n\nকব্জি বা আঙুল নাড়ালে কি ব্যথা বাড়ে?\n[[options: হ্যাঁ | না]]')
+  await askBiLuna(
+    [
+      { author: 'patient', body: '📍 Middle of the left forearm' },
+      { author: 'biluna', body: 'Pain in the middle of your left forearm.\n\nDoes the pain feel worse when you move your wrist?' },
+      { author: 'patient', body: 'amk banglai bolo' },
+    ],
+    'bn',
+    { generate: f.generate },
+  )
+  expect(f.calls[0].instructions).toMatch(/Give your previous reply again, all of it, in Bangla/)
+})
+
+test('an ordinary message gets no language-switch note', async () => {
+  const f = fake(good)
+  await askBiLuna(history, 'en', { generate: f.generate })
+  expect(f.calls[0].instructions).not.toMatch(/previous reply again/)
+})

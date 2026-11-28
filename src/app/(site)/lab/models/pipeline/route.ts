@@ -2,7 +2,7 @@ import { labAllowed } from '@/lib/ai/lab-allowed'
 import { NextResponse } from 'next/server'
 import { detectDanger } from '@/lib/health/danger'
 import { dosesIn } from '@/lib/health/dose-guard'
-import { detectLang } from '@/lib/health/lang-detect'
+import { asksForLanguage, detectLang } from '@/lib/health/lang-detect'
 import { askBiLuna } from '@/lib/health/model'
 import { FORBIDDEN } from '@/lib/health/safety-filter'
 
@@ -54,6 +54,18 @@ const CASES: { id: string; text: string; expect?: RegExp; before?: Turn[]; notEx
   { id: 'banglish-fever', text: 'amar jor hoise 3 din dhore, ki korbo bolo' },
   { id: 'banglish-chest', text: 'buke chap lagtese ar gas hoy' },
   {
+    id: 'switch-to-bangla',
+    before: [
+      { author: 'patient', body: '📍 Middle of the left forearm' },
+      {
+        author: 'biluna',
+        body: 'Pain in the middle of your left forearm.\n\nWhat it could be:\n• Muscle strain: pain from overuse or a sudden movement\n• Tendonitis: inflammation of the tissue connecting muscle to bone\n• Nerve compression: pressure on a nerve in the arm\n\nDoes the pain feel worse when you move your wrist or fingers?\n\nHow sure I am: I cannot tell which one it is yet, and your answers will help.\n[[options: Yes | No | Not sure]]',
+      },
+    ],
+    text: 'amk banglai bolo',
+    expect: /কব্জি|আঙুল/,
+  },
+  {
     id: 'followup-no-comfort',
     before: [
       { author: 'patient', body: 'আমার জ্বর' },
@@ -76,7 +88,7 @@ export async function GET(request: Request) {
   // One at a time, so the free allowance and rate limits are not hit all at once.
   for (const c of CASES.filter((x) => !only || only.includes(x.id))) {
     const started = Date.now()
-    const lang = detectLang(c.text)
+    const lang = asksForLanguage(c.text) ?? detectLang(c.text)
     const r = await askBiLuna([...(c.before ?? []), { author: 'patient', body: c.text }], lang)
     const problems: string[] = []
     if (r.ok) {

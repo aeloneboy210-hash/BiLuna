@@ -21,7 +21,7 @@ const BANGLISH = new Set(
     'bacha baccha bachcha bacchar jinis gula gulo guli valo bhalo kharap khub onek ektu shudhu ' +
     'tai tao toh na naa haa hae ji jee accha achha thik ache shob sob sobai ekdom shuru ' +
     'chap buke bukh pith komor peshab proshrab paikhana paykhana patla payokhana shorire sorire gaye ' +
-    'raat sokal bikal shondha ajke aj kalke gotokal porshu shoptaho bochor'
+    'amk amay amare banglai banglay banglate bangla raat sokal bikal shondha ajke aj kalke gotokal porshu shoptaho bochor'
   ).split(' '),
 )
 
@@ -86,4 +86,23 @@ export function chatLang(history: { author: 'patient' | 'biluna'; body: string }
     if (lang) return lang
   }
   return null
+}
+
+const MENTIONS_BN = /(?<![a-z])(?:bangla\w*|bengali|bangali)(?![a-z])|বাংলা/iu
+const MENTIONS_EN = /(?<![a-z])(?:english|ingreji|engliish)(?![a-z])|ইংরেজি|ইংলিশ/iu
+const ASKS = /(?<![a-z])(?:bolo|bolen|bolun|bol|bolba|bolben|kotha|likho|lekho|speak|talk|reply|answer|write|say|use|please|plz|pls|te|e|a|y|i)(?![a-z])|বল|লিখ|কথা|দাও|দিন|উত্তর/iu
+
+/**
+ * "amk banglai bolo", "বাংলায় বলো", "please speak English": the patient asks BiLuna to change its language.
+ * Returns that language, or null. Short messages only, naming one language, so "I don't understand the
+ * English words in my Bangla report" is not a request.
+ */
+export function asksForLanguage(text: string): Lang | null {
+  const words = text.trim().split(/\s+/)
+  if (words.length > 8) return null
+  const bn = MENTIONS_BN.test(text)
+  const en = MENTIONS_EN.test(text)
+  // One or two words ("Bangla?", "English please") are a request on their own.
+  if (bn === en || (words.length > 2 && !ASKS.test(text))) return null
+  return bn ? 'bn' : 'en'
 }
