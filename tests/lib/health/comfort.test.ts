@@ -40,3 +40,8 @@ test('drops a sources line the AI wrote and a second confidence line', () => {
   ).toBe('ORS দিন।\n\nআমি কতটা নিশ্চিত: নিশ্চিত নই।')
   expect(dropRepeats('Rest.\n\nHow sure I am: fairly sure.', P)).toBe('Rest.\n\nHow sure I am: fairly sure.')
 })
+
+test('drops lines that are only web-page tags', () => {
+  expect(dropRepeats('ORS দিন।\n\n<div style="font-size: 0.8em; color: gray;">\n</div>', [])).toBe('ORS দিন।')
+  expect(dropRepeats('Use a <b>cool</b> cloth.', [])).toBe('Use a <b>cool</b> cloth.')
+})

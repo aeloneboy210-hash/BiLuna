@@ -35,7 +35,8 @@ export function dropStockOpeners(text: string): string {
 
 /**
  * The screen already shows the sources and one confidence line. If the AI writes its own "Source: WHO …" line,
- * or a second confidence line, those are taken out (the first confidence line, the specific one, stays).
+ * a second confidence line, or a line of bare web-page tags, those are taken out (the first confidence line,
+ * the specific one, stays).
  */
 export function dropRepeats(text: string, confidencePrefixes: string[]): string {
   let seenConfidence = false
@@ -44,6 +45,8 @@ export function dropRepeats(text: string, confidencePrefixes: string[]): string 
     .filter((line) => {
       const t = line.trim()
       if (/^(?:sources?|references?|তথ্যসূত্র|উৎস|সূত্র)\s*[:：]/iu.test(t)) return false
+      // Web-page code the AI sometimes adds (an empty <div> for a footnote): the chat shows plain text only.
+      if (/^(?:<\/?[a-z][^>]*>\s*)+$/i.test(t)) return false
       if (confidencePrefixes.some((p) => t.startsWith(p))) {
         if (seenConfidence) return false
         seenConfidence = true
